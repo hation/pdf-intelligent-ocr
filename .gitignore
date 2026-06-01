@@ -43,6 +43,7 @@ Thumbs.db
 .venv/
 venv/
 env/
+node_modules/
 
 # 操作系统临时文件
 *.swp
