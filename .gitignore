@@ -1,0 +1,52 @@
+# 文件和文件夹
+files/
+outputs/
+outputs_liteparse/
+outputs_liteparse_ocr/
+outputs_batch_optimized/
+outputs_high_accuracy/
+test_output_optimized/
+test_accurate_output/
+liteparse/
+
+# 临时文件
+*.tmp
+*.temp
+*~
+*.swp
+
+# 日志文件
+*.log
+ocr_processing.log
+ocr_accuracy_processing.log
+ocr_batch.log
+
+# 缓存和临时目录
+__pycache__/
+*.pyc
+*.pyo
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 配置文件（可能包含敏感信息）
+*.config
+*.cfg
+*.ini
+
+# 编译的Python字节码
+*.pyc
+
+# 安装的依赖
+*.egg-info/
+.venv/
+venv/
+env/
+
+# 操作系统临时文件
+*.swp
+*.swo
+
+# Tesseract OCR 临时文件
+tess*

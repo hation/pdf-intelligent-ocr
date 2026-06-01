@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@llamaindex/liteparse": "^2.0.4"
+  }
+}

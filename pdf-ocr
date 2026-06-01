@@ -1,0 +1,51 @@
+#!/bin/bash
+
+# PDF OCR识别方案快捷命令
+# 用于快速访问我们的Tesseract OCR识别方案
+
+SCRIPT_DIR="/Users/xingan/Documents/software/workspace/summary"
+OCR_SCRIPT="$SCRIPT_DIR/direct_tesseract_ocr.py"
+CONFIG="$SCRIPT_DIR/pdf_ocr_recipe.txt"
+
+# 检查参数
+if [ "$#" -eq 0 ]; then
+    echo "PDF OCR识别方案快捷命令"
+    echo "用法: pdf-ocr <PDF文件路径>"
+    echo "或使用 'pdf-ocr help' 查看详细信息"
+    exit 1
+fi
+
+# 显示帮助
+if [ "$1" = "help" ]; then
+    echo "PDF OCR识别方案 - 帮助信息"
+    echo "-----------------------------------"
+    cat "$CONFIG"
+    exit 0
+fi
+
+# 检查脚本是否存在
+if [ ! -f "$OCR_SCRIPT" ]; then
+    echo "错误: 无法找到OCR脚本 $OCR_SCRIPT"
+    exit 1
+fi
+
+# 检查是否是文件
+if [ -f "$1" ]; then
+    # 检查文件是否为PDF
+    if file "$1" | grep -q "PDF document"; then
+        echo "开始处理PDF文件: $1"
+        echo "使用Tesseract OCR引擎进行识别..."
+        
+        # 确保脚本有执行权限
+        chmod +x "$OCR_SCRIPT"
+        
+        # 运行OCR脚本
+        python3 "$OCR_SCRIPT" "$1"
+    else
+        echo "错误: 文件 $1 不是有效的PDF文件"
+        exit 1
+    fi
+else
+    echo "错误: 文件 $1 不存在"
+    exit 1
+fi

@@ -1,0 +1,12 @@
+# 核心依赖
+pdf2image>=1.17.0
+pytesseract>=0.3.13
+Pillow>=10.2.0
+PyPDF2>=3.0.0
+
+# 可选依赖（用于进度监控）
+# tqdm>=4.66.0
+
+# 系统依赖（需要单独安装）
+# Tesseract OCR: https://github.com/tesseract-ocr/tesseract
+# poppler-utils（用于 pdf2image）
