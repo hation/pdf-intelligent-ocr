@@ -110,7 +110,3 @@ pdf-ocr-tool/
 ## 许可证
 
 MIT License
-
-## 作者
-
-Xing An
