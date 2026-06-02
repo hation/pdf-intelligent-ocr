@@ -346,6 +346,76 @@ class FinancialResearchSummarizer:
                 stocks.append(cleaned)
         return stocks[:3]
     
+    def is_ebook(self, text):
+        ebook_markers = ['目录', 'Contents', 'Table of Contents', '前言', '序言', '版权', 'Chapter', '章节']
+        marker_count = sum(1 for marker in ebook_markers if marker.lower() in text.lower())
+        chapter_matches = re.findall(r'(?:第\s*[一二三四五六七八九十百零0-9]+\s*[章节篇部]|Chapter\s+\d+|\d+(?:\.\d+){0,2}\s+[^\n]{2,60})', text, flags=re.IGNORECASE)
+        return marker_count >= 2 and len(chapter_matches) >= 5
+    
+    def clean_toc_item(self, line):
+        line = re.sub(r'^[#\-*•\s]+', '', line.strip())
+        line = re.sub(r'\s*[.·…]{2,}\s*\d+\s*$', '', line)
+        line = re.sub(r'\s+\d+\s*$', '', line)
+        line = re.sub(r'\s+', ' ', line)
+        return line.strip(' ，,。；;')
+    
+    def is_toc_item(self, line):
+        if len(line) < 3 or len(line) > 90:
+            return False
+        if re.fullmatch(r'\d+', line):
+            return False
+        patterns = [
+            r'^第\s*[一二三四五六七八九十百零0-9]+\s*(?:部分|章节|章|节|篇|部)',
+            r'^Chapter\s+\d+',
+            r'^\d+(?:\.\d+){0,2}\s+\S+',
+            r'^[一二三四五六七八九十]+[、.．]\s*\S+'
+        ]
+        return any(re.search(pattern, line, flags=re.IGNORECASE) for pattern in patterns)
+    
+    def extract_ebook_toc(self, text, limit=30):
+        lines = [self.clean_toc_item(line) for line in text.splitlines()]
+        toc_lines = []
+        in_toc = False
+        non_toc_count = 0
+        seen = set()
+        for line in lines:
+            if not line:
+                continue
+            if re.fullmatch(r'(目录|Contents|Table of Contents)', line, flags=re.IGNORECASE):
+                in_toc = True
+                non_toc_count = 0
+                continue
+            if in_toc:
+                if self.is_toc_item(line):
+                    if line not in seen:
+                        toc_lines.append(line)
+                        seen.add(line)
+                    non_toc_count = 0
+                else:
+                    non_toc_count += 1
+                if non_toc_count >= 8 or len(toc_lines) >= limit:
+                    break
+        if len(toc_lines) < 5:
+            for line in lines:
+                if self.is_toc_item(line) and line not in seen:
+                    toc_lines.append(line)
+                    seen.add(line)
+                if len(toc_lines) >= limit:
+                    break
+        return toc_lines
+    
+    def make_ebook_one_line_conclusion(self, title, toc_items):
+        cleaned_title = re.sub(r'_hybrid|_tesseract|_liteparse|\.md$', '', title)
+        topics = []
+        for item in toc_items[:6]:
+            topic = re.sub(r'^(第\s*[一二三四五六七八九十百零0-9]+\s*(?:部分|章节|章|节|篇|部)|Chapter\s+\d+|\d+(?:\.\d+){0,2}|[一二三四五六七八九十]+[、.．])\s*', '', item, flags=re.IGNORECASE)
+            topic = topic.strip(' ：:，,。；;')
+            if topic:
+                topics.append(topic)
+        if topics:
+            return f"该电子书围绕{cleaned_title}展开，主要覆盖{'、'.join(topics[:4])}等内容。"
+        return f"该电子书围绕{cleaned_title}展开，主要内容可从目录结构把握。"
+    
     def make_one_line_conclusion(self, title, highlights):
         if highlights:
             first = highlights[0]
@@ -357,14 +427,28 @@ class FinancialResearchSummarizer:
     
     def summarize(self, filename, markdown_text, plain_text):
         text = self.normalize_text(plain_text)
+        quality_score = self.extract_quality_score(markdown_text)
+        parser = self.extract_parser(markdown_text)
+        toc_items = self.extract_ebook_toc(text)
+        if toc_items and self.is_ebook(text):
+            conclusion = self.make_ebook_one_line_conclusion(filename, toc_items)
+            return {
+                'one_line_conclusion': conclusion,
+                'highlights': toc_items,
+                'key_data': [],
+                'catalysts': [],
+                'risks': [],
+                'stocks': [],
+                'quotes': toc_items[:3],
+                'quality_score': quality_score,
+                'parser': parser
+            }
         sentences = self.split_sentences(text)
         highlights = self.pick_sentences(sentences, self.sections['核心看点'], 5)
         key_data = self.pick_sentences(sentences, self.sections['关键数据'], 5)
         catalysts = self.pick_sentences(sentences, self.sections['催化因素'], 4)
         risks = self.pick_risk_sentences(sentences, 3)
         stocks = self.extract_stock_names(text)
-        quality_score = self.extract_quality_score(markdown_text)
-        parser = self.extract_parser(markdown_text)
         conclusion = self.make_one_line_conclusion(filename, highlights)
         quotes = highlights[:3] or sentences[:3]
         return {
