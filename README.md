@@ -54,6 +54,19 @@ pip install pdf2image pytesseract Pillow PyPDF2
 ### 基础使用
 
 ```bash
+# 推荐：混合解析 + 缓存 + 质量评分 + 结构化总结
+python3 daily_500_pdf_processor.py "input_dir" "output_dir" --workers 2 --min-score 60
+
+# 只解析PDF为Markdown，不生成总结
+python3 daily_500_pdf_processor.py "input_dir" "output_dir" --workers 2 --min-score 60 --no-ai
+
+# 单文件混合解析验证
+python3 hybrid_pdf_parser.py "input.pdf" "output_dir" --min-score 60
+```
+
+### 兼容旧方案
+
+```bash
 # 高精度识别
 python3 batch_ocr_accurate.py "input_dir" "output_dir"
 
@@ -86,18 +99,25 @@ python3 batch_ocr_optimized.py "input_dir" "output_dir"
 
 ```
 pdf-ocr-tool/
-├── README.md              # 项目说明文档
-├── LICENSE                # 许可证信息
-├── requirements.txt       # Python 依赖包
-├── .gitignore            # git 忽略文件
-├── batch_ocr_accurate.py  # 高精度识别脚本
-├── batch_ocr_optimized.py # 优化方案脚本
-├── direct_tesseract_ocr.py # 快速识别脚本
-├── monitor_accurate.sh    # 高精度方案监控脚本
-├── monitor_process.sh     # 优化方案监控脚本
-├── pdf-ocr               # 快捷命令工具
-├── resource_optimization_report.md # 资源优化报告
-└── high_accuracy_report.md # 高精度方案报告
+├── daily_500_pdf_processor.py       # 兼容入口：批量处理主命令
+├── hybrid_pdf_parser.py             # 兼容入口：单文件混合解析
+├── ai_content_summarizer.py         # 兼容入口：Markdown总结
+├── pdf_processing_pipeline.py       # 兼容入口：处理管道
+├── src/
+│   └── pdf_ocr_tool/
+│       ├── parsers/                 # PDF解析层
+│       │   ├── hybrid_pdf_parser.py # 混合解析、缓存、质量评分
+│       │   ├── direct_tesseract_ocr.py
+│       │   └── parse_with_liteparse_ocr.py
+│       ├── summarizers/             # 总结层
+│       │   └── financial_summarizer.py
+│       ├── pipeline/                # 编排层
+│       │   └── pdf_processing_pipeline.py
+│       ├── scripts/                 # 命令入口实现
+│       │   └── daily_500_pdf_processor.py
+│       └── legacy/                  # 历史/兼容处理脚本
+├── requirements.txt
+└── README.md
 ```
 
 ## 系统要求

@@ -7,6 +7,11 @@ outputs_batch_optimized/
 outputs_high_accuracy/
 test_output_optimized/
 test_accurate_output/
+test_output/
+hybrid_test_output/
+hybrid_pipeline_output/
+hybrid_sample_input/
+architecture_check_output/
 liteparse/
 
 # 临时文件
@@ -29,6 +34,9 @@ __pycache__/
 # 系统文件
 .DS_Store
 Thumbs.db
+
+# CodeGraph 相关文件
+.codegraph/
 
 # 配置文件（可能包含敏感信息）
 *.config
