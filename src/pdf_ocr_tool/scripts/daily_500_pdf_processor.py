@@ -94,15 +94,17 @@ class DailyPDFProcessor:
     def run_ai_analysis(self):
         """运行AI内容分析"""
         processed_dir = os.path.join(self.config['output_dir'], 'processed')
-        analysis_report = os.path.join(self.config['output_dir'], 'reports', 
-                                     f"ai_analysis_{datetime.now().strftime('%Y%m%d')}.md")
+        summary_list_file = os.path.join(self.config['output_dir'], 'reports', 
+                                     f"summary_list_{datetime.now().strftime('%Y%m%d')}.md")
+        summary_dir = os.path.join(self.config['output_dir'], 'summaries')
         
         summarizer = ai_content_summarizer.MarkdownFileSummarizer()
         analyses = summarizer.batch_process_markdown_files(processed_dir)
         
         if analyses:
-            summarizer.generate_batch_report(analyses, analysis_report)
-            self.logger.info(f"AI分析完成，报告已保存到: {analysis_report}")
+            summarizer.generate_summary_outputs(analyses, summary_list_file, summary_dir)
+            self.logger.info(f"总结清单已保存到: {summary_list_file}")
+            self.logger.info(f"单文件总结已保存到: {summary_dir}")
         else:
             self.logger.warning("没有找到可分析的文件")
     

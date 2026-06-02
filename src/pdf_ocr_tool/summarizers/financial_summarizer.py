@@ -455,39 +455,76 @@ class MarkdownFileSummarizer:
             content += f"- {item}\n"
         return content
     
-    def generate_batch_report(self, analyses, output_file):
-        """生成批量分析报告"""
+    def get_structured_fields(self, analysis):
+        """提取一句话总结和核心看点"""
+        structured = analysis.get('structured_summary', {})
+        if structured:
+            one_line = structured.get('one_line_conclusion', '未提取到有效结论')
+            highlights = structured.get('highlights', [])
+        else:
+            one_line = analysis.get('summary', '未提取到有效结论')
+            highlights = []
+        return one_line, highlights
+    
+    def sanitize_summary_filename(self, filename):
+        """生成单文件总结文件名"""
+        base_name = os.path.splitext(filename)[0]
+        base_name = re.sub(r'_(hybrid|tesseract|liteparse)$', '', base_name)
+        return f"{base_name}_summary.md"
+    
+    def generate_summary_list_report(self, analyses, output_file):
+        """生成一句话总结清单"""
         if not analyses:
             return False
-        
-        report_content = f"# 每日PDF内容分析报告 {datetime.now().strftime('%Y-%m-%d')}\n\n"
-        
-        # 总体统计
-        report_content += f"## 总体统计\n"
-        report_content += f"- 分析文件数: {len(analyses)}\n\n"
-        
-        report_content += f"## 文件详情分析\n"
-        
-        # 详细报告
+        os.makedirs(os.path.dirname(output_file) or '.', exist_ok=True)
+        report_content = f"# 总结清单 {datetime.now().strftime('%Y-%m-%d')}\n\n"
+        report_content += "| 文档名称 | 一句话总结 |\n"
+        report_content += "|---|---|\n"
         for analysis in analyses:
             filename = analysis['filename']
-            structured = analysis.get('structured_summary', {})
-            
-            report_content += f"\n### 文件: {filename}\n"
-            
-            if structured:
-                report_content += f"\n#### 一句话总结\n{structured.get('one_line_conclusion', '未提取到有效结论')}\n"
-                report_content += self.format_list_section('核心看点', structured.get('highlights', []))
-            else:
-                report_content += f"\n#### 一句话总结\n{analysis['summary']}\n"
-                report_content += "\n#### 核心看点\n- 未提取到明确内容\n"
-        
-        # 保存报告
+            one_line, _ = self.get_structured_fields(analysis)
+            escaped_filename = filename.replace('|', '\\|')
+            escaped_summary = one_line.replace('|', '\\|').replace('\n', ' ')
+            report_content += f"| {escaped_filename} | {escaped_summary} |\n"
         with open(output_file, 'w', encoding='utf-8') as f:
             f.write(report_content)
-        
-        print(f"报告已保存到: {output_file}")
+        print(f"总结清单已保存到: {output_file}")
         return True
+    
+    def generate_single_summary_files(self, analyses, summary_dir):
+        """为每个Markdown生成单独总结文件"""
+        if not analyses:
+            return []
+        os.makedirs(summary_dir, exist_ok=True)
+        output_files = []
+        for analysis in analyses:
+            filename = analysis['filename']
+            one_line, highlights = self.get_structured_fields(analysis)
+            output_file = os.path.join(summary_dir, self.sanitize_summary_filename(filename))
+            content = f"# {filename}\n\n"
+            content += f"## 一句话总结\n\n{one_line}\n\n"
+            content += "## 核心看点\n\n"
+            if highlights:
+                for item in highlights:
+                    content += f"- {item}\n"
+            else:
+                content += "- 未提取到明确内容\n"
+            with open(output_file, 'w', encoding='utf-8') as f:
+                f.write(content)
+            output_files.append(output_file)
+        print(f"单文件总结已保存到: {summary_dir}")
+        return output_files
+    
+    def generate_summary_outputs(self, analyses, summary_list_file, summary_dir):
+        """生成总结清单和单文件总结"""
+        list_result = self.generate_summary_list_report(analyses, summary_list_file)
+        single_files = self.generate_single_summary_files(analyses, summary_dir)
+        return list_result and bool(single_files)
+    
+    def generate_batch_report(self, analyses, output_file):
+        """兼容旧接口：生成一句话总结清单"""
+        summary_dir = os.path.join(os.path.dirname(os.path.dirname(output_file)), 'summaries')
+        return self.generate_summary_outputs(analyses, output_file, summary_dir)
 
 
 def main():
@@ -496,7 +533,8 @@ def main():
     )
     
     parser.add_argument('input', help='输入文件或目录')
-    parser.add_argument('-o', '--output', help='输出文件路径')
+    parser.add_argument('-o', '--output', help='总结清单输出路径')
+    parser.add_argument('--summary-dir', help='单文件总结输出目录')
     parser.add_argument('-v', '--verbose', action='store_true', help='显示详细信息')
     
     args = parser.parse_args()
@@ -515,9 +553,10 @@ def main():
             print("没有找到可处理的Markdown文件")
             return 1
         
-        # 生成报告
-        output_file = args.output or os.path.join(args.input, f"content_analysis_{datetime.now().strftime('%Y%m%d')}.md")
-        summarizer.generate_batch_report(analyses, output_file)
+        # 生成总结清单和单文件总结
+        output_file = args.output or os.path.join(args.input, f"summary_list_{datetime.now().strftime('%Y%m%d')}.md")
+        summary_dir = args.summary_dir or os.path.join(os.path.dirname(args.input), 'summaries')
+        summarizer.generate_summary_outputs(analyses, output_file, summary_dir)
     
     elif os.path.isfile(args.input):
         # 处理单个文件
@@ -525,16 +564,16 @@ def main():
             analysis = summarizer.process_markdown_file(args.input)
             
             if analysis:
-                print(f"\n=== 文件分析结果 ===")
+                one_line, highlights = summarizer.get_structured_fields(analysis)
+                print(f"\n=== 文件总结结果 ===")
                 print(f"文件名: {args.input}")
-                print(f"摘要: {analysis['summary']}")
-                print(f"关键词: {', '.join(analysis['keywords'][:10])}")
-                
-                if 'statistics' in analysis:
-                    stats = analysis['statistics']
-                    print(f"字符数: {stats['char_count']}")
-                    print(f"单词数: {stats['word_count']}")
-                    print(f"句子数: {stats['sentence_count']}")
+                print(f"一句话总结: {one_line}")
+                print("核心看点:")
+                if highlights:
+                    for item in highlights:
+                        print(f"- {item}")
+                else:
+                    print("- 未提取到明确内容")
             else:
                 print("无法分析该文件")
         
