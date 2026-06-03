@@ -29,6 +29,23 @@ class DailyPDFProcessor:
         # 创建临时目录
         self.temp_dir = tempfile.mkdtemp(prefix="pdf_processing_")
         self.logger.info(f"临时目录: {self.temp_dir}")
+        
+        # 固定缓存位置（在输出根目录）
+        self.cache_file = self._get_cache_file()
+    
+    def _get_cache_file(self):
+        """获取固定的缓存文件路径"""
+        # 找到 output 根目录
+        output_dir = self.config['output_dir']
+        # 向上查找直到找到 daily 目录的父目录（output）
+        while True:
+            parent = os.path.dirname(output_dir)
+            if os.path.basename(output_dir) == 'daily' or parent == output_dir:
+                break
+            output_dir = parent
+        
+        # 缓存文件放在 output 根目录
+        return os.path.join(output_dir, '.pdf_parse_cache.json')
     
     def setup_logging(self):
         """设置日志系统"""
@@ -80,6 +97,9 @@ class DailyPDFProcessor:
         # 创建处理管道实例
         pipeline = pdf_processing_pipeline.PDFProcessingPipeline(self.config)
         
+        # 传递固定缓存文件路径
+        self.config['cache_file'] = self.cache_file
+        
         success = pipeline.run_pipeline(
             self.config['input_dir'], 
             os.path.join(self.config['output_dir'], 'processed')
@@ -89,7 +109,54 @@ class DailyPDFProcessor:
             # 生成每日报告
             pipeline.generate_summary_report(os.path.join(self.config['output_dir'], 'processed'))
         
-        return success
+        return success, pipeline
+    
+    def move_processed_files(self):
+        """将已处理的PDF文件移动到B文件夹"""
+        input_dir = self.config['input_dir']
+        # B文件夹路径：input_dir的同级目录，命名为 files_processed
+        processed_dir = os.path.join(os.path.dirname(input_dir), "files_processed")
+        
+        os.makedirs(processed_dir, exist_ok=True)
+        
+        # 获取已处理成功的文件列表
+        processed_md_dir = os.path.join(self.config['output_dir'], 'processed')
+        if not os.path.exists(processed_md_dir):
+            self.logger.warning(f"处理目录不存在: {processed_md_dir}")
+            return
+        
+        # 获取所有已生成的markdown文件名（不含扩展名）
+        processed_files = set()
+        for md_file in os.listdir(processed_md_dir):
+            if md_file.endswith('.md'):
+                # 移除 .md 扩展名
+                base_name = md_file[:-3]
+                # 移除可能的后缀如 _hybrid
+                if '_hybrid' in base_name:
+                    base_name = base_name.replace('_hybrid', '')
+                elif '_tesseract' in base_name:
+                    base_name = base_name.replace('_tesseract', '')
+                elif '_liteparse' in base_name:
+                    base_name = base_name.replace('_liteparse', '')
+                processed_files.add(base_name)
+        
+        # 移动对应的PDF文件
+        moved_count = 0
+        for pdf_file in os.listdir(input_dir):
+            if pdf_file.lower().endswith('.pdf'):
+                pdf_base_name = pdf_file[:-4]  # 移除 .pdf 扩展名
+                if pdf_base_name in processed_files:
+                    src_path = os.path.join(input_dir, pdf_file)
+                    dst_path = os.path.join(processed_dir, pdf_file)
+                    
+                    try:
+                        shutil.move(src_path, dst_path)
+                        self.logger.info(f"已移动文件: {pdf_file} -> {processed_dir}")
+                        moved_count += 1
+                    except Exception as e:
+                        self.logger.error(f"移动文件失败 {pdf_file}: {e}")
+        
+        self.logger.info(f"共移动 {moved_count} 个文件到 {processed_dir}")
     
     def run_ai_analysis(self):
         """运行AI内容分析"""
@@ -191,7 +258,7 @@ class DailyPDFProcessor:
             # 运行处理管道
             processing_start_time = time.time()
             self.logger.info("正在运行处理管道...")
-            pipeline_success = self.run_processing_pipeline()
+            pipeline_success, pipeline = self.run_processing_pipeline()
             
             if pipeline_success:
                 self.logger.info("处理管道运行成功")
@@ -209,6 +276,10 @@ class DailyPDFProcessor:
             # 运行优化分析
             self.logger.info("正在生成优化报告...")
             self.run_optimization_analysis()
+            
+            # 移动已处理的文件到B文件夹
+            self.logger.info("正在移动已处理的文件...")
+            self.move_processed_files()
             
             total_time = time.time() - processing_start_time
             self.logger.info(f"=== 处理完成 ===")

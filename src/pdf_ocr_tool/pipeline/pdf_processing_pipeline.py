@@ -88,7 +88,8 @@ class PDFProcessingPipeline:
         try:
             min_score = self.config.get('min_score', 60)
             force = self.config.get('force', False)
-            result = parse_pdf_to_markdown(filename, output_dir, min_score=min_score, force=force)
+            cache_file = self.config.get('cache_file')
+            result = parse_pdf_to_markdown(filename, output_dir, min_score=min_score, force=force, cache_file=cache_file)
             parser = result.get('parser', 'hybrid')
             quality_score = result.get('quality_score', 0)
             md_path = result.get('md_path')

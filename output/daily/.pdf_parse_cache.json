@@ -1,0 +1,52 @@
+{
+  "/Users/xingan/Documents/software/workspace/summary/files/【大佬持仓跟踪】HVDC+华为+AIDC，客户包括华为、维谛、台达等企业，熔断器已形成最高1500VDC平台，这家公司高压直流继电器已布局1000V产品.pdf": {
+    "pdf_hash": "b6187bcc9a262ee2037d73018f642df7",
+    "md_path": "/Users/xingan/Documents/software/workspace/summary/output/daily/20260602/processed/【大佬持仓跟踪】HVDC+华为+AIDC，客户包括华为、维谛、台达等企业，熔断器已形成最高1500VDC平台，这家公司高压直流继电器已布局1000V产品_hybrid.md",
+    "parser": "tesseract_300dpi_t150",
+    "quality_score": 100,
+    "quality": {
+      "score": 100,
+      "total_len": 2744,
+      "chinese_ratio": 0.5729,
+      "alnum_ratio": 0.7048,
+      "noise_ratio": 0.0,
+      "keyword_hits": 24,
+      "title_hits": 7,
+      "line_count": 59,
+      "avg_line_len": 46.51
+    },
+    "success": true,
+    "attempts": [
+      {
+        "parser": "liteparse_text",
+        "quality": {
+          "score": 12,
+          "total_len": 27,
+          "chinese_ratio": 0.3704,
+          "alnum_ratio": 0.8889,
+          "noise_ratio": 0.0,
+          "keyword_hits": 1,
+          "title_hits": 0,
+          "line_count": 1,
+          "avg_line_len": 27.0
+        }
+      },
+      {
+        "parser": "tesseract_300dpi_t150",
+        "quality": {
+          "score": 100,
+          "total_len": 2744,
+          "chinese_ratio": 0.5729,
+          "alnum_ratio": 0.7048,
+          "noise_ratio": 0.0,
+          "keyword_hits": 24,
+          "title_hits": 7,
+          "line_count": 59,
+          "avg_line_len": 46.51
+        }
+      }
+    ],
+    "updated_at": "2026-06-02T17:07:30.683824",
+    "elapsed_seconds": 17.58
+  }
+}

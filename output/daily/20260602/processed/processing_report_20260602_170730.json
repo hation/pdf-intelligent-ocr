@@ -1,0 +1,53 @@
+{
+  "timestamp": "2026-06-02T17:07:30.904964",
+  "total_files": 7,
+  "success_count": 7,
+  "failed_count": 0,
+  "processing_time": 19.21558713912964,
+  "files_per_minute": 21.857255620606747,
+  "average_time_per_file": 2.7450838770185197,
+  "detailed_stats": [
+    {
+      "filename": "电子书-《赢家的诅咒》经济生活中的悖论和反常现象-（美）理查德·塞勒.pdf",
+      "strategy": "liteparse_text",
+      "char_count": 684944,
+      "processing_time": 8.734718084335327
+    },
+    {
+      "filename": "【机构调研】这家铜箔供应商相继攻克HVLP1-4代产品，公司5月稼动率已打满.pdf",
+      "strategy": "tesseract_300dpi_t150",
+      "char_count": 980,
+      "processing_time": 10.753150939941406
+    },
+    {
+      "filename": "【盘中宝】电子产业不可或缺的隐形骨架，这类产品供给受限、需求快速增长，这家公司特种产品开发正在有序推进中.pdf",
+      "strategy": "tesseract_300dpi_t150",
+      "char_count": 1204,
+      "processing_time": 11.256925106048584
+    },
+    {
+      "filename": "【风口研报·行业】华为“韬（τ）定律”用3D堆叠换性能，分析师认为功耗大幅提升驱动散热方案迭代升级，这些公司深耕主动散热有望受益.pdf",
+      "strategy": "tesseract_300dpi_t150",
+      "char_count": 1541,
+      "processing_time": 14.221379041671753
+    },
+    {
+      "filename": "【电报解读】该细分领域是商业航天与人工智能深度融合的“战略新赛道”，我国相关产业正形成多点开花、分工协作的格局，大规模部署或将加速，这家公司产品已应用到商业航天.pdf",
+      "strategy": "tesseract_300dpi_t150",
+      "char_count": 1727,
+      "processing_time": 14.904114246368408
+    },
+    {
+      "filename": "【点金互动易】长鑫+长存，半导体材料供货长江存储和长鑫存储，这家公司深度卡位集成电路薄膜新材料，拥有稀土光磁及生物医用等高端性新材料布局.pdf",
+      "strategy": "tesseract_300dpi_t150",
+      "char_count": 2653,
+      "processing_time": 18.16930603981018
+    },
+    {
+      "filename": "【大佬持仓跟踪】HVDC+华为+AIDC，客户包括华为、维谛、台达等企业，熔断器已形成最高1500VDC平台，这家公司高压直流继电器已布局1000V产品.pdf",
+      "strategy": "tesseract_300dpi_t150",
+      "char_count": 2940,
+      "processing_time": 18.99705219268799
+    }
+  ]
+}

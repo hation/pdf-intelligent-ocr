@@ -69,6 +69,24 @@ def load_cache(output_dir):
         return {}
 
 
+def load_cache_from_file(cache_file):
+    """从指定文件加载缓存"""
+    if not os.path.exists(cache_file):
+        return {}
+    try:
+        with open(cache_file, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def save_cache_to_file(cache, cache_file):
+    """保存缓存到指定文件"""
+    ensure_dir(os.path.dirname(cache_file))
+    with open(cache_file, "w", encoding="utf-8") as f:
+        json.dump(cache, f, ensure_ascii=False, indent=2)
+
+
 def save_cache(output_dir, cache):
     path = cache_path(output_dir)
     with open(path, "w", encoding="utf-8") as f:
@@ -264,10 +282,14 @@ def validate_cached_result(entry, pdf_hash):
     return entry.get("pdf_hash") == pdf_hash and md_path and os.path.exists(md_path) and entry.get("quality_score", 0) >= 60
 
 
-def parse_pdf_to_markdown(pdf_path, output_dir, min_score=60, force=False):
+def parse_pdf_to_markdown(pdf_path, output_dir, min_score=60, force=False, cache_file=None):
     ensure_dir(output_dir)
     pdf_hash = compute_file_hash(pdf_path)
-    cache = load_cache(output_dir)
+    # 使用指定的缓存文件或默认缓存路径
+    if cache_file:
+        cache = load_cache_from_file(cache_file)
+    else:
+        cache = load_cache(output_dir)
     cache_key = os.path.abspath(pdf_path)
     cached = cache.get(cache_key)
 
@@ -280,6 +302,9 @@ def parse_pdf_to_markdown(pdf_path, output_dir, min_score=60, force=False):
             "from_cache": True,
             "quality": cached.get("quality", {}),
         }
+    
+    # 保存缓存文件路径供后续使用
+    current_cache_file = cache_file or cache_path(output_dir)
 
     started_at = time.time()
     attempts = []
@@ -294,7 +319,7 @@ def parse_pdf_to_markdown(pdf_path, output_dir, min_score=60, force=False):
             attempts.append({"parser": "pypdf_selectable", "quality": quality})
             if quality["score"] >= min_score:
                 md_path = write_result(output_dir, pdf_path, "PyPDF2可选文本", text, quality, {"页数": pages})
-                result = save_parse_cache(cache, cache_key, pdf_hash, md_path, "pypdf_selectable", quality, started_at, attempts, output_dir)
+                result = save_parse_cache(cache, cache_key, pdf_hash, md_path, "pypdf_selectable", quality, started_at, attempts, current_cache_file)
                 return result
         except Exception as e:
             attempts.append({"parser": "pypdf_selectable", "error": str(e)})
@@ -306,7 +331,7 @@ def parse_pdf_to_markdown(pdf_path, output_dir, min_score=60, force=False):
             attempts.append({"parser": "liteparse_text", "quality": quality})
             if quality["score"] >= min_score:
                 md_path = write_result(output_dir, pdf_path, "LiteParse非OCR", text, quality, meta)
-                result = save_parse_cache(cache, cache_key, pdf_hash, md_path, "liteparse_text", quality, started_at, attempts, output_dir)
+                result = save_parse_cache(cache, cache_key, pdf_hash, md_path, "liteparse_text", quality, started_at, attempts, current_cache_file)
                 return result
         except Exception as e:
             attempts.append({"parser": "liteparse_text", "error": str(e)})
@@ -318,7 +343,7 @@ def parse_pdf_to_markdown(pdf_path, output_dir, min_score=60, force=False):
             quality = best_attempt["quality"]
             text = pdf_info.get("sample_text", "")
             md_path = write_result(output_dir, pdf_path, f"{parser_name}_low_quality", text, quality, {"页数": page_count, "状态": "大文件跳过全量OCR"})
-            result = save_parse_cache(cache, cache_key, pdf_hash, md_path, parser_name, quality, started_at, attempts, output_dir, success=False)
+            result = save_parse_cache(cache, cache_key, pdf_hash, md_path, parser_name, quality, started_at, attempts, current_cache_file, success=False)
             return result
 
     for dpi, threshold in [(300, 150), (400, 150), (400, 180)]:
@@ -329,7 +354,7 @@ def parse_pdf_to_markdown(pdf_path, output_dir, min_score=60, force=False):
             attempts.append({"parser": parser_name, "quality": quality})
             if quality["score"] >= min_score:
                 md_path = write_result(output_dir, pdf_path, f"Tesseract OCR {dpi}DPI", text, quality, meta)
-                result = save_parse_cache(cache, cache_key, pdf_hash, md_path, parser_name, quality, started_at, attempts, output_dir)
+                result = save_parse_cache(cache, cache_key, pdf_hash, md_path, parser_name, quality, started_at, attempts, current_cache_file)
                 return result
         except Exception as e:
             attempts.append({"parser": f"tesseract_{dpi}dpi_t{threshold}", "error": str(e)})
@@ -344,7 +369,7 @@ def parse_pdf_to_markdown(pdf_path, output_dir, min_score=60, force=False):
         except Exception:
             meta = {}
         md_path = write_result(output_dir, pdf_path, f"{parser_name}_best_effort", text, quality, {**meta, "状态": "质量未达标"})
-        return save_parse_cache(cache, cache_key, pdf_hash, md_path, parser_name, quality, started_at, attempts, output_dir, success=False)
+        return save_parse_cache(cache, cache_key, pdf_hash, md_path, parser_name, quality, started_at, attempts, current_cache_file, success=False)
 
     return {
         "success": False,
@@ -363,7 +388,7 @@ def select_best_attempt(attempts):
     return max(candidates, key=lambda item: item["quality"]["score"])
 
 
-def save_parse_cache(cache, cache_key, pdf_hash, md_path, parser, quality, started_at, attempts, output_dir, success=True):
+def save_parse_cache(cache, cache_key, pdf_hash, md_path, parser, quality, started_at, attempts, cache_file, success=True):
     entry = {
         "pdf_hash": pdf_hash,
         "md_path": md_path,
@@ -376,7 +401,11 @@ def save_parse_cache(cache, cache_key, pdf_hash, md_path, parser, quality, start
         "elapsed_seconds": round(time.time() - started_at, 2),
     }
     cache[cache_key] = entry
-    save_cache(output_dir, cache)
+    # 使用指定的缓存文件或默认路径
+    if os.path.isdir(cache_file):
+        save_cache(cache_file, cache)
+    else:
+        save_cache_to_file(cache, cache_file)
     return {
         "success": success,
         "md_path": md_path,
