@@ -64,6 +64,35 @@ python3 daily_500_pdf_processor.py --workers 8 --min-score 60 --force
 4. 结果保存在 output/daily/YYYYMMDD/
 ```
 
+### 📑 专题报告提取
+
+从已处理的文档中提取指定主题的报告，按子分类分组展示：
+
+```bash
+# 默认提取AI与科技主题
+python3 extract_topic_summary.py
+
+# 指定参数
+python3 extract_topic_summary.py \
+  --input output/daily/20260714 \
+  --topic AI \
+  --date 20260715 \
+  --output custom_report.md
+```
+
+**输出位置**: `output/topic_summaries/<topic>/<topic>_documents_summary_YYYYMMDD.md`
+
+**报告结构**:
+- 概览统计（总文档数、子分类统计）
+- 按子分类分组展示
+- 每个文档包含一句话总结 + 5个核心看点
+
+**AI子分类**:
+- 🤖 AI大模型与应用
+- 🔧 AI算力与硬件
+- 🤖 具身智能与机器人
+- 🔬 前沿科技
+
 ## 项目结构
 
 ```
@@ -71,12 +100,15 @@ summary/
 ├── files/              # A文件夹：放入新PDF
 ├── files_processed/    # B文件夹：已处理文件
 ├── output/
-│   └── daily/          # 每日输出目录
-│       ├── YYYYMMDD/   # 按日期隔离
-│       │   ├── processed/    # 解析后的Markdown
-│       │   ├── reports/      # 报告文件
-│       │   └── summaries/    # 单文件总结
-│       └── .pdf_parse_cache.json  # 跨天共享缓存
+│   ├── daily/          # 每日输出目录
+│   │   ├── YYYYMMDD/   # 按日期隔离
+│   │   │   ├── processed/    # 解析后的Markdown
+│   │   │   ├── reports/      # 报告文件
+│   │   │   └── summaries/    # 单文件总结
+│   │   └── .pdf_parse_cache.json  # 跨天共享缓存
+│   └── topic_summaries/   # 专题报告目录
+│       └── AI/            # AI与科技专题报告
+│           └── AI_documents_summary_YYYYMMDD.md
 ├── src/
 │   └── pdf_ocr_tool/
 │       ├── parsers/          # PDF解析层
@@ -85,6 +117,8 @@ summary/
 │       └── summarizers/      # 总结生成器
 ├── tests/             # 测试脚本
 ├── archive/           # 旧版本代码归档
+├── daily_500_pdf_processor.py  # 每日处理入口
+├── extract_topic_summary.py     # 专题报告提取
 └── README.md
 ```
 
