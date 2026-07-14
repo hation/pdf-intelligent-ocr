@@ -15,11 +15,6 @@ from datetime import datetime
 import json
 
 # 导入项目核心功能
-from pdf_ocr_tool.parsers.parse_with_liteparse_ocr import parse_pdf_with_liteparse_ocr
-from pdf_ocr_tool.legacy.batch_ocr_optimized import batch_process as optimized_batch_process
-from pdf_ocr_tool.legacy.batch_ocr_accurate import batch_process as accurate_batch_process
-from pdf_ocr_tool.legacy.pdf_summarizer import extract_text_from_pdf, analyze_text
-from pdf_ocr_tool.parsers.direct_tesseract_ocr import tesseract_ocr_on_pdf
 from pdf_ocr_tool.parsers.hybrid_pdf_parser import parse_pdf_to_markdown
 
 

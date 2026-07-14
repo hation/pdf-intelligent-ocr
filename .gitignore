@@ -1,6 +1,8 @@
 # 文件和文件夹
 files/
+files_processed/
 outputs/
+output/
 outputs_liteparse/
 outputs_liteparse_ocr/
 outputs_batch_optimized/
@@ -59,3 +61,6 @@ node_modules/
 
 # Tesseract OCR 临时文件
 tess*
+
+# PDF解析缓存
+.pdf_parse_cache.json
