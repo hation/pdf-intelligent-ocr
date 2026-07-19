@@ -240,7 +240,7 @@ def find_summary_list(base_dir):
 
 def main():
     parser = argparse.ArgumentParser(description='生成主题专题报告')
-    parser.add_argument('--input', '-i', default='output/daily/20260714',
+    parser.add_argument('--input', '-i', default='output/daily/20260719',
                         help='输入目录（包含summaries/和reports/）')
     parser.add_argument('--topic', '-t', default='AI',
                         help='主题名称（AI/finance/medical等）')

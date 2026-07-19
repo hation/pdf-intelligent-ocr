@@ -1718,5 +1718,2221 @@
     ],
     "updated_at": "2026-07-14T22:59:38.118036",
     "elapsed_seconds": 6.27
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/AI大模型合规指南-合规99问.pdf": {
+    "pdf_hash": "278306b3bf47d8b6d13ee013456dda72",
+    "md_path": "output/daily/20260715/processed/AI大模型合规指南-合规99问_hybrid.md",
+    "parser": "liteparse_text",
+    "quality_score": 85,
+    "quality": {
+      "score": 85,
+      "total_len": 216199,
+      "chinese_ratio": 0.7171,
+      "alnum_ratio": 0.7674,
+      "noise_ratio": 0.0001,
+      "keyword_hits": 24,
+      "title_hits": 0,
+      "line_count": 6763,
+      "avg_line_len": 31.97
+    },
+    "success": true,
+    "attempts": [
+      {
+        "parser": "liteparse_text",
+        "quality": {
+          "score": 85,
+          "total_len": 216199,
+          "chinese_ratio": 0.7171,
+          "alnum_ratio": 0.7674,
+          "noise_ratio": 0.0001,
+          "keyword_hits": 24,
+          "title_hits": 0,
+          "line_count": 6763,
+          "avg_line_len": 31.97
+        }
+      }
+    ],
+    "updated_at": "2026-07-15T16:51:26.728307",
+    "elapsed_seconds": 2.77
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/2026年GEO行业现状与趋势研究.pdf": {
+    "pdf_hash": "6f59934217a20489572174d20de3fd2d",
+    "md_path": "output/daily/20260715/processed/2026年GEO行业现状与趋势研究_hybrid.md",
+    "parser": "liteparse_text",
+    "quality_score": 65,
+    "quality": {
+      "score": 65,
+      "total_len": 21226,
+      "chinese_ratio": 0.2811,
+      "alnum_ratio": 0.431,
+      "noise_ratio": 0.0,
+      "keyword_hits": 20,
+      "title_hits": 0,
+      "line_count": 330,
+      "avg_line_len": 64.32
+    },
+    "success": true,
+    "attempts": [
+      {
+        "parser": "liteparse_text",
+        "quality": {
+          "score": 65,
+          "total_len": 21226,
+          "chinese_ratio": 0.2811,
+          "alnum_ratio": 0.431,
+          "noise_ratio": 0.0,
+          "keyword_hits": 20,
+          "title_hits": 0,
+          "line_count": 330,
+          "avg_line_len": 64.32
+        }
+      }
+    ],
+    "updated_at": "2026-07-15T16:51:27.146850",
+    "elapsed_seconds": 0.4
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/Nomura野村-中国航天网捕首获成功：中国走出火箭复用原创路径.pdf": {
+    "pdf_hash": "d7ad3751ca3d0367a17f8f81412fe4ad",
+    "md_path": "output/daily/20260715/processed/Nomura野村-中国航天网捕首获成功：中国走出火箭复用原创路径_hybrid.md",
+    "parser": "liteparse_text",
+    "quality_score": 29,
+    "quality": {
+      "score": 29,
+      "total_len": 299,
+      "chinese_ratio": 0.2676,
+      "alnum_ratio": 0.8361,
+      "noise_ratio": 0.0,
+      "keyword_hits": 1,
+      "title_hits": 0,
+      "line_count": 9,
+      "avg_line_len": 33.22
+    },
+    "success": false,
+    "attempts": [
+      {
+        "parser": "liteparse_text",
+        "quality": {
+          "score": 29,
+          "total_len": 299,
+          "chinese_ratio": 0.2676,
+          "alnum_ratio": 0.8361,
+          "noise_ratio": 0.0,
+          "keyword_hits": 1,
+          "title_hits": 0,
+          "line_count": 9,
+          "avg_line_len": 33.22
+        }
+      },
+      {
+        "parser": "tesseract_300dpi_t150",
+        "quality": {
+          "score": 24,
+          "total_len": 42206,
+          "chinese_ratio": 0.0026,
+          "alnum_ratio": 0.7719,
+          "noise_ratio": 0.1994,
+          "keyword_hits": 2,
+          "title_hits": 0,
+          "line_count": 444,
+          "avg_line_len": 95.06
+        }
+      },
+      {
+        "parser": "tesseract_400dpi_t150",
+        "quality": {
+          "score": 24,
+          "total_len": 41674,
+          "chinese_ratio": 0.0026,
+          "alnum_ratio": 0.7817,
+          "noise_ratio": 0.2009,
+          "keyword_hits": 1,
+          "title_hits": 0,
+          "line_count": 457,
+          "avg_line_len": 91.19
+        }
+      },
+      {
+        "parser": "tesseract_400dpi_t180",
+        "quality": {
+          "score": 24,
+          "total_len": 42013,
+          "chinese_ratio": 0.003,
+          "alnum_ratio": 0.7759,
+          "noise_ratio": 0.1997,
+          "keyword_hits": 2,
+          "title_hits": 0,
+          "line_count": 440,
+          "avg_line_len": 95.48
+        }
+      }
+    ],
+    "updated_at": "2026-07-15T16:59:44.518763",
+    "elapsed_seconds": 458.95
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/人形机器人大时代-解码商业化脉络.pdf": {
+    "pdf_hash": "ea8844c51107682549bee9cb286143bd",
+    "md_path": "output/daily/20260715/processed/人形机器人大时代-解码商业化脉络_hybrid.md",
+    "parser": "tesseract_300dpi_t150",
+    "quality_score": 85,
+    "quality": {
+      "score": 85,
+      "total_len": 18234,
+      "chinese_ratio": 0.8191,
+      "alnum_ratio": 0.873,
+      "noise_ratio": 0.0,
+      "keyword_hits": 21,
+      "title_hits": 0,
+      "line_count": 465,
+      "avg_line_len": 39.21
+    },
+    "success": true,
+    "attempts": [
+      {
+        "parser": "liteparse_text",
+        "quality": {
+          "score": 37,
+          "total_len": 375,
+          "chinese_ratio": 0.3467,
+          "alnum_ratio": 0.832,
+          "noise_ratio": 0.0,
+          "keyword_hits": 1,
+          "title_hits": 0,
+          "line_count": 13,
+          "avg_line_len": 28.85
+        }
+      },
+      {
+        "parser": "tesseract_300dpi_t150",
+        "quality": {
+          "score": 85,
+          "total_len": 18234,
+          "chinese_ratio": 0.8191,
+          "alnum_ratio": 0.873,
+          "noise_ratio": 0.0,
+          "keyword_hits": 21,
+          "title_hits": 0,
+          "line_count": 465,
+          "avg_line_len": 39.21
+        }
+      }
+    ],
+    "updated_at": "2026-07-15T17:03:04.166585",
+    "elapsed_seconds": 199.61
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/【季报高增长】先进封装+AI PC，上半年净利润同比暴增15倍！这家公司布局2.5D、3D封装等前沿技术，重点发力AI PC等产品线，构建了从低功耗边缘计算到高性能服务器的全场景AI算力产.pdf": {
+    "pdf_hash": "1ac372539e403d18ed5cb7f2e9f40b73",
+    "md_path": "output/daily/20260715/processed/【季报高增长】先进封装+AI PC，上半年净利润同比暴增15倍！这家公司布局2.5D、3D封装等前沿技术，重点发力AI PC等产品线，构建了从低功耗边缘计算到高性能服务器的全场景AI算力产_hybrid.md",
+    "parser": "tesseract_300dpi_t150",
+    "quality_score": 85,
+    "quality": {
+      "score": 85,
+      "total_len": 10434,
+      "chinese_ratio": 0.1906,
+      "alnum_ratio": 0.6077,
+      "noise_ratio": 0.0043,
+      "keyword_hits": 21,
+      "title_hits": 6,
+      "line_count": 181,
+      "avg_line_len": 57.65
+    },
+    "success": true,
+    "attempts": [
+      {
+        "parser": "liteparse_text",
+        "quality": {
+          "score": 12,
+          "total_len": 27,
+          "chinese_ratio": 0.3704,
+          "alnum_ratio": 0.8889,
+          "noise_ratio": 0.0,
+          "keyword_hits": 1,
+          "title_hits": 0,
+          "line_count": 1,
+          "avg_line_len": 27.0
+        }
+      },
+      {
+        "parser": "tesseract_300dpi_t150",
+        "quality": {
+          "score": 85,
+          "total_len": 10434,
+          "chinese_ratio": 0.1906,
+          "alnum_ratio": 0.6077,
+          "noise_ratio": 0.0043,
+          "keyword_hits": 21,
+          "title_hits": 6,
+          "line_count": 181,
+          "avg_line_len": 57.65
+        }
+      }
+    ],
+    "updated_at": "2026-07-15T17:05:59.154363",
+    "elapsed_seconds": 174.96
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/高盛-解读中国大模型：全球规模化落地的智能发展关键拐点.pdf": {
+    "pdf_hash": "f565b8221a13bb1458b156c4c249dddd",
+    "md_path": "output/daily/20260715/processed/高盛-解读中国大模型：全球规模化落地的智能发展关键拐点_hybrid.md",
+    "parser": "liteparse_text",
+    "quality_score": 31,
+    "quality": {
+      "score": 31,
+      "total_len": 119968,
+      "chinese_ratio": 0.0047,
+      "alnum_ratio": 0.6496,
+      "noise_ratio": 0.1477,
+      "keyword_hits": 2,
+      "title_hits": 0,
+      "line_count": 1091,
+      "avg_line_len": 109.96
+    },
+    "success": false,
+    "attempts": [
+      {
+        "parser": "liteparse_text",
+        "quality": {
+          "score": 31,
+          "total_len": 119968,
+          "chinese_ratio": 0.0047,
+          "alnum_ratio": 0.6496,
+          "noise_ratio": 0.1477,
+          "keyword_hits": 2,
+          "title_hits": 0,
+          "line_count": 1091,
+          "avg_line_len": 109.96
+        }
+      }
+    ],
+    "updated_at": "2026-07-15T17:06:00.326086",
+    "elapsed_seconds": 1.14
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/光的全链条通胀.pdf": {
+    "pdf_hash": "254138d130922ae31a242abc53d386aa",
+    "md_path": "output/daily/20260715/processed/光的全链条通胀_hybrid.md",
+    "parser": "tesseract_300dpi_t150",
+    "quality_score": 90,
+    "quality": {
+      "score": 90,
+      "total_len": 3280,
+      "chinese_ratio": 0.5649,
+      "alnum_ratio": 0.7805,
+      "noise_ratio": 0.0335,
+      "keyword_hits": 16,
+      "title_hits": 1,
+      "line_count": 88,
+      "avg_line_len": 37.27
+    },
+    "success": true,
+    "attempts": [
+      {
+        "parser": "liteparse_text",
+        "quality": {
+          "score": 12,
+          "total_len": 85,
+          "chinese_ratio": 0.3529,
+          "alnum_ratio": 0.8471,
+          "noise_ratio": 0.0,
+          "keyword_hits": 1,
+          "title_hits": 0,
+          "line_count": 3,
+          "avg_line_len": 28.33
+        }
+      },
+      {
+        "parser": "tesseract_300dpi_t150",
+        "quality": {
+          "score": 90,
+          "total_len": 3280,
+          "chinese_ratio": 0.5649,
+          "alnum_ratio": 0.7805,
+          "noise_ratio": 0.0335,
+          "keyword_hits": 16,
+          "title_hits": 1,
+          "line_count": 88,
+          "avg_line_len": 37.27
+        }
+      }
+    ],
+    "updated_at": "2026-07-15T17:06:35.509244",
+    "elapsed_seconds": 35.17
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/【点金互动易】CPU+国产算力，自研本土安全可控高端处理器，AI Agent爆火拉高通用计算需求，这家公司CPU与GPU协同放量，有望加速渗透电信、金融等核心商业市场.pdf": {
+    "pdf_hash": "4aca22f8bf137bce68263bb607138761",
+    "md_path": "output/daily/20260715/processed/【点金互动易】CPU+国产算力，自研本土安全可控高端处理器，AI Agent爆火拉高通用计算需求，这家公司CPU与GPU协同放量，有望加速渗透电信、金融等核心商业市场_hybrid.md",
+    "parser": "tesseract_300dpi_t150",
+    "quality_score": 88,
+    "quality": {
+      "score": 88,
+      "total_len": 3279,
+      "chinese_ratio": 0.3907,
+      "alnum_ratio": 0.6898,
+      "noise_ratio": 0.0778,
+      "keyword_hits": 20,
+      "title_hits": 3,
+      "line_count": 81,
+      "avg_line_len": 40.48
+    },
+    "success": true,
+    "attempts": [
+      {
+        "parser": "liteparse_text",
+        "quality": {
+          "score": 12,
+          "total_len": 27,
+          "chinese_ratio": 0.3704,
+          "alnum_ratio": 0.8889,
+          "noise_ratio": 0.0,
+          "keyword_hits": 1,
+          "title_hits": 0,
+          "line_count": 1,
+          "avg_line_len": 27.0
+        }
+      },
+      {
+        "parser": "tesseract_300dpi_t150",
+        "quality": {
+          "score": 88,
+          "total_len": 3279,
+          "chinese_ratio": 0.3907,
+          "alnum_ratio": 0.6898,
+          "noise_ratio": 0.0778,
+          "keyword_hits": 20,
+          "title_hits": 3,
+          "line_count": 81,
+          "avg_line_len": 40.48
+        }
+      }
+    ],
+    "updated_at": "2026-07-15T17:07:06.362636",
+    "elapsed_seconds": 30.84
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/摩根大通-SpaceX与特斯拉合并构想.pdf": {
+    "pdf_hash": "72cd128af6bb1d77cccf390e36121cb8",
+    "md_path": "output/daily/20260715/processed/摩根大通-SpaceX与特斯拉合并构想_hybrid.md",
+    "parser": "liteparse_text",
+    "quality_score": 24,
+    "quality": {
+      "score": 24,
+      "total_len": 46363,
+      "chinese_ratio": 0.0019,
+      "alnum_ratio": 0.7702,
+      "noise_ratio": 0.2145,
+      "keyword_hits": 2,
+      "title_hits": 0,
+      "line_count": 435,
+      "avg_line_len": 106.58
+    },
+    "success": false,
+    "attempts": [
+      {
+        "parser": "liteparse_text",
+        "quality": {
+          "score": 24,
+          "total_len": 46363,
+          "chinese_ratio": 0.0019,
+          "alnum_ratio": 0.7702,
+          "noise_ratio": 0.2145,
+          "keyword_hits": 2,
+          "title_hits": 0,
+          "line_count": 435,
+          "avg_line_len": 106.58
+        }
+      },
+      {
+        "parser": "tesseract_300dpi_t150",
+        "quality": {
+          "score": 24,
+          "total_len": 48955,
+          "chinese_ratio": 0.0004,
+          "alnum_ratio": 0.7346,
+          "noise_ratio": 0.2048,
+          "keyword_hits": 1,
+          "title_hits": 0,
+          "line_count": 470,
+          "avg_line_len": 104.16
+        }
+      },
+      {
+        "parser": "tesseract_400dpi_t150",
+        "quality": {
+          "score": 24,
+          "total_len": 49428,
+          "chinese_ratio": 0.0004,
+          "alnum_ratio": 0.7268,
+          "noise_ratio": 0.2007,
+          "keyword_hits": 1,
+          "title_hits": 0,
+          "line_count": 466,
+          "avg_line_len": 106.07
+        }
+      },
+      {
+        "parser": "tesseract_400dpi_t180",
+        "quality": {
+          "score": 24,
+          "total_len": 48962,
+          "chinese_ratio": 0.0004,
+          "alnum_ratio": 0.7339,
+          "noise_ratio": 0.209,
+          "keyword_hits": 1,
+          "title_hits": 0,
+          "line_count": 465,
+          "avg_line_len": 105.29
+        }
+      }
+    ],
+    "updated_at": "2026-07-15T17:13:53.505314",
+    "elapsed_seconds": 407.13
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/大摩路演-中国医疗健康行业观察：药明康德——首选标的.pdf": {
+    "pdf_hash": "6ef05078483aeffcf031b8b5e83af983",
+    "md_path": "output/daily/20260715/processed/大摩路演-中国医疗健康行业观察：药明康德——首选标的_hybrid.md",
+    "parser": "pypdf_selectable",
+    "quality_score": 80,
+    "quality": {
+      "score": 80,
+      "total_len": 570,
+      "chinese_ratio": 0.614,
+      "alnum_ratio": 0.7754,
+      "noise_ratio": 0.0,
+      "keyword_hits": 7,
+      "title_hits": 4,
+      "line_count": 19,
+      "avg_line_len": 30.0
+    },
+    "success": true,
+    "attempts": [
+      {
+        "parser": "pypdf_selectable",
+        "quality": {
+          "score": 80,
+          "total_len": 570,
+          "chinese_ratio": 0.614,
+          "alnum_ratio": 0.7754,
+          "noise_ratio": 0.0,
+          "keyword_hits": 7,
+          "title_hits": 4,
+          "line_count": 19,
+          "avg_line_len": 30.0
+        }
+      }
+    ],
+    "updated_at": "2026-07-15T17:13:53.591040",
+    "elapsed_seconds": 0.07
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/大摩闭门会-亚洲研讨会-大中华区科技硬件.pdf": {
+    "pdf_hash": "a43de697ab04aab42f26e4ba878febba",
+    "md_path": "output/daily/20260715/processed/大摩闭门会-亚洲研讨会-大中华区科技硬件_hybrid.md",
+    "parser": "tesseract_300dpi_t150",
+    "quality_score": 95,
+    "quality": {
+      "score": 95,
+      "total_len": 9803,
+      "chinese_ratio": 0.669,
+      "alnum_ratio": 0.8188,
+      "noise_ratio": 0.0,
+      "keyword_hits": 26,
+      "title_hits": 3,
+      "line_count": 268,
+      "avg_line_len": 36.58
+    },
+    "success": true,
+    "attempts": [
+      {
+        "parser": "liteparse_text",
+        "quality": {
+          "score": 37,
+          "total_len": 230,
+          "chinese_ratio": 0.3478,
+          "alnum_ratio": 0.8348,
+          "noise_ratio": 0.0,
+          "keyword_hits": 1,
+          "title_hits": 0,
+          "line_count": 8,
+          "avg_line_len": 28.75
+        }
+      },
+      {
+        "parser": "tesseract_300dpi_t150",
+        "quality": {
+          "score": 95,
+          "total_len": 9803,
+          "chinese_ratio": 0.669,
+          "alnum_ratio": 0.8188,
+          "noise_ratio": 0.0,
+          "keyword_hits": 26,
+          "title_hits": 3,
+          "line_count": 268,
+          "avg_line_len": 36.58
+        }
+      }
+    ],
+    "updated_at": "2026-07-15T17:15:31.927297",
+    "elapsed_seconds": 98.32
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/天风海外-韩国散户去杠杆调研.pdf": {
+    "pdf_hash": "55dea1a79033ad8bf6ed9de79649b2b3",
+    "md_path": "output/daily/20260715/processed/天风海外-韩国散户去杠杆调研_hybrid.md",
+    "parser": "liteparse_text",
+    "quality_score": 85,
+    "quality": {
+      "score": 85,
+      "total_len": 7525,
+      "chinese_ratio": 0.5454,
+      "alnum_ratio": 0.7312,
+      "noise_ratio": 0.0,
+      "keyword_hits": 12,
+      "title_hits": 0,
+      "line_count": 195,
+      "avg_line_len": 38.59
+    },
+    "success": true,
+    "attempts": [
+      {
+        "parser": "pypdf_selectable",
+        "quality": {
+          "score": 85,
+          "total_len": 7645,
+          "chinese_ratio": 0.5264,
+          "alnum_ratio": 0.7211,
+          "noise_ratio": 0.0,
+          "keyword_hits": 12,
+          "title_hits": 0,
+          "line_count": 207,
+          "avg_line_len": 36.93
+        }
+      },
+      {
+        "parser": "pypdf_selectable",
+        "error": "'utf-8' codec can't encode characters in position 3731-3735: surrogates not allowed"
+      },
+      {
+        "parser": "liteparse_text",
+        "quality": {
+          "score": 85,
+          "total_len": 7525,
+          "chinese_ratio": 0.5454,
+          "alnum_ratio": 0.7312,
+          "noise_ratio": 0.0,
+          "keyword_hits": 12,
+          "title_hits": 0,
+          "line_count": 195,
+          "avg_line_len": 38.59
+        }
+      }
+    ],
+    "updated_at": "2026-07-15T17:15:32.763495",
+    "elapsed_seconds": 0.82
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/【研选•研报数据】《“十五五”碳达峰行动方案》发布，环保行业迎来提质扩容新周期；服务器PCB核心厂商，上半年业绩大超预期，积极把握算力需求激增带来的市场机遇.pdf": {
+    "pdf_hash": "eec54065a916933adb9a296dc1800668",
+    "md_path": "output/daily/20260715/processed/【研选•研报数据】《“十五五”碳达峰行动方案》发布，环保行业迎来提质扩容新周期；服务器PCB核心厂商，上半年业绩大超预期，积极把握算力需求激增带来的市场机遇_hybrid.md",
+    "parser": "tesseract_300dpi_t150",
+    "quality_score": 100,
+    "quality": {
+      "score": 100,
+      "total_len": 2333,
+      "chinese_ratio": 0.5079,
+      "alnum_ratio": 0.6421,
+      "noise_ratio": 0.0159,
+      "keyword_hits": 20,
+      "title_hits": 9,
+      "line_count": 62,
+      "avg_line_len": 37.63
+    },
+    "success": true,
+    "attempts": [
+      {
+        "parser": "liteparse_text",
+        "quality": {
+          "score": 12,
+          "total_len": 27,
+          "chinese_ratio": 0.3704,
+          "alnum_ratio": 0.8889,
+          "noise_ratio": 0.0,
+          "keyword_hits": 1,
+          "title_hits": 0,
+          "line_count": 1,
+          "avg_line_len": 27.0
+        }
+      },
+      {
+        "parser": "tesseract_300dpi_t150",
+        "quality": {
+          "score": 100,
+          "total_len": 2333,
+          "chinese_ratio": 0.5079,
+          "alnum_ratio": 0.6421,
+          "noise_ratio": 0.0159,
+          "keyword_hits": 20,
+          "title_hits": 9,
+          "line_count": 62,
+          "avg_line_len": 37.63
+        }
+      }
+    ],
+    "updated_at": "2026-07-15T17:15:53.757738",
+    "elapsed_seconds": 20.97
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/大摩闭门会-美元多头低估美国CPI数据意外的风险.pdf": {
+    "pdf_hash": "61a6213fa991a2518b9c5bd88fd30992",
+    "md_path": "output/daily/20260715/processed/大摩闭门会-美元多头低估美国CPI数据意外的风险_hybrid.md",
+    "parser": "tesseract_300dpi_t150",
+    "quality_score": 78,
+    "quality": {
+      "score": 78,
+      "total_len": 2151,
+      "chinese_ratio": 0.6416,
+      "alnum_ratio": 0.815,
+      "noise_ratio": 0.0846,
+      "keyword_hits": 5,
+      "title_hits": 0,
+      "line_count": 60,
+      "avg_line_len": 35.85
+    },
+    "success": true,
+    "attempts": [
+      {
+        "parser": "liteparse_text",
+        "quality": {
+          "score": 12,
+          "total_len": 56,
+          "chinese_ratio": 0.3571,
+          "alnum_ratio": 0.8571,
+          "noise_ratio": 0.0,
+          "keyword_hits": 1,
+          "title_hits": 0,
+          "line_count": 2,
+          "avg_line_len": 28.0
+        }
+      },
+      {
+        "parser": "tesseract_300dpi_t150",
+        "quality": {
+          "score": 78,
+          "total_len": 2151,
+          "chinese_ratio": 0.6416,
+          "alnum_ratio": 0.815,
+          "noise_ratio": 0.0846,
+          "keyword_hits": 5,
+          "title_hits": 0,
+          "line_count": 60,
+          "avg_line_len": 35.85
+        }
+      }
+    ],
+    "updated_at": "2026-07-15T17:16:16.232308",
+    "elapsed_seconds": 22.46
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/长十乙回收成功-商业航天后市展望.pdf": {
+    "pdf_hash": "93e7d7e15950f7c3e0d32114b6b70de0",
+    "md_path": "output/daily/20260715/processed/长十乙回收成功-商业航天后市展望_hybrid.md",
+    "parser": "tesseract_300dpi_t150",
+    "quality_score": 95,
+    "quality": {
+      "score": 95,
+      "total_len": 4523,
+      "chinese_ratio": 0.6783,
+      "alnum_ratio": 0.8324,
+      "noise_ratio": 0.0336,
+      "keyword_hits": 12,
+      "title_hits": 2,
+      "line_count": 132,
+      "avg_line_len": 34.27
+    },
+    "success": true,
+    "attempts": [
+      {
+        "parser": "liteparse_text",
+        "quality": {
+          "score": 32,
+          "total_len": 143,
+          "chinese_ratio": 0.3497,
+          "alnum_ratio": 0.8392,
+          "noise_ratio": 0.0,
+          "keyword_hits": 1,
+          "title_hits": 0,
+          "line_count": 5,
+          "avg_line_len": 28.6
+        }
+      },
+      {
+        "parser": "tesseract_300dpi_t150",
+        "quality": {
+          "score": 95,
+          "total_len": 4523,
+          "chinese_ratio": 0.6783,
+          "alnum_ratio": 0.8324,
+          "noise_ratio": 0.0336,
+          "keyword_hits": 12,
+          "title_hits": 2,
+          "line_count": 132,
+          "avg_line_len": 34.27
+        }
+      }
+    ],
+    "updated_at": "2026-07-15T17:17:06.648780",
+    "elapsed_seconds": 50.4
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/高盛-宁德时代： 不止于电芯.pdf": {
+    "pdf_hash": "ded23ac4188decd229521cfb0b449acc",
+    "md_path": "output/daily/20260715/processed/高盛-宁德时代： 不止于电芯_hybrid.md",
+    "parser": "liteparse_text",
+    "quality_score": 52,
+    "quality": {
+      "score": 52,
+      "total_len": 1082,
+      "chinese_ratio": 0.3235,
+      "alnum_ratio": 0.8299,
+      "noise_ratio": 0.0,
+      "keyword_hits": 1,
+      "title_hits": 0,
+      "line_count": 36,
+      "avg_line_len": 30.06
+    },
+    "success": false,
+    "attempts": [
+      {
+        "parser": "liteparse_text",
+        "quality": {
+          "score": 52,
+          "total_len": 1082,
+          "chinese_ratio": 0.3235,
+          "alnum_ratio": 0.8299,
+          "noise_ratio": 0.0,
+          "keyword_hits": 1,
+          "title_hits": 0,
+          "line_count": 36,
+          "avg_line_len": 30.06
+        }
+      },
+      {
+        "parser": "tesseract_300dpi_t150",
+        "quality": {
+          "score": 26,
+          "total_len": 162017,
+          "chinese_ratio": 0.0029,
+          "alnum_ratio": 0.5479,
+          "noise_ratio": 0.1122,
+          "keyword_hits": 1,
+          "title_hits": 0,
+          "line_count": 2612,
+          "avg_line_len": 62.03
+        }
+      },
+      {
+        "parser": "tesseract_400dpi_t150",
+        "quality": {
+          "score": 26,
+          "total_len": 168698,
+          "chinese_ratio": 0.0024,
+          "alnum_ratio": 0.5269,
+          "noise_ratio": 0.11,
+          "keyword_hits": 1,
+          "title_hits": 0,
+          "line_count": 2595,
+          "avg_line_len": 65.01
+        }
+      },
+      {
+        "parser": "tesseract_400dpi_t180",
+        "quality": {
+          "score": 34,
+          "total_len": 176535,
+          "chinese_ratio": 0.0035,
+          "alnum_ratio": 0.5016,
+          "noise_ratio": 0.0987,
+          "keyword_hits": 2,
+          "title_hits": 0,
+          "line_count": 2231,
+          "avg_line_len": 79.13
+        }
+      }
+    ],
+    "updated_at": "2026-07-15T17:33:36.185223",
+    "elapsed_seconds": 989.47
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/医药行业行业研究：MASH行业深度：Madrigal先飞，MNC逐鹿-国金证券.pdf": {
+    "pdf_hash": "306f569f20ef6ef4e9d2c63b0d1a80be",
+    "md_path": "output/daily/20260719/processed/医药行业行业研究：MASH行业深度：Madrigal先飞，MNC逐鹿-国金证券_hybrid.md",
+    "parser": "pypdf_selectable",
+    "quality_score": 90,
+    "quality": {
+      "score": 90,
+      "total_len": 34662,
+      "chinese_ratio": 0.5181,
+      "alnum_ratio": 0.7318,
+      "noise_ratio": 0.0005,
+      "keyword_hits": 18,
+      "title_hits": 1,
+      "line_count": 857,
+      "avg_line_len": 40.45
+    },
+    "success": true,
+    "attempts": [
+      {
+        "parser": "pypdf_selectable",
+        "quality": {
+          "score": 90,
+          "total_len": 34662,
+          "chinese_ratio": 0.5181,
+          "alnum_ratio": 0.7318,
+          "noise_ratio": 0.0005,
+          "keyword_hits": 18,
+          "title_hits": 1,
+          "line_count": 857,
+          "avg_line_len": 40.45
+        }
+      }
+    ],
+    "updated_at": "2026-07-19T19:50:30.826995",
+    "elapsed_seconds": 3.07
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/中文-美国能源部《温室气体排放对美国气候影响的批判性综述》.pdf": {
+    "pdf_hash": "2774c9fc23ad80ebc00c53dd3ca05dd9",
+    "md_path": "output/daily/20260719/processed/中文-美国能源部《温室气体排放对美国气候影响的批判性综述》_hybrid.md",
+    "parser": "tesseract_300dpi_t150",
+    "quality_score": 88,
+    "quality": {
+      "score": 88,
+      "total_len": 192695,
+      "chinese_ratio": 0.4003,
+      "alnum_ratio": 0.775,
+      "noise_ratio": 0.0459,
+      "keyword_hits": 15,
+      "title_hits": 2,
+      "line_count": 4549,
+      "avg_line_len": 42.36
+    },
+    "success": true,
+    "attempts": [
+      {
+        "parser": "tesseract_300dpi_t150",
+        "quality": {
+          "score": 88,
+          "total_len": 192695,
+          "chinese_ratio": 0.4003,
+          "alnum_ratio": 0.775,
+          "noise_ratio": 0.0459,
+          "keyword_hits": 15,
+          "title_hits": 2,
+          "line_count": 4549,
+          "avg_line_len": 42.36
+        }
+      }
+    ],
+    "updated_at": "2026-07-19T20:09:48.489792",
+    "elapsed_seconds": 1157.64
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/素材即增长2026跨境电商广告素材增长白皮书-YinoLink易诺.pdf": {
+    "pdf_hash": "e9c0599a794150f901c45777248a5d16",
+    "md_path": "output/daily/20260719/processed/素材即增长2026跨境电商广告素材增长白皮书-YinoLink易诺_hybrid.md",
+    "parser": "pypdf_selectable",
+    "quality_score": 90,
+    "quality": {
+      "score": 90,
+      "total_len": 15123,
+      "chinese_ratio": 0.676,
+      "alnum_ratio": 0.7708,
+      "noise_ratio": 0.0,
+      "keyword_hits": 13,
+      "title_hits": 1,
+      "line_count": 746,
+      "avg_line_len": 20.27
+    },
+    "success": true,
+    "attempts": [
+      {
+        "parser": "pypdf_selectable",
+        "quality": {
+          "score": 90,
+          "total_len": 15123,
+          "chinese_ratio": 0.676,
+          "alnum_ratio": 0.7708,
+          "noise_ratio": 0.0,
+          "keyword_hits": 13,
+          "title_hits": 1,
+          "line_count": 746,
+          "avg_line_len": 20.27
+        }
+      }
+    ],
+    "updated_at": "2026-07-19T20:09:50.197210",
+    "elapsed_seconds": 1.66
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/26Q2销售复盘报告女鞋大盘-知衣科技.pdf": {
+    "pdf_hash": "b6d15e90b7b81b86fc8d8d80f2c932ab",
+    "md_path": "output/daily/20260719/processed/26Q2销售复盘报告女鞋大盘-知衣科技_hybrid.md",
+    "parser": "tesseract_400dpi_t180",
+    "quality_score": 63,
+    "quality": {
+      "score": 63,
+      "total_len": 12905,
+      "chinese_ratio": 0.1919,
+      "alnum_ratio": 0.4191,
+      "noise_ratio": 0.0306,
+      "keyword_hits": 7,
+      "title_hits": 1,
+      "line_count": 356,
+      "avg_line_len": 36.25
+    },
+    "success": true,
+    "attempts": [
+      {
+        "parser": "tesseract_300dpi_t150",
+        "quality": {
+          "score": 57,
+          "total_len": 15497,
+          "chinese_ratio": 0.1587,
+          "alnum_ratio": 0.3514,
+          "noise_ratio": 0.0345,
+          "keyword_hits": 7,
+          "title_hits": 1,
+          "line_count": 336,
+          "avg_line_len": 46.12
+        }
+      },
+      {
+        "parser": "tesseract_400dpi_t150",
+        "quality": {
+          "score": 57,
+          "total_len": 13601,
+          "chinese_ratio": 0.179,
+          "alnum_ratio": 0.3976,
+          "noise_ratio": 0.0289,
+          "keyword_hits": 7,
+          "title_hits": 1,
+          "line_count": 322,
+          "avg_line_len": 42.24
+        }
+      },
+      {
+        "parser": "tesseract_400dpi_t180",
+        "quality": {
+          "score": 63,
+          "total_len": 12905,
+          "chinese_ratio": 0.1919,
+          "alnum_ratio": 0.4191,
+          "noise_ratio": 0.0306,
+          "keyword_hits": 7,
+          "title_hits": 1,
+          "line_count": 356,
+          "avg_line_len": 36.25
+        }
+      }
+    ],
+    "updated_at": "2026-07-19T20:14:25.066689",
+    "elapsed_seconds": 274.83
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/2026面向Token（词元）运营的大模型推理优化技术白皮书-联通数智 (1).pdf": {
+    "pdf_hash": "0471f59a53f44db9f652658d8d1cfaa4",
+    "md_path": "output/daily/20260719/processed/2026面向Token（词元）运营的大模型推理优化技术白皮书-联通数智 (1)_hybrid.md",
+    "parser": "tesseract_300dpi_t150",
+    "quality_score": 83,
+    "quality": {
+      "score": 83,
+      "total_len": 138986,
+      "chinese_ratio": 0.3422,
+      "alnum_ratio": 0.6936,
+      "noise_ratio": 0.034,
+      "keyword_hits": 17,
+      "title_hits": 1,
+      "line_count": 3357,
+      "avg_line_len": 41.4
+    },
+    "success": true,
+    "attempts": [
+      {
+        "parser": "tesseract_300dpi_t150",
+        "quality": {
+          "score": 83,
+          "total_len": 138986,
+          "chinese_ratio": 0.3422,
+          "alnum_ratio": 0.6936,
+          "noise_ratio": 0.034,
+          "keyword_hits": 17,
+          "title_hits": 1,
+          "line_count": 3357,
+          "avg_line_len": 41.4
+        }
+      }
+    ],
+    "updated_at": "2026-07-19T20:29:02.794887",
+    "elapsed_seconds": 877.69
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/北美商业航天研究(一)：以互联网为鉴，看北美太空产业发展-东北证券.pdf": {
+    "pdf_hash": "2e0016a5b1c477af6e5246fb91000b7a",
+    "md_path": "output/daily/20260719/processed/北美商业航天研究(一)：以互联网为鉴，看北美太空产业发展-东北证券_hybrid.md",
+    "parser": "pypdf_selectable",
+    "quality_score": 95,
+    "quality": {
+      "score": 95,
+      "total_len": 34384,
+      "chinese_ratio": 0.5055,
+      "alnum_ratio": 0.6216,
+      "noise_ratio": 0.0,
+      "keyword_hits": 26,
+      "title_hits": 3,
+      "line_count": 980,
+      "avg_line_len": 35.09
+    },
+    "success": true,
+    "attempts": [
+      {
+        "parser": "pypdf_selectable",
+        "quality": {
+          "score": 95,
+          "total_len": 34384,
+          "chinese_ratio": 0.5055,
+          "alnum_ratio": 0.6216,
+          "noise_ratio": 0.0,
+          "keyword_hits": 26,
+          "title_hits": 3,
+          "line_count": 980,
+          "avg_line_len": 35.09
+        }
+      }
+    ],
+    "updated_at": "2026-07-19T20:29:06.116428",
+    "elapsed_seconds": 3.29
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/保险行业投资端系列研究（二）：分红险转型重塑险资配置框架-东方证券.pdf": {
+    "pdf_hash": "36a520efde27ee24953caf67ea0ec1f3",
+    "md_path": "output/daily/20260719/processed/保险行业投资端系列研究（二）：分红险转型重塑险资配置框架-东方证券_hybrid.md",
+    "parser": "pypdf_selectable",
+    "quality_score": 95,
+    "quality": {
+      "score": 95,
+      "total_len": 31072,
+      "chinese_ratio": 0.527,
+      "alnum_ratio": 0.745,
+      "noise_ratio": 0.0,
+      "keyword_hits": 19,
+      "title_hits": 3,
+      "line_count": 777,
+      "avg_line_len": 39.99
+    },
+    "success": true,
+    "attempts": [
+      {
+        "parser": "pypdf_selectable",
+        "quality": {
+          "score": 95,
+          "total_len": 31072,
+          "chinese_ratio": 0.527,
+          "alnum_ratio": 0.745,
+          "noise_ratio": 0.0,
+          "keyword_hits": 19,
+          "title_hits": 3,
+          "line_count": 777,
+          "avg_line_len": 39.99
+        }
+      }
+    ],
+    "updated_at": "2026-07-19T20:29:10.475893",
+    "elapsed_seconds": 4.34
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/2026智果AgentArts智能体平台智能体运营运维报告-华为云.pdf": {
+    "pdf_hash": "00af355b574554aa609b17e49f05e3ce",
+    "md_path": "output/daily/20260719/processed/2026智果AgentArts智能体平台智能体运营运维报告-华为云_hybrid.md",
+    "parser": "tesseract_300dpi_t150",
+    "quality_score": 83,
+    "quality": {
+      "score": 83,
+      "total_len": 268527,
+      "chinese_ratio": 0.3379,
+      "alnum_ratio": 0.5546,
+      "noise_ratio": 0.0439,
+      "keyword_hits": 18,
+      "title_hits": 1,
+      "line_count": 9202,
+      "avg_line_len": 29.18
+    },
+    "success": true,
+    "attempts": [
+      {
+        "parser": "tesseract_300dpi_t150",
+        "quality": {
+          "score": 83,
+          "total_len": 268527,
+          "chinese_ratio": 0.3379,
+          "alnum_ratio": 0.5546,
+          "noise_ratio": 0.0439,
+          "keyword_hits": 18,
+          "title_hits": 1,
+          "line_count": 9202,
+          "avg_line_len": 29.18
+        }
+      }
+    ],
+    "updated_at": "2026-07-19T20:54:46.989660",
+    "elapsed_seconds": 1536.49
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/26Q2销售复盘报告男装大盘-知衣科技.pdf": {
+    "pdf_hash": "ee02366a8f636fc5a212be3c6fe85fde",
+    "md_path": "output/daily/20260719/processed/26Q2销售复盘报告男装大盘-知衣科技_hybrid.md",
+    "parser": "tesseract_300dpi_t150",
+    "quality_score": 57,
+    "quality": {
+      "score": 57,
+      "total_len": 13514,
+      "chinese_ratio": 0.1713,
+      "alnum_ratio": 0.3729,
+      "noise_ratio": 0.0333,
+      "keyword_hits": 7,
+      "title_hits": 1,
+      "line_count": 291,
+      "avg_line_len": 46.44
+    },
+    "success": false,
+    "attempts": [
+      {
+        "parser": "tesseract_300dpi_t150",
+        "quality": {
+          "score": 57,
+          "total_len": 13514,
+          "chinese_ratio": 0.1713,
+          "alnum_ratio": 0.3729,
+          "noise_ratio": 0.0333,
+          "keyword_hits": 7,
+          "title_hits": 1,
+          "line_count": 291,
+          "avg_line_len": 46.44
+        }
+      },
+      {
+        "parser": "tesseract_400dpi_t150",
+        "quality": {
+          "score": 57,
+          "total_len": 15306,
+          "chinese_ratio": 0.1494,
+          "alnum_ratio": 0.3301,
+          "noise_ratio": 0.0387,
+          "keyword_hits": 7,
+          "title_hits": 1,
+          "line_count": 380,
+          "avg_line_len": 40.28
+        }
+      },
+      {
+        "parser": "tesseract_400dpi_t180",
+        "quality": {
+          "score": 57,
+          "total_len": 11592,
+          "chinese_ratio": 0.1668,
+          "alnum_ratio": 0.401,
+          "noise_ratio": 0.0333,
+          "keyword_hits": 7,
+          "title_hits": 1,
+          "line_count": 338,
+          "avg_line_len": 34.3
+        }
+      }
+    ],
+    "updated_at": "2026-07-19T21:00:06.617906",
+    "elapsed_seconds": 319.57
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/2026年新能源平地机行业词条报告-头豹研究院.pdf": {
+    "pdf_hash": "38463b82093dcc49f3832d76be33055d",
+    "md_path": "output/daily/20260719/processed/2026年新能源平地机行业词条报告-头豹研究院_hybrid.md",
+    "parser": "pypdf_selectable",
+    "quality_score": 85,
+    "quality": {
+      "score": 85,
+      "total_len": 20986,
+      "chinese_ratio": 0.705,
+      "alnum_ratio": 0.8192,
+      "noise_ratio": 0.0,
+      "keyword_hits": 21,
+      "title_hits": 0,
+      "line_count": 647,
+      "avg_line_len": 32.44
+    },
+    "success": true,
+    "attempts": [
+      {
+        "parser": "pypdf_selectable",
+        "quality": {
+          "score": 85,
+          "total_len": 20986,
+          "chinese_ratio": 0.705,
+          "alnum_ratio": 0.8192,
+          "noise_ratio": 0.0,
+          "keyword_hits": 21,
+          "title_hits": 0,
+          "line_count": 647,
+          "avg_line_len": 32.44
+        }
+      }
+    ],
+    "updated_at": "2026-07-19T21:00:09.627751",
+    "elapsed_seconds": 2.97
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/未来产业投资地图系列之“可控核聚变”-中信建投.pdf": {
+    "pdf_hash": "c993a24bf7f531754a07e3710ff31e4d",
+    "md_path": "output/daily/20260719/processed/未来产业投资地图系列之“可控核聚变”-中信建投_hybrid.md",
+    "parser": "pypdf_selectable",
+    "quality_score": 95,
+    "quality": {
+      "score": 95,
+      "total_len": 36517,
+      "chinese_ratio": 0.7106,
+      "alnum_ratio": 0.8349,
+      "noise_ratio": 0.0,
+      "keyword_hits": 18,
+      "title_hits": 3,
+      "line_count": 1049,
+      "avg_line_len": 34.81
+    },
+    "success": true,
+    "attempts": [
+      {
+        "parser": "pypdf_selectable",
+        "quality": {
+          "score": 95,
+          "total_len": 36517,
+          "chinese_ratio": 0.7106,
+          "alnum_ratio": 0.8349,
+          "noise_ratio": 0.0,
+          "keyword_hits": 18,
+          "title_hits": 3,
+          "line_count": 1049,
+          "avg_line_len": 34.81
+        }
+      }
+    ],
+    "updated_at": "2026-07-19T21:00:16.584992",
+    "elapsed_seconds": 6.91
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/2026年企业AI工作流重构研究报告：从个人提效到流程再设计-前哨科技.pdf": {
+    "pdf_hash": "d332045cfe5c54c9e5b6304428d16876",
+    "md_path": "output/daily/20260719/processed/2026年企业AI工作流重构研究报告：从个人提效到流程再设计-前哨科技_hybrid.md",
+    "parser": "tesseract_300dpi_t150",
+    "quality_score": 75,
+    "quality": {
+      "score": 75,
+      "total_len": 56911,
+      "chinese_ratio": 0.2265,
+      "alnum_ratio": 0.4475,
+      "noise_ratio": 0.0674,
+      "keyword_hits": 10,
+      "title_hits": 2,
+      "line_count": 1994,
+      "avg_line_len": 28.54
+    },
+    "success": true,
+    "attempts": [
+      {
+        "parser": "tesseract_300dpi_t150",
+        "quality": {
+          "score": 75,
+          "total_len": 56911,
+          "chinese_ratio": 0.2265,
+          "alnum_ratio": 0.4475,
+          "noise_ratio": 0.0674,
+          "keyword_hits": 10,
+          "title_hits": 2,
+          "line_count": 1994,
+          "avg_line_len": 28.54
+        }
+      }
+    ],
+    "updated_at": "2026-07-19T21:06:59.992434",
+    "elapsed_seconds": 403.37
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/典型浆纸一体化厂区暖通节能路径探讨-中国轻工业长沙工程公司.pdf": {
+    "pdf_hash": "b833f371a09d61e5037f96fae8cb77bf",
+    "md_path": "output/daily/20260719/processed/典型浆纸一体化厂区暖通节能路径探讨-中国轻工业长沙工程公司_hybrid.md",
+    "parser": "tesseract_400dpi_t180",
+    "quality_score": 52,
+    "quality": {
+      "score": 52,
+      "total_len": 7287,
+      "chinese_ratio": 0.1345,
+      "alnum_ratio": 0.4369,
+      "noise_ratio": 0.073,
+      "keyword_hits": 7,
+      "title_hits": 0,
+      "line_count": 308,
+      "avg_line_len": 23.66
+    },
+    "success": false,
+    "attempts": [
+      {
+        "parser": "tesseract_300dpi_t150",
+        "quality": {
+          "score": 44,
+          "total_len": 7110,
+          "chinese_ratio": 0.152,
+          "alnum_ratio": 0.4741,
+          "noise_ratio": 0.1312,
+          "keyword_hits": 6,
+          "title_hits": 0,
+          "line_count": 322,
+          "avg_line_len": 22.08
+        }
+      },
+      {
+        "parser": "tesseract_400dpi_t150",
+        "quality": {
+          "score": 44,
+          "total_len": 8488,
+          "chinese_ratio": 0.138,
+          "alnum_ratio": 0.414,
+          "noise_ratio": 0.1013,
+          "keyword_hits": 7,
+          "title_hits": 0,
+          "line_count": 329,
+          "avg_line_len": 25.8
+        }
+      },
+      {
+        "parser": "tesseract_400dpi_t180",
+        "quality": {
+          "score": 52,
+          "total_len": 7287,
+          "chinese_ratio": 0.1345,
+          "alnum_ratio": 0.4369,
+          "noise_ratio": 0.073,
+          "keyword_hits": 7,
+          "title_hits": 0,
+          "line_count": 308,
+          "avg_line_len": 23.66
+        }
+      }
+    ],
+    "updated_at": "2026-07-19T21:10:04.055506",
+    "elapsed_seconds": 184.03
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/储能系统电池管理，SOC与SOH协同估计及一致性评价-西安理工大学.pdf": {
+    "pdf_hash": "b611f6550a8b5f309b22dff9afbf35a8",
+    "md_path": "output/daily/20260719/processed/储能系统电池管理，SOC与SOH协同估计及一致性评价-西安理工大学_hybrid.md",
+    "parser": "tesseract_300dpi_t150",
+    "quality_score": 68,
+    "quality": {
+      "score": 68,
+      "total_len": 37995,
+      "chinese_ratio": 0.2333,
+      "alnum_ratio": 0.4868,
+      "noise_ratio": 0.0568,
+      "keyword_hits": 6,
+      "title_hits": 2,
+      "line_count": 1479,
+      "avg_line_len": 25.69
+    },
+    "success": true,
+    "attempts": [
+      {
+        "parser": "tesseract_300dpi_t150",
+        "quality": {
+          "score": 68,
+          "total_len": 37995,
+          "chinese_ratio": 0.2333,
+          "alnum_ratio": 0.4868,
+          "noise_ratio": 0.0568,
+          "keyword_hits": 6,
+          "title_hits": 2,
+          "line_count": 1479,
+          "avg_line_len": 25.69
+        }
+      }
+    ],
+    "updated_at": "2026-07-19T21:13:52.119547",
+    "elapsed_seconds": 228.01
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/2026最终电力方案：欧洲摆脱技术依附的清洁能源之路报告-赛迪译丛.pdf": {
+    "pdf_hash": "1f4e10065d2033629a3a39d3d2abb9e5",
+    "md_path": "output/daily/20260719/processed/2026最终电力方案：欧洲摆脱技术依附的清洁能源之路报告-赛迪译丛_hybrid.md",
+    "parser": "pypdf_selectable",
+    "quality_score": 85,
+    "quality": {
+      "score": 85,
+      "total_len": 12540,
+      "chinese_ratio": 0.7794,
+      "alnum_ratio": 0.8258,
+      "noise_ratio": 0.0,
+      "keyword_hits": 16,
+      "title_hits": 0,
+      "line_count": 451,
+      "avg_line_len": 27.8
+    },
+    "success": true,
+    "attempts": [
+      {
+        "parser": "pypdf_selectable",
+        "quality": {
+          "score": 85,
+          "total_len": 12540,
+          "chinese_ratio": 0.7794,
+          "alnum_ratio": 0.8258,
+          "noise_ratio": 0.0,
+          "keyword_hits": 16,
+          "title_hits": 0,
+          "line_count": 451,
+          "avg_line_len": 27.8
+        }
+      }
+    ],
+    "updated_at": "2026-07-19T21:13:54.551657",
+    "elapsed_seconds": 2.4
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/2025年中国医疗器械行业人才供给趋势报告-猎聘.pdf": {
+    "pdf_hash": "165546c652263d015db2d23ed2248509",
+    "md_path": "output/daily/20260719/processed/2025年中国医疗器械行业人才供给趋势报告-猎聘_hybrid.md",
+    "parser": "pypdf_selectable",
+    "quality_score": 90,
+    "quality": {
+      "score": 90,
+      "total_len": 10443,
+      "chinese_ratio": 0.6011,
+      "alnum_ratio": 0.7505,
+      "noise_ratio": 0.0,
+      "keyword_hits": 20,
+      "title_hits": 1,
+      "line_count": 540,
+      "avg_line_len": 19.34
+    },
+    "success": true,
+    "attempts": [
+      {
+        "parser": "pypdf_selectable",
+        "quality": {
+          "score": 90,
+          "total_len": 10443,
+          "chinese_ratio": 0.6011,
+          "alnum_ratio": 0.7505,
+          "noise_ratio": 0.0,
+          "keyword_hits": 20,
+          "title_hits": 1,
+          "line_count": 540,
+          "avg_line_len": 19.34
+        }
+      }
+    ],
+    "updated_at": "2026-07-19T21:13:58.132392",
+    "elapsed_seconds": 3.53
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/中国智能手机追踪器（5月）：历史新高ASP和库存水平-贝恩斯坦.pdf": {
+    "pdf_hash": "c614064378e9fa9725b9e554ab94f327",
+    "md_path": "output/daily/20260719/processed/中国智能手机追踪器（5月）：历史新高ASP和库存水平-贝恩斯坦_hybrid.md",
+    "parser": "tesseract_300dpi_t150",
+    "quality_score": 31,
+    "quality": {
+      "score": 31,
+      "total_len": 87208,
+      "chinese_ratio": 0.0022,
+      "alnum_ratio": 0.6624,
+      "noise_ratio": 0.1693,
+      "keyword_hits": 2,
+      "title_hits": 0,
+      "line_count": 1253,
+      "avg_line_len": 69.6
+    },
+    "success": false,
+    "attempts": [
+      {
+        "parser": "tesseract_300dpi_t150",
+        "quality": {
+          "score": 31,
+          "total_len": 87208,
+          "chinese_ratio": 0.0022,
+          "alnum_ratio": 0.6624,
+          "noise_ratio": 0.1693,
+          "keyword_hits": 2,
+          "title_hits": 0,
+          "line_count": 1253,
+          "avg_line_len": 69.6
+        }
+      },
+      {
+        "parser": "tesseract_400dpi_t150",
+        "quality": {
+          "score": 31,
+          "total_len": 85544,
+          "chinese_ratio": 0.0023,
+          "alnum_ratio": 0.6788,
+          "noise_ratio": 0.1702,
+          "keyword_hits": 2,
+          "title_hits": 0,
+          "line_count": 1341,
+          "avg_line_len": 63.79
+        }
+      },
+      {
+        "parser": "tesseract_400dpi_t180",
+        "quality": {
+          "score": 31,
+          "total_len": 88456,
+          "chinese_ratio": 0.0019,
+          "alnum_ratio": 0.6534,
+          "noise_ratio": 0.1663,
+          "keyword_hits": 2,
+          "title_hits": 0,
+          "line_count": 1231,
+          "avg_line_len": 71.86
+        }
+      }
+    ],
+    "updated_at": "2026-07-19T21:26:57.265606",
+    "elapsed_seconds": 779.11
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/2026效果广告自动化AI赋能广告全球概况及营销从业者实操指南-TikTokNewtonX.pdf": {
+    "pdf_hash": "4db6bc79d1ec55caef7acb0f94a38cc1",
+    "md_path": "output/daily/20260719/processed/2026效果广告自动化AI赋能广告全球概况及营销从业者实操指南-TikTokNewtonX_hybrid.md",
+    "parser": "tesseract_300dpi_t150",
+    "quality_score": 31,
+    "quality": {
+      "score": 31,
+      "total_len": 37946,
+      "chinese_ratio": 0.0013,
+      "alnum_ratio": 0.7835,
+      "noise_ratio": 0.1435,
+      "keyword_hits": 1,
+      "title_hits": 0,
+      "line_count": 1032,
+      "avg_line_len": 36.77
+    },
+    "success": false,
+    "attempts": [
+      {
+        "parser": "tesseract_300dpi_t150",
+        "quality": {
+          "score": 31,
+          "total_len": 37946,
+          "chinese_ratio": 0.0013,
+          "alnum_ratio": 0.7835,
+          "noise_ratio": 0.1435,
+          "keyword_hits": 1,
+          "title_hits": 0,
+          "line_count": 1032,
+          "avg_line_len": 36.77
+        }
+      },
+      {
+        "parser": "tesseract_400dpi_t150",
+        "quality": {
+          "score": 31,
+          "total_len": 38181,
+          "chinese_ratio": 0.0014,
+          "alnum_ratio": 0.7804,
+          "noise_ratio": 0.1429,
+          "keyword_hits": 1,
+          "title_hits": 0,
+          "line_count": 1025,
+          "avg_line_len": 37.25
+        }
+      },
+      {
+        "parser": "tesseract_400dpi_t180",
+        "quality": {
+          "score": 31,
+          "total_len": 37884,
+          "chinese_ratio": 0.0013,
+          "alnum_ratio": 0.785,
+          "noise_ratio": 0.1427,
+          "keyword_hits": 1,
+          "title_hits": 0,
+          "line_count": 1020,
+          "avg_line_len": 37.14
+        }
+      }
+    ],
+    "updated_at": "2026-07-19T21:36:15.729182",
+    "elapsed_seconds": 558.42
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/2026电力行业中期策略：算电共振，电价筑底，重塑新周期-国盛证券.pdf": {
+    "pdf_hash": "bbd22a044b101b70f40aebb2f37d00c4",
+    "md_path": "output/daily/20260719/processed/2026电力行业中期策略：算电共振，电价筑底，重塑新周期-国盛证券_hybrid.md",
+    "parser": "pypdf_selectable",
+    "quality_score": 93,
+    "quality": {
+      "score": 93,
+      "total_len": 77801,
+      "chinese_ratio": 0.4165,
+      "alnum_ratio": 0.6111,
+      "noise_ratio": 0.0,
+      "keyword_hits": 24,
+      "title_hits": 5,
+      "line_count": 1923,
+      "avg_line_len": 40.46
+    },
+    "success": true,
+    "attempts": [
+      {
+        "parser": "pypdf_selectable",
+        "quality": {
+          "score": 93,
+          "total_len": 77801,
+          "chinese_ratio": 0.4165,
+          "alnum_ratio": 0.6111,
+          "noise_ratio": 0.0,
+          "keyword_hits": 24,
+          "title_hits": 5,
+          "line_count": 1923,
+          "avg_line_len": 40.46
+        }
+      }
+    ],
+    "updated_at": "2026-07-19T21:36:24.372288",
+    "elapsed_seconds": 8.61
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/打造全球冠军：亚太地区的下一波医疗技术浪潮-贝恩.pdf": {
+    "pdf_hash": "eea1a3a3a98051d5a242f8fb13f4ebe9",
+    "md_path": "output/daily/20260719/processed/打造全球冠军：亚太地区的下一波医疗技术浪潮-贝恩_hybrid.md",
+    "parser": "tesseract_300dpi_t150",
+    "quality_score": 31,
+    "quality": {
+      "score": 31,
+      "total_len": 58999,
+      "chinese_ratio": 0.0008,
+      "alnum_ratio": 0.8209,
+      "noise_ratio": 0.151,
+      "keyword_hits": 1,
+      "title_hits": 0,
+      "line_count": 780,
+      "avg_line_len": 75.64
+    },
+    "success": false,
+    "attempts": [
+      {
+        "parser": "tesseract_300dpi_t150",
+        "quality": {
+          "score": 31,
+          "total_len": 58999,
+          "chinese_ratio": 0.0008,
+          "alnum_ratio": 0.8209,
+          "noise_ratio": 0.151,
+          "keyword_hits": 1,
+          "title_hits": 0,
+          "line_count": 780,
+          "avg_line_len": 75.64
+        }
+      },
+      {
+        "parser": "tesseract_400dpi_t150",
+        "quality": {
+          "score": 31,
+          "total_len": 58909,
+          "chinese_ratio": 0.0008,
+          "alnum_ratio": 0.822,
+          "noise_ratio": 0.1493,
+          "keyword_hits": 1,
+          "title_hits": 0,
+          "line_count": 774,
+          "avg_line_len": 76.11
+        }
+      },
+      {
+        "parser": "tesseract_400dpi_t180",
+        "quality": {
+          "score": 31,
+          "total_len": 59033,
+          "chinese_ratio": 0.0008,
+          "alnum_ratio": 0.8204,
+          "noise_ratio": 0.1511,
+          "keyword_hits": 1,
+          "title_hits": 0,
+          "line_count": 778,
+          "avg_line_len": 75.88
+        }
+      }
+    ],
+    "updated_at": "2026-07-19T21:45:09.525446",
+    "elapsed_seconds": 525.13
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/中国零碳校园的标准体系建设-中国建筑节能协会.pdf": {
+    "pdf_hash": "af20bdf8b8da5c23bb6b851aeb0824da",
+    "md_path": "output/daily/20260719/processed/中国零碳校园的标准体系建设-中国建筑节能协会_hybrid.md",
+    "parser": "tesseract_300dpi_t150",
+    "quality_score": 62,
+    "quality": {
+      "score": 62,
+      "total_len": 11125,
+      "chinese_ratio": 0.199,
+      "alnum_ratio": 0.4858,
+      "noise_ratio": 0.1357,
+      "keyword_hits": 8,
+      "title_hits": 1,
+      "line_count": 501,
+      "avg_line_len": 22.21
+    },
+    "success": true,
+    "attempts": [
+      {
+        "parser": "tesseract_300dpi_t150",
+        "quality": {
+          "score": 62,
+          "total_len": 11125,
+          "chinese_ratio": 0.199,
+          "alnum_ratio": 0.4858,
+          "noise_ratio": 0.1357,
+          "keyword_hits": 8,
+          "title_hits": 1,
+          "line_count": 501,
+          "avg_line_len": 22.21
+        }
+      }
+    ],
+    "updated_at": "2026-07-19T21:46:50.122950",
+    "elapsed_seconds": 100.52
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/数智领航·绿色低碳：2025年度中国特色航运中心发展报告-交通运输部.pdf": {
+    "pdf_hash": "2a08fff5b0162ab7f98dbfbc1a7bc2dd",
+    "md_path": "output/daily/20260719/processed/数智领航·绿色低碳：2025年度中国特色航运中心发展报告-交通运输部_hybrid.md",
+    "parser": "pypdf_selectable",
+    "quality_score": 95,
+    "quality": {
+      "score": 95,
+      "total_len": 51932,
+      "chinese_ratio": 0.6494,
+      "alnum_ratio": 0.7969,
+      "noise_ratio": 0.0189,
+      "keyword_hits": 23,
+      "title_hits": 3,
+      "line_count": 1504,
+      "avg_line_len": 34.53
+    },
+    "success": true,
+    "attempts": [
+      {
+        "parser": "pypdf_selectable",
+        "quality": {
+          "score": 95,
+          "total_len": 51932,
+          "chinese_ratio": 0.6494,
+          "alnum_ratio": 0.7969,
+          "noise_ratio": 0.0189,
+          "keyword_hits": 23,
+          "title_hits": 3,
+          "line_count": 1504,
+          "avg_line_len": 34.53
+        }
+      }
+    ],
+    "updated_at": "2026-07-19T21:47:08.942886",
+    "elapsed_seconds": 18.73
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/电子特气行业报告：需求高增+海外供给收缩，推动含氟气体景气度提升-太平洋证券.pdf": {
+    "pdf_hash": "8febc339a164e4dfcb8614f1e2e13ebe",
+    "md_path": "output/daily/20260719/processed/电子特气行业报告：需求高增+海外供给收缩，推动含氟气体景气度提升-太平洋证券_hybrid.md",
+    "parser": "pypdf_selectable",
+    "quality_score": 100,
+    "quality": {
+      "score": 100,
+      "total_len": 22530,
+      "chinese_ratio": 0.5965,
+      "alnum_ratio": 0.7226,
+      "noise_ratio": 0.0,
+      "keyword_hits": 25,
+      "title_hits": 5,
+      "line_count": 797,
+      "avg_line_len": 28.27
+    },
+    "success": true,
+    "attempts": [
+      {
+        "parser": "pypdf_selectable",
+        "quality": {
+          "score": 100,
+          "total_len": 22530,
+          "chinese_ratio": 0.5965,
+          "alnum_ratio": 0.7226,
+          "noise_ratio": 0.0,
+          "keyword_hits": 25,
+          "title_hits": 5,
+          "line_count": 797,
+          "avg_line_len": 28.27
+        }
+      }
+    ],
+    "updated_at": "2026-07-19T21:47:15.407610",
+    "elapsed_seconds": 6.44
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/「白噪音器」2026年5月市场月度报告-蔚云出海(广州)企业咨询.pdf": {
+    "pdf_hash": "13ac8ec8dd2ed717a29cf8cc1ed00ff8",
+    "md_path": "output/daily/20260719/processed/「白噪音器」2026年5月市场月度报告-蔚云出海(广州)企业咨询_hybrid.md",
+    "parser": "pypdf_selectable",
+    "quality_score": 75,
+    "quality": {
+      "score": 75,
+      "total_len": 8879,
+      "chinese_ratio": 0.1924,
+      "alnum_ratio": 0.462,
+      "noise_ratio": 0.0041,
+      "keyword_hits": 8,
+      "title_hits": 3,
+      "line_count": 568,
+      "avg_line_len": 15.63
+    },
+    "success": true,
+    "attempts": [
+      {
+        "parser": "pypdf_selectable",
+        "quality": {
+          "score": 75,
+          "total_len": 8879,
+          "chinese_ratio": 0.1924,
+          "alnum_ratio": 0.462,
+          "noise_ratio": 0.0041,
+          "keyword_hits": 8,
+          "title_hits": 3,
+          "line_count": 568,
+          "avg_line_len": 15.63
+        }
+      }
+    ],
+    "updated_at": "2026-07-19T21:47:25.362499",
+    "elapsed_seconds": 9.91
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/2026年OPC一人公司白皮书AI时代个人创业全指南-北京创业科创科技中心.pdf": {
+    "pdf_hash": "25d097f79fa0305cfd5d7ec183411575",
+    "md_path": "output/daily/20260719/processed/2026年OPC一人公司白皮书AI时代个人创业全指南-北京创业科创科技中心_hybrid.md",
+    "parser": "pypdf_selectable",
+    "quality_score": 90,
+    "quality": {
+      "score": 90,
+      "total_len": 138679,
+      "chinese_ratio": 0.7226,
+      "alnum_ratio": 0.858,
+      "noise_ratio": 0.0002,
+      "keyword_hits": 29,
+      "title_hits": 1,
+      "line_count": 3233,
+      "avg_line_len": 42.89
+    },
+    "success": true,
+    "attempts": [
+      {
+        "parser": "pypdf_selectable",
+        "quality": {
+          "score": 90,
+          "total_len": 138679,
+          "chinese_ratio": 0.7226,
+          "alnum_ratio": 0.858,
+          "noise_ratio": 0.0002,
+          "keyword_hits": 29,
+          "title_hits": 1,
+          "line_count": 3233,
+          "avg_line_len": 42.89
+        }
+      }
+    ],
+    "updated_at": "2026-07-19T21:47:28.649571",
+    "elapsed_seconds": 3.27
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/2026大家居创新趋势研究报告-中国建博会（广州）.pdf": {
+    "pdf_hash": "9ab3905da75a1473e700f75dc09ce756",
+    "md_path": "output/daily/20260719/processed/2026大家居创新趋势研究报告-中国建博会（广州）_hybrid.md",
+    "parser": "pypdf_selectable",
+    "quality_score": 95,
+    "quality": {
+      "score": 95,
+      "total_len": 159145,
+      "chinese_ratio": 0.5647,
+      "alnum_ratio": 0.7999,
+      "noise_ratio": 0.0208,
+      "keyword_hits": 25,
+      "title_hits": 3,
+      "line_count": 4043,
+      "avg_line_len": 39.36
+    },
+    "success": true,
+    "attempts": [
+      {
+        "parser": "pypdf_selectable",
+        "quality": {
+          "score": 95,
+          "total_len": 159145,
+          "chinese_ratio": 0.5647,
+          "alnum_ratio": 0.7999,
+          "noise_ratio": 0.0208,
+          "keyword_hits": 25,
+          "title_hits": 3,
+          "line_count": 4043,
+          "avg_line_len": 39.36
+        }
+      }
+    ],
+    "updated_at": "2026-07-19T21:48:00.880377",
+    "elapsed_seconds": 32.19
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/2026IP联名营销白皮书-新世代情绪消费洞察-阿里鱼.pdf": {
+    "pdf_hash": "571c375e453e586924589d4609eecf1a",
+    "md_path": "output/daily/20260719/processed/2026IP联名营销白皮书-新世代情绪消费洞察-阿里鱼_hybrid.md",
+    "parser": "tesseract_300dpi_t150",
+    "quality_score": 83,
+    "quality": {
+      "score": 83,
+      "total_len": 55932,
+      "chinese_ratio": 0.3172,
+      "alnum_ratio": 0.4664,
+      "noise_ratio": 0.0177,
+      "keyword_hits": 14,
+      "title_hits": 2,
+      "line_count": 2112,
+      "avg_line_len": 26.48
+    },
+    "success": true,
+    "attempts": [
+      {
+        "parser": "tesseract_300dpi_t150",
+        "quality": {
+          "score": 83,
+          "total_len": 55932,
+          "chinese_ratio": 0.3172,
+          "alnum_ratio": 0.4664,
+          "noise_ratio": 0.0177,
+          "keyword_hits": 14,
+          "title_hits": 2,
+          "line_count": 2112,
+          "avg_line_len": 26.48
+        }
+      }
+    ],
+    "updated_at": "2026-07-19T21:54:57.834705",
+    "elapsed_seconds": 416.87
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/建筑行业2026年中期策略：硅基通胀、掘金泛洁净室链，内需聚焦“六张网”、外需聚焦重建&工业模块-广发.pdf": {
+    "pdf_hash": "06e45a03f84ca9573da05c11d1eeb210",
+    "md_path": "output/daily/20260719/processed/建筑行业2026年中期策略：硅基通胀、掘金泛洁净室链，内需聚焦“六张网”、外需聚焦重建&工业模块-广发_hybrid.md",
+    "parser": "pypdf_selectable",
+    "quality_score": 93,
+    "quality": {
+      "score": 93,
+      "total_len": 54691,
+      "chinese_ratio": 0.4472,
+      "alnum_ratio": 0.6194,
+      "noise_ratio": 0.0003,
+      "keyword_hits": 32,
+      "title_hits": 6,
+      "line_count": 1492,
+      "avg_line_len": 36.66
+    },
+    "success": true,
+    "attempts": [
+      {
+        "parser": "pypdf_selectable",
+        "quality": {
+          "score": 93,
+          "total_len": 54691,
+          "chinese_ratio": 0.4472,
+          "alnum_ratio": 0.6194,
+          "noise_ratio": 0.0003,
+          "keyword_hits": 32,
+          "title_hits": 6,
+          "line_count": 1492,
+          "avg_line_len": 36.66
+        }
+      }
+    ],
+    "updated_at": "2026-07-19T21:55:06.973651",
+    "elapsed_seconds": 9.09
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/2026央企穿透式监管风险洞察能力建设白皮书-百望股份.pdf": {
+    "pdf_hash": "694ce0db813dc8b7dbc6fc4076d56a6e",
+    "md_path": "output/daily/20260719/processed/2026央企穿透式监管风险洞察能力建设白皮书-百望股份_hybrid.md",
+    "parser": "tesseract_300dpi_t150",
+    "quality_score": 90,
+    "quality": {
+      "score": 90,
+      "total_len": 25712,
+      "chinese_ratio": 0.6292,
+      "alnum_ratio": 0.6666,
+      "noise_ratio": 0.0053,
+      "keyword_hits": 15,
+      "title_hits": 1,
+      "line_count": 788,
+      "avg_line_len": 32.63
+    },
+    "success": true,
+    "attempts": [
+      {
+        "parser": "tesseract_300dpi_t150",
+        "quality": {
+          "score": 90,
+          "total_len": 25712,
+          "chinese_ratio": 0.6292,
+          "alnum_ratio": 0.6666,
+          "noise_ratio": 0.0053,
+          "keyword_hits": 15,
+          "title_hits": 1,
+          "line_count": 788,
+          "avg_line_len": 32.63
+        }
+      }
+    ],
+    "updated_at": "2026-07-19T21:59:04.024960",
+    "elapsed_seconds": 237.0
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/北交所医疗产业系列研究（一）：医疗器械行业稳步扩容，北交所医疗器械标的梳理-华源证券.pdf": {
+    "pdf_hash": "d7e05b7df1072e2ac020f2a95abcda7d",
+    "md_path": "output/daily/20260719/processed/北交所医疗产业系列研究（一）：医疗器械行业稳步扩容，北交所医疗器械标的梳理-华源证券_hybrid.md",
+    "parser": "pypdf_selectable",
+    "quality_score": 100,
+    "quality": {
+      "score": 100,
+      "total_len": 26698,
+      "chinese_ratio": 0.6369,
+      "alnum_ratio": 0.7834,
+      "noise_ratio": 0.0,
+      "keyword_hits": 19,
+      "title_hits": 4,
+      "line_count": 756,
+      "avg_line_len": 35.31
+    },
+    "success": true,
+    "attempts": [
+      {
+        "parser": "pypdf_selectable",
+        "quality": {
+          "score": 100,
+          "total_len": 26698,
+          "chinese_ratio": 0.6369,
+          "alnum_ratio": 0.7834,
+          "noise_ratio": 0.0,
+          "keyword_hits": 19,
+          "title_hits": 4,
+          "line_count": 756,
+          "avg_line_len": 35.31
+        }
+      }
+    ],
+    "updated_at": "2026-07-19T21:59:08.134736",
+    "elapsed_seconds": 4.07
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/2025年全球电力发展转型报告-GEIDCO全球能源互联网发展合作组织.pdf": {
+    "pdf_hash": "12e4723f23c5663ca1ccaa971cf08a09",
+    "md_path": "output/daily/20260719/processed/2025年全球电力发展转型报告-GEIDCO全球能源互联网发展合作组织_hybrid.md",
+    "parser": "tesseract_300dpi_t150",
+    "quality_score": 85,
+    "quality": {
+      "score": 85,
+      "total_len": 183143,
+      "chinese_ratio": 0.5418,
+      "alnum_ratio": 0.7387,
+      "noise_ratio": 0.0102,
+      "keyword_hits": 26,
+      "title_hits": 0,
+      "line_count": 5500,
+      "avg_line_len": 33.3
+    },
+    "success": true,
+    "attempts": [
+      {
+        "parser": "tesseract_300dpi_t150",
+        "quality": {
+          "score": 85,
+          "total_len": 183143,
+          "chinese_ratio": 0.5418,
+          "alnum_ratio": 0.7387,
+          "noise_ratio": 0.0102,
+          "keyword_hits": 26,
+          "title_hits": 0,
+          "line_count": 5500,
+          "avg_line_len": 33.3
+        }
+      }
+    ],
+    "updated_at": "2026-07-19T22:24:02.632019",
+    "elapsed_seconds": 1494.42
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/人工智能通识：第六章+智能之眼——视觉感知.pdf": {
+    "pdf_hash": "8f56a6ea9fae7f4b44effb65ab8c314e",
+    "md_path": "output/daily/20260719/processed/人工智能通识：第六章+智能之眼——视觉感知_hybrid.md",
+    "parser": "tesseract_300dpi_t150",
+    "quality_score": 90,
+    "quality": {
+      "score": 90,
+      "total_len": 21122,
+      "chinese_ratio": 0.4924,
+      "alnum_ratio": 0.6419,
+      "noise_ratio": 0.0144,
+      "keyword_hits": 8,
+      "title_hits": 1,
+      "line_count": 832,
+      "avg_line_len": 25.39
+    },
+    "success": true,
+    "attempts": [
+      {
+        "parser": "tesseract_300dpi_t150",
+        "quality": {
+          "score": 90,
+          "total_len": 21122,
+          "chinese_ratio": 0.4924,
+          "alnum_ratio": 0.6419,
+          "noise_ratio": 0.0144,
+          "keyword_hits": 8,
+          "title_hits": 1,
+          "line_count": 832,
+          "avg_line_len": 25.39
+        }
+      }
+    ],
+    "updated_at": "2026-07-19T22:29:38.319815",
+    "elapsed_seconds": 335.63
+  },
+  "/Users/xingan/Documents/software/workspace/summary/files/2025电制可持续航空燃料（e-SAF）市场报告：欧洲的先发优势与未来路径：欧洲能否实现电子煤油发展目标-（英文）欧洲运输与环境联合会T&E.pdf": {
+    "pdf_hash": "cab2d634f7ae15a09bddbf3887b9f86f",
+    "md_path": "output/daily/20260719/processed/2025电制可持续航空燃料（e-SAF）市场报告：欧洲的先发优势与未来路径：欧洲能否实现电子煤油发展目标-（英文）欧洲运输与环境联合会T&E_hybrid.md",
+    "parser": "tesseract_300dpi_t150",
+    "quality_score": 36,
+    "quality": {
+      "score": 36,
+      "total_len": 144173,
+      "chinese_ratio": 0.0016,
+      "alnum_ratio": 0.7236,
+      "noise_ratio": 0.1734,
+      "keyword_hits": 1,
+      "title_hits": 1,
+      "line_count": 2357,
+      "avg_line_len": 61.17
+    },
+    "success": false,
+    "attempts": [
+      {
+        "parser": "tesseract_300dpi_t150",
+        "quality": {
+          "score": 36,
+          "total_len": 144173,
+          "chinese_ratio": 0.0016,
+          "alnum_ratio": 0.7236,
+          "noise_ratio": 0.1734,
+          "keyword_hits": 1,
+          "title_hits": 1,
+          "line_count": 2357,
+          "avg_line_len": 61.17
+        }
+      },
+      {
+        "parser": "tesseract_400dpi_t150",
+        "quality": {
+          "score": 36,
+          "total_len": 145240,
+          "chinese_ratio": 0.0017,
+          "alnum_ratio": 0.7214,
+          "noise_ratio": 0.1705,
+          "keyword_hits": 1,
+          "title_hits": 1,
+          "line_count": 2444,
+          "avg_line_len": 59.43
+        }
+      },
+      {
+        "parser": "tesseract_400dpi_t180",
+        "quality": {
+          "score": 36,
+          "total_len": 142745,
+          "chinese_ratio": 0.0017,
+          "alnum_ratio": 0.727,
+          "noise_ratio": 0.1705,
+          "keyword_hits": 1,
+          "title_hits": 1,
+          "line_count": 2445,
+          "avg_line_len": 58.38
+        }
+      }
+    ],
+    "updated_at": "2026-07-19T22:52:54.188412",
+    "elapsed_seconds": 1395.82
   }
 }

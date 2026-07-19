@@ -52,3 +52,82 @@ tesseract_ocr_on_pdf("/path/to/your/difficult.pdf")
 ### 成功案例
 已成功处理文件: 【机构调研】这家铜箔供应商相继攻克HVLP1-4代产品，公司5月稼动率已打满.pdf
 识别结果: /Users/xingan/Documents/software/workspace/summary/outputs_liteparse_ocr/【机构调研】这家铜箔供应商相继攻克HVLP1-4代产品，公司5月稼动率已打满.md
+
+
+---
+
+## 项目工作流程指南
+
+### 第一步：先了解项目现状（必须做）
+在开始写代码之前，先完成以下检查：
+
+1. **先看 README.md**
+   - 搞清楚这项目有什么功能
+   - 看已有脚本的用途说明
+
+2. **查看项目目录结构**
+   - 看根目录有哪些 `.py` 脚本
+   - 每个脚本的作用是什么
+   - 现有输出目录结构是什么样的
+
+### 第二步：使用项目已有脚本（严禁自己写新的！）
+项目已有三个核心脚本：
+
+1. **`daily_500_pdf_processor.py`**
+   - 用途：完整处理新PDF
+   - 流程：`files/` 目录 → PDF解析 → 生成Markdown → 生成AI总结 → 文件移动到 `files_processed/`
+   - 输出位置：`output/daily/YYYYMMDD/`（包含 `processed/` + `summaries/` + `reports/`）
+
+2. **`batch_summarize.py`**
+   - 用途：批量为已解析的PDF生成总结
+   - 注意：可能需要修改硬编码的日期目录
+   - 输出：`summaries/` + `reports/`
+
+3. **`extract_topic_summary.py`**
+   - 用途：从已有总结中提取专题报告（如AI专题）
+   - 输入：`output/daily/YYYYMMDD/summaries/` + `output/daily/YYYYMMDD/reports/`
+   - 输出：`output/topic_summaries/<topic>/`
+
+### 第三步：只改必要的配置，不要写新脚本
+如果需要处理新日期的文件：
+- 只修改脚本中硬编码的日期（如从 `20260714` 改为 `20260719`）
+- 不要新建 `generate_xxx.py` 脚本！
+- 不要复制 `src/` 里的模块到根目录！
+
+---
+
+## 昨天（2026-07-19）犯的错，下次绝对不要犯
+
+### ❶ 自己写一堆重复脚本
+- 错误做法：写了 `generate_report.py`、`generate_real_summary.py`、`ai_content_summarizer.py`...
+- 避免做法：项目已经有完整功能，只需要用，不需要写新的
+
+### ❷ 随便加 --no-ai 跳过关键步骤
+- 错误做法：第一次运行时加了 `--no-ai`，导致没有 `summaries/`，后来还得单独补
+- 避免做法：先确认需求，不要随便加参数
+
+### ❸ 没看 README 就开始写代码
+- 错误做法：直到被提醒才看 README
+- 避免做法：每次接手任务，先看 README 和项目目录结构，了解已有功能
+
+### ❹ 搞反需求
+- 错误做法：以为只处理AI相关的，实际是处理全部再提取AI
+- 避免做法：听完需求后，用自己的话复述一遍确认
+
+---
+
+## 今天的总结任务的标准流程
+
+如果下次需要处理新的PDF并总结：
+
+```bash
+# 1. 确认 files/ 目录有新PDF
+# 2. 运行完整处理（不要用 --no-ai）
+python3 daily_500_pdf_processor.py
+
+# 3. 如果是之前解析过但没有总结的，修改 batch_summarize.py 中的日期，然后运行
+python3 batch_summarize.py
+
+# 4. 提取专题报告（如AI）
+python3 extract_topic_summary.py
+```

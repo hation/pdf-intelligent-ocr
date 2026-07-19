@@ -176,9 +176,9 @@ def process_file(filename, processed_dir, summaries_dir):
         }
 
 def main():
-    processed_dir = "/Users/xingan/Documents/software/workspace/summary/output/daily/20260714/processed"
-    summaries_dir = "/Users/xingan/Documents/software/workspace/summary/output/daily/20260714/summaries"
-    reports_dir = "/Users/xingan/Documents/software/workspace/summary/output/daily/20260714/reports"
+    processed_dir = "/Users/xingan/Documents/software/workspace/summary/output/daily/20260719/processed"
+    summaries_dir = "/Users/xingan/Documents/software/workspace/summary/output/daily/20260719/summaries"
+    reports_dir = "/Users/xingan/Documents/software/workspace/summary/output/daily/20260719/reports"
     
     os.makedirs(summaries_dir, exist_ok=True)
     os.makedirs(reports_dir, exist_ok=True)
@@ -204,7 +204,7 @@ def main():
     
     # 生成汇总清单（按类别分组）
     print(f"\n=== 生成汇总清单 ===")
-    summary_list_path = os.path.join(reports_dir, "summary_list_20260714_v3.md")
+    summary_list_path = os.path.join(reports_dir, "summary_list_20260719.md")
     
     # 按类别分组
     results_by_category = {}
