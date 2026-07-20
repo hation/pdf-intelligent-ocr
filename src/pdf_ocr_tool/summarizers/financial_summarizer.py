@@ -15,6 +15,25 @@ import math
 from datetime import datetime
 import statistics
 
+# LLM 相关导入（支持火山引擎方舟）
+try:
+    from openai import OpenAI
+    LLM_AVAILABLE = True
+except ImportError:
+    LLM_AVAILABLE = False
+    print("⚠️  未安装openai库，将使用纯算法模式")
+
+# 支持 .env 文件加载
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
+# 方舟模型配置
+ARK_MODEL = "doubao-seed-2.0-pro"
+ARK_BASE_URL = "https://ark.cn-beijing.volces.com/api/plan/v3"
+
 
 class AIContentSummarizer:
     """AI内容总结器类"""
@@ -206,12 +225,95 @@ class AIContentSummarizer:
 class FinancialResearchSummarizer:
     """财经研报结构化总结器"""
     
-    def __init__(self):
+    def __init__(self, use_llm=True):
+        self.use_llm = use_llm and LLM_AVAILABLE and os.environ.get('OPENAI_API_KEY')
+        
+        if self.use_llm:
+            self.llm_client = OpenAI(
+                base_url=ARK_BASE_URL
+            )
+            print("✅ LLM模式已启用（豆包-1.5-pro）")
+        else:
+            print("ℹ️  使用纯算法模式")
+        
         self.sections = {
-            '核心看点': ['公司', '产品', '客户', '订单', '产能', '认证', '供应链', '需求', '技术', '业务', '行业'],
-            '关键数据': ['%', '亿元', '万元', '万吨', '吨', 'GWh', 'MW', 'GW', '202', '同比', '环比', '增长', '百吨', '满产', '稼动率'],
-            '催化因素': ['放量', '投放', '测试', '认证', '通过', '订单', '需求', '推进', '进入', '供应链', '量产', '开发'],
-            '风险提示': ['风险', '不构成', '公告', '公开报告', '为准', '波动', '不及预期']
+            # ========== 核心看点（扩充） ==========
+            '核心看点': [
+                '公司', '产品', '客户', '订单', '产能', '认证', '供应链', '需求', '技术', '业务', '行业',
+                '技术壁垒', '研发投入', '专利', '发明专利', '核心技术',
+                '产能扩张', '新产能', '投产', '量产', '达产', '满产',
+                '客户导入', '切入', '进入供应链', '通过认证', '供应商',
+                '国产替代', '进口替代', '自主可控', '技术突破', '技术革新'
+            ],
+            
+            # ========== 新增：AI与科技（优先级最高） ==========
+            'AI科技': [
+                '人工智能', '大模型', '算力', 'GPU', '光模块', 'AI芯片', '具身智能',
+                'ChatGPT', 'GPT', 'AGI', '算力网络', '数据中心', '液冷', 'PCB',
+                '英伟达', '昇腾', '寒武纪', '海光', '推理', '训练', 'Transformer',
+                'Agent', '智能体', '应用落地', '渗透率', 'AI+', '数字经济',
+                '半导体', '封装', 'Chiplet', '先进封装', 'CoWoS', 'HBM', 'DDR',
+                '服务器', '交换机', '光通信', 'CPO', '800G', '400G', '1.6T',
+                '人形机器人', '工业机器人', '机器视觉', '边缘计算', '云计算'
+            ],
+            
+            # ========== 扩充：关键数据 ==========
+            '关键数据': [
+                '%', '亿元', '万元', '万吨', '吨', 'GWh', 'MW', 'GW', '202', '同比', '环比', '增长', '百吨', '满产', '稼动率',
+                '亿美元', '万', '亿', '百万', '市占率', '渗透率', '增长率',
+                '毛利率', '净利率', 'ROE', 'PE', 'PB', 'PS', 'EPS', '估值',
+                'CAGR', '复合增长率', 'YoY', 'QoQ', '累计',
+                '产能', '产量', '出货量', '营收', '收入', '利润', '净利润',
+                '产能利用率', '利用率', '开工率',
+                '万片', '万颗', '万套', '万辆', '万台'
+            ],
+            
+            # ========== 催化因素（扩充） ==========
+            '催化因素': [
+                '放量', '投放', '测试', '认证', '通过', '订单', '需求', '推进', '进入', '供应链', '量产', '开发',
+                '突破', '落地', '上线', '发布', '投产', '试产', '量产线',
+                '中标', '中标通知书', '合同', '签约', '合作', '战略合作',
+                '利好', '超预期', '超指引', '超市场预期'
+            ],
+            
+            # ========== 新增：政策导向 ==========
+            '政策导向': [
+                '政策', '规划', '十四五', '十五五', '目录', '指引', '意见', '通知',
+                '国务院', '工信部', '发改委', '证监会', '监管', '合规', '标准制定',
+                '国产替代', '自主可控', '卡脖子', '进口替代', '自主创新', '专精特新',
+                '扶持', '补贴', '税收优惠', '产业基金', '政府采购',
+                '新基建', '数字经济', '双碳', '碳中和', '碳达峰', '能源转型'
+            ],
+            
+            # ========== 新增：竞争格局 ==========
+            '竞争格局': [
+                '市占率', '市场份额', 'CR3', 'CR5', 'CR10', '龙头', '寡头', '垄断',
+                '竞争格局', '集中度', '分散', '整合', '并购', '收购', '兼并重组',
+                '进入壁垒', '护城河', '壁垒', '差异化', '性价比', '价格战', '份额'
+            ],
+            
+            # ========== 新增：估值与财务 ==========
+            '估值水平': [
+                '估值', 'PE', 'PB', 'PS', '市值', '溢价', '折价', '低估', '高估',
+                '合理估值', '安全边际', '性价比',
+                '毛利率', '净利率', 'ROE', 'ROA', 'ROIC', '现金流', '负债率',
+                '股息率', '分红', '回购', '增发', '配股', '可转债', '股权激励'
+            ],
+            
+            # ========== 风险提示（扩充） ==========
+            '风险提示': [
+                '风险', '不构成', '公告', '公开报告', '为准', '波动', '不及预期',
+                '不确定性', '风险因素', '提示', '审慎', '谨慎',
+                '下行风险', '上行风险', '业绩承压', '压力'
+            ],
+            
+            # ========== 新增：降权关键词（负分） ==========
+            '降权关键词': [
+                '免责声明', '风险提示', '不构成投资', '仅供参考', '数据来源',
+                '本文摘自', '资料来源', '公开信息', '仅供学习', '转载自',
+                '版权声明', '来源于网络', '侵删', '本报告仅供',
+                '请务必阅读', '投资有风险', '入市需谨慎', '仅代表个人'
+            ]
         }
         self.ocr_corrections = {
             '移动率': '稼动率',
@@ -282,15 +384,52 @@ class FinancialResearchSummarizer:
     
     def score_sentence(self, sentence, keywords):
         score = 0
-        for keyword in keywords:
+        
+        # ========== 第一步：先降权（套话减分） ==========
+        for keyword in self.sections['降权关键词']:
+            if keyword.lower() in sentence.lower():
+                score -= 5  # 套话直接扣5分！
+        
+        # ========== 第二步：按不同类别关键词加权（动态权重） ==========
+        # AI科技关键词权重最高（+3分/个）
+        for keyword in self.sections['AI科技']:
+            if keyword.lower() in sentence.lower():
+                score += 3
+        
+        # 关键数据权重高（+3分/个）
+        for keyword in self.sections['关键数据']:
+            if keyword.lower() in sentence.lower():
+                score += 3
+        
+        # 政策导向权重高（+2分/个）
+        for keyword in self.sections['政策导向']:
             if keyword.lower() in sentence.lower():
                 score += 2
+        
+        # 催化因素权重高（+2分/个）
+        for keyword in self.sections['催化因素']:
+            if keyword.lower() in sentence.lower():
+                score += 2
+        
+        # 其他分类权重（+1分/个）
+        other_keywords = self.sections['核心看点'] + self.sections['竞争格局'] + self.sections['估值水平'] + self.sections['风险提示']
+        for keyword in other_keywords:
+            if keyword.lower() in sentence.lower():
+                score += 1
+        
+        # ========== 第三步：通用加分规则 ==========
+        # 包含数字加分（数据重要）
         if re.search(r'\d', sentence):
             score += 2
-        if len(sentence) <= 120:
+        
+        # 句子长度适中加分
+        if 20 <= len(sentence) <= 120:
             score += 1
-        if any(word in sentence for word in ['公司', '产品', '客户', '订单', '产能', '供应链']):
-            score += 2
+        
+        # 非常短的句子可能没意义，扣分
+        if len(sentence) < 15:
+            score -= 3
+        
         return score
     
     def pick_sentences(self, sentences, keywords, limit=4):
@@ -416,7 +555,98 @@ class FinancialResearchSummarizer:
             return f"该电子书围绕{cleaned_title}展开，主要覆盖{'、'.join(topics[:4])}等内容。"
         return f"该电子书围绕{cleaned_title}展开，主要内容可从目录结构把握。"
     
-    def make_one_line_conclusion(self, title, highlights):
+    def llm_generate_one_line_summary(self, title, text):
+        """使用LLM生成真正的一句话总结"""
+        if not self.use_llm:
+            return None
+        
+        try:
+            # 取前2000字符，避免token超限
+            short_text = text[:2000] if len(text) > 2000 else text
+            
+            # 清理文件名
+            clean_title = re.sub(r'_hybrid|_tesseract|_liteparse|\.md$', '', title)
+            
+            prompt = f"""文档标题：{clean_title}
+
+文档内容：
+{short_text}
+
+请用200字左右总结核心，必须含1个关键数据/结论，不要背景，不要评价，直接输出。"""
+            
+            response = self.llm_client.chat.completions.create(
+                model=ARK_MODEL,
+                temperature=0.3,
+                max_tokens=300,
+                messages=[
+                    {"role": "system", "content": "你是一位专业的财经研报分析师，擅长用一句话概括研报核心。"},
+                    {"role": "user", "content": prompt}
+                ]
+            )
+            
+            summary = response.choices[0].message.content.strip()
+            return summary
+            
+        except Exception as e:
+            print(f"  ⚠️  LLM调用失败: {e}")
+            return None
+    
+    def llm_generate_highlights(self, title, text):
+        """使用LLM生成核心看点"""
+        if not self.use_llm:
+            return None
+        
+        try:
+            # 取前3000字符，避免token超限
+            short_text = text[:3000] if len(text) > 3000 else text
+            
+            # 清理文件名
+            clean_title = re.sub(r'_hybrid|_tesseract|_liteparse|\.md$', '', title)
+            
+            prompt = f"""文档标题：{clean_title}
+
+文档内容：
+{short_text}
+
+请提取本文的5个核心论点，每点用一句话概括，不要背景铺垫，直接列出。"""
+            
+            response = self.llm_client.chat.completions.create(
+                model=ARK_MODEL,
+                temperature=0.3,
+                max_tokens=500,
+                messages=[
+                    {"role": "system", "content": "你是一位专业的财经研报分析师，擅长提取核心论点。"},
+                    {"role": "user", "content": prompt}
+                ]
+            )
+            
+            highlights_text = response.choices[0].message.content.strip()
+            
+            # 解析返回的内容，按行分割，提取非空行
+            highlights = []
+            for line in highlights_text.split('\n'):
+                line = line.strip()
+                # 去掉编号（如 "1. "、"（1）" 等格式）
+                line = re.sub(r'^\d+[\.、]\s*', '', line)
+                line = re.sub(r'^[\(（]\d+[\)）]\s*', '', line)
+                line = line.strip('- ').strip('• ').strip()
+                if line and len(line) > 10:
+                    highlights.append(line)
+            
+            return highlights[:5] if highlights else None
+            
+        except Exception as e:
+            print(f"  ⚠️  LLM调用失败: {e}")
+            return None
+    
+    def make_one_line_conclusion(self, title, highlights, full_text=None):
+        # 如果有全文且启用了LLM，优先用LLM生成
+        if self.use_llm and full_text:
+            llm_result = self.llm_generate_one_line_summary(title, full_text)
+            if llm_result:
+                return llm_result
+        
+        # 回退到算法模式
         if highlights:
             first = highlights[0]
             if len(first) > 90:
@@ -430,34 +660,60 @@ class FinancialResearchSummarizer:
         quality_score = self.extract_quality_score(markdown_text)
         parser = self.extract_parser(markdown_text)
         toc_items = self.extract_ebook_toc(text)
+        
+        # ========== 电子书模式也保留8个维度，不全是空了！ ==========
         if toc_items and self.is_ebook(text):
-            conclusion = self.make_ebook_one_line_conclusion(filename, toc_items)
+            sentences = self.split_sentences(text)
+            # 电子书也优先用LLM
+            conclusion = self.make_one_line_conclusion(filename, toc_items, text)
+            # 优先用LLM生成核心看点
+            if self.use_llm:
+                llm_highlights = self.llm_generate_highlights(filename, text)
+                highlights = llm_highlights if llm_highlights else toc_items
+            else:
+                highlights = toc_items
             return {
                 'one_line_conclusion': conclusion,
-                'highlights': toc_items,
-                'key_data': [],
-                'catalysts': [],
-                'risks': [],
-                'stocks': [],
+                'highlights': highlights,
+                'ai_tech': self.pick_sentences(sentences, self.sections['AI科技'], 4),
+                'key_data': self.pick_sentences(sentences, self.sections['关键数据'], 5),
+                'catalysts': self.pick_sentences(sentences, self.sections['催化因素'], 4),
+                'policy': self.pick_sentences(sentences, self.sections['政策导向'], 3),
+                'competition': self.pick_sentences(sentences, self.sections['竞争格局'], 3),
+                'valuation': self.pick_sentences(sentences, self.sections['估值水平'], 3),
+                'risks': self.pick_risk_sentences(sentences, 3),
+                'stocks': self.extract_stock_names(text),
                 'quotes': toc_items[:3],
                 'quality_score': quality_score,
                 'parser': parser
             }
+        
         sentences = self.split_sentences(text)
-        highlights = self.pick_sentences(sentences, self.sections['核心看点'], 5)
-        key_data = self.pick_sentences(sentences, self.sections['关键数据'], 5)
-        catalysts = self.pick_sentences(sentences, self.sections['催化因素'], 4)
-        risks = self.pick_risk_sentences(sentences, 3)
-        stocks = self.extract_stock_names(text)
-        conclusion = self.make_one_line_conclusion(filename, highlights)
+        
+        # 优先用LLM生成核心看点
+        if self.use_llm:
+            llm_highlights = self.llm_generate_highlights(filename, text)
+            if llm_highlights:
+                highlights = llm_highlights
+            else:
+                highlights = self.pick_sentences(sentences, self.sections['核心看点'], 5)
+        else:
+            highlights = self.pick_sentences(sentences, self.sections['核心看点'], 5)
+        
+        conclusion = self.make_one_line_conclusion(filename, highlights, text)
         quotes = highlights[:3] or sentences[:3]
+        
         return {
             'one_line_conclusion': conclusion,
             'highlights': highlights,
-            'key_data': key_data,
-            'catalysts': catalysts,
-            'risks': risks,
-            'stocks': stocks,
+            'ai_tech': self.pick_sentences(sentences, self.sections['AI科技'], 4),
+            'key_data': self.pick_sentences(sentences, self.sections['关键数据'], 5),
+            'catalysts': self.pick_sentences(sentences, self.sections['催化因素'], 4),
+            'policy': self.pick_sentences(sentences, self.sections['政策导向'], 3),
+            'competition': self.pick_sentences(sentences, self.sections['竞争格局'], 3),
+            'valuation': self.pick_sentences(sentences, self.sections['估值水平'], 3),
+            'risks': self.pick_risk_sentences(sentences, 3),
+            'stocks': self.extract_stock_names(text),
             'quotes': quotes,
             'quality_score': quality_score,
             'parser': parser
