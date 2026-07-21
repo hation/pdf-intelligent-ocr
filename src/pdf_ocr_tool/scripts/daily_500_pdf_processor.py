@@ -159,21 +159,40 @@ class DailyPDFProcessor:
         self.logger.info(f"共移动 {moved_count} 个文件到 {processed_dir}")
     
     def run_ai_analysis(self):
-        """运行AI内容分析"""
+        """运行AI内容分析（只处理新文件，并行处理）"""
         processed_dir = os.path.join(self.config['output_dir'], 'processed')
         summary_list_file = os.path.join(self.config['output_dir'], 'reports', 
                                      f"summary_list_{datetime.now().strftime('%Y%m%d')}.md")
         summary_dir = os.path.join(self.config['output_dir'], 'summaries')
         
+        # 设置API Key（从环境变量或.env读取）
+        import os as _os
+        if not _os.environ.get('OPENAI_API_KEY'):
+            try:
+                from dotenv import load_dotenv
+                load_dotenv()
+            except ImportError:
+                pass
+        
+        # 确保summaries目录存在
+        _os.makedirs(summary_dir, exist_ok=True)
+        
         summarizer = ai_content_summarizer.MarkdownFileSummarizer()
-        analyses = summarizer.batch_process_markdown_files(processed_dir)
+        # 只处理新文件，6个并行进程
+        analyses = summarizer.batch_process_markdown_files(
+            processed_dir, 
+            only_new=True, 
+            summaries_dir=summary_dir,
+            workers=6
+        )
         
         if analyses:
             summarizer.generate_summary_outputs(analyses, summary_list_file, summary_dir)
             self.logger.info(f"总结清单已保存到: {summary_list_file}")
             self.logger.info(f"单文件总结已保存到: {summary_dir}")
+            self.logger.info(f"本次共处理 {len(analyses)} 个新文件")
         else:
-            self.logger.warning("没有找到可分析的文件")
+            self.logger.info("没有新文件需要处理（所有文件已有总结）")
     
     def clean_up(self):
         """清理临时文件"""
@@ -304,7 +323,7 @@ def main():
     )
     
     parser.add_argument('input_dir', help='输入目录（包含PDF文件）')
-    parser.add_argument('output_dir', help='输出目录（保存处理结果）')
+    parser.add_argument('output_dir', help='输出目录（如 output/daily/，自动追加当天日期）')
     parser.add_argument('--workers', type=int, default=8, 
                        help='并行工作进程数（默认: 8）')
     parser.add_argument('--strategy', choices=['auto', 'tesseract', 'liteparse', 'optimized'], 
@@ -318,10 +337,18 @@ def main():
     
     args = parser.parse_args()
     
+    # 自动追加当天日期作为输出子目录
+    # 用户传 output/daily/ -> 实际输出 output/daily/YYYYMMDD/
+    today_str = datetime.now().strftime('%Y%m%d')
+    output_dir = args.output_dir.rstrip('/')
+    # 如果末尾不是日期格式，自动追加当天日期
+    if not re.search(r'\d{8}$', output_dir):
+        output_dir = os.path.join(output_dir, today_str)
+    
     # 配置
     config = {
         'input_dir': args.input_dir,
-        'output_dir': args.output_dir,
+        'output_dir': output_dir,
         'workers': args.workers,
         'strategy': args.strategy,
         'min_score': args.min_score,

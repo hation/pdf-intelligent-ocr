@@ -37,13 +37,21 @@ def read_summary_content(filepath):
         if one_sentence_match:
             one_sentence = one_sentence_match.group(1).strip()
         
-        # 提取核心看点
+        # 提取核心看点（支持 "1. xxx"、"- xxx"、"• xxx" 三种格式）
         key_points = []
         key_points_match = re.search(r'##\s*核心看点\s*\n\s*(.*?)(?=\n##|\Z)', content, re.DOTALL)
         if key_points_match:
             points_text = key_points_match.group(1)
-            points = re.findall(r'\d+\.\s*(.*?)(?=\n\d+\.|\Z)', points_text, re.DOTALL)
-            key_points = [p.strip() for p in points if p.strip()]
+            # 按行分割，提取列表项
+            for line in points_text.split('\n'):
+                line = line.strip()
+                if not line:
+                    continue
+                # 去掉前缀：数字编号(1.)、横线(-)、星号(*)、点号(•)
+                line = re.sub(r'^\d+[\.\、\)]\s*', '', line)
+                line = re.sub(r'^[-\*\•]\s*', '', line)
+                if line and len(line) > 5:
+                    key_points.append(line)
         
         return {
             'one_sentence': one_sentence,
@@ -92,17 +100,8 @@ def extract_and_copy(input_dir, output_dir=None):
         input_dir: summaries目录路径（如 output/daily/20260720/summaries）
         output_dir: 输出目录（默认为output/topic_summaries/AI）
     """
-    # 从input目录路径提取日期
-    date_str = None
-    path_parts = input_dir.split(os.sep)
-    for part in path_parts:
-        if re.match(r'^\d{8}$', part):
-            date_str = part
-            break
-    
-    # 如果路径中没有日期，用当前日期
-    if not date_str:
-        date_str = datetime.now().strftime('%Y%m%d')
+    # 使用当前日期作为输出目录名（什么时候总结就用哪天）
+    date_str = datetime.now().strftime('%Y%m%d')
     
     # 输出结构：output_dir/YYYYMMDD/summaries/
     if output_dir is None:
@@ -112,8 +111,21 @@ def extract_and_copy(input_dir, output_dir=None):
     summaries_subdir = os.path.join(date_dir, 'summaries')
     os.makedirs(summaries_subdir, exist_ok=True)
     
-    # 扫描所有总结文件
-    summary_files = [f for f in os.listdir(input_dir) if f.endswith('.md')]
+    # 扫描总结文件，只处理今天生成的（避免和之前的数据混淆）
+    from datetime import datetime as dt
+    today_start = dt.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    
+    summary_files = []
+    for f in os.listdir(input_dir):
+        if not f.endswith('.md'):
+            continue
+        file_path = os.path.join(input_dir, f)
+        mtime = dt.fromtimestamp(os.path.getmtime(file_path))
+        if mtime >= today_start:
+            summary_files.append(f)
+    
+    print(f"  筛选条件: 只处理 {date_str} 生成的文件")
+    print(f"  今日文件数: {len(summary_files)}")
     
     ai_files = []
     non_ai_files = []

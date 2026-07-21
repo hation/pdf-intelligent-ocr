@@ -561,8 +561,8 @@ class FinancialResearchSummarizer:
             return None
         
         try:
-            # 取前2000字符，避免token超限
-            short_text = text[:2000] if len(text) > 2000 else text
+            # 取前5000字符，避免token超限
+            short_text = text[:5000] if len(text) > 5000 else text
             
             # 清理文件名
             clean_title = re.sub(r'_hybrid|_tesseract|_liteparse|\.md$', '', title)
@@ -597,8 +597,8 @@ class FinancialResearchSummarizer:
             return None
         
         try:
-            # 取前3000字符，避免token超限
-            short_text = text[:3000] if len(text) > 3000 else text
+            # 取前5000字符，避免token超限
+            short_text = text[:5000] if len(text) > 5000 else text
             
             # 清理文件名
             clean_title = re.sub(r'_hybrid|_tesseract|_liteparse|\.md$', '', title)
@@ -768,22 +768,67 @@ class MarkdownFileSummarizer:
             print(f"Error processing file {file_path}: {e}")
             return None
     
-    def batch_process_markdown_files(self, directory):
-        """批量处理Markdown文件"""
-        results = []
+    def batch_process_markdown_files(self, directory, only_new=False, summaries_dir=None, workers=6):
+        """批量处理Markdown文件（支持只处理新文件+并行处理）
         
+        Args:
+            directory: processed目录
+            only_new: 是否只处理未生成总结的新文件
+            summaries_dir: summaries目录（用于判断是否已处理）
+            workers: 并行线程数（LLM是IO密集型，用线程池）
+        """
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+        
+        # 收集需要处理的文件
+        files_to_process = []
         for filename in os.listdir(directory):
-            if filename.endswith('.md') and not filename.startswith(('structured_analysis', 'ai_analysis', 'daily_summary', 'content_analysis', 'optimization_report')):
-                file_path = os.path.join(directory, filename)
-                
-                print(f"正在分析: {filename}")
-                
-                analysis = self.process_markdown_file(file_path)
-                
-                if analysis:
-                    analysis['filename'] = filename
-                    results.append(analysis)
+            if not filename.endswith('.md'):
+                continue
+            if filename.startswith(('structured_analysis', 'ai_analysis', 'daily_summary', 'content_analysis', 'optimization_report')):
+                continue
+            
+            # 如果只处理新文件，检查是否已有总结
+            if only_new and summaries_dir:
+                summary_name = self.sanitize_summary_filename(filename)
+                summary_path = os.path.join(summaries_dir, summary_name)
+                if os.path.exists(summary_path):
+                    continue  # 已有总结，跳过
+            
+            files_to_process.append(filename)
         
+        if not files_to_process:
+            print(f"✓ 没有需要处理的文件（所有文件已有总结）")
+            return []
+        
+        print(f"📊 共 {len(files_to_process)} 个文件需要处理，使用 {workers} 个并行线程")
+        
+        results = []
+        completed_count = 0
+        total_count = len(files_to_process)
+        
+        # 使用多线程并行处理（LLM是IO密集型）
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            # 提交所有任务
+            future_to_filename = {
+                executor.submit(self.process_markdown_file, os.path.join(directory, filename)): filename
+                for filename in files_to_process
+            }
+            
+            # 按完成顺序收集结果
+            for future in as_completed(future_to_filename):
+                filename = future_to_filename[future]
+                completed_count += 1
+                
+                try:
+                    analysis = future.result()
+                    if analysis:
+                        analysis['filename'] = filename
+                        results.append(analysis)
+                        print(f"  [{completed_count}/{total_count}] ✓ {filename[:50]}")
+                except Exception as e:
+                    print(f"  [{completed_count}/{total_count}] ✗ {filename[:50]}: {e}")
+        
+        print(f"\n✓ 并行处理完成: {len(results)}/{total_count} 成功")
         return results
     
     def format_list_section(self, title, items):
@@ -812,23 +857,74 @@ class MarkdownFileSummarizer:
         base_name = re.sub(r'_(hybrid|tesseract|liteparse)$', '', base_name)
         return f"{base_name}_summary.md"
     
-    def generate_summary_list_report(self, analyses, output_file):
-        """生成一句话总结清单"""
-        if not analyses:
-            return False
+    def generate_summary_list_report(self, analyses, output_file, summary_dir=None):
+        """生成一句话总结清单（累积模式：包含当天所有已总结的文档）
+        
+        Args:
+            analyses: 本次处理的文档列表
+            output_file: 清单输出路径
+            summary_dir: summaries目录，用于累积所有已总结文档
+        """
         os.makedirs(os.path.dirname(output_file) or '.', exist_ok=True)
-        report_content = f"# 总结清单 {datetime.now().strftime('%Y-%m-%d')}\n\n"
-        report_content += "| 文档名称 | 一句话总结 |\n"
-        report_content += "|---|---|\n"
+        
+        # 收集所有已总结的文档（累积模式）
+        all_summaries = []
+        
+        # 1. 先从 summaries_dir 读取所有已存在的总结文件
+        if summary_dir and os.path.exists(summary_dir):
+            for fname in os.listdir(summary_dir):
+                if not fname.endswith('_summary.md'):
+                    continue
+                summary_path = os.path.join(summary_dir, fname)
+                try:
+                    with open(summary_path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                    
+                    # 提取一句话总结
+                    one_sentence = "暂无"
+                    one_sentence_match = re.search(r'##\s*一句话总结\s*\n\s*(.*?)(?=\n##|\Z)', content, re.DOTALL)
+                    if one_sentence_match:
+                        one_sentence = one_sentence_match.group(1).strip()
+                    
+                    # 文档名（去掉 _summary.md 后缀）
+                    doc_name = fname.replace('_summary.md', '')
+                    for suffix in ['_hybrid', '_tesseract', '_liteparse']:
+                        if doc_name.endswith(suffix):
+                            doc_name = doc_name[:-len(suffix)]
+                            break
+                    
+                    all_summaries.append({
+                        'filename': doc_name,
+                        'one_line': one_sentence
+                    })
+                except Exception:
+                    continue
+        
+        # 2. 补充本次新处理的文档（去重）
+        existing_names = {s['filename'] for s in all_summaries}
         for analysis in analyses:
             filename = analysis['filename']
             one_line, _ = self.get_structured_fields(analysis)
+            if filename not in existing_names:
+                all_summaries.append({
+                    'filename': filename,
+                    'one_line': one_line
+                })
+        
+        # 生成报告
+        report_content = f"# 总结清单 {datetime.now().strftime('%Y-%m-%d %H:%M')}\n\n"
+        report_content += f"**文档总数**：{len(all_summaries)} 份\n\n"
+        report_content += "| 文档名称 | 一句话总结 |\n"
+        report_content += "|---|---|\n"
+        for summary in all_summaries:
+            filename = summary['filename']
+            one_line = summary['one_line']
             escaped_filename = filename.replace('|', '\\|')
             escaped_summary = one_line.replace('|', '\\|').replace('\n', ' ')
             report_content += f"| {escaped_filename} | {escaped_summary} |\n"
         with open(output_file, 'w', encoding='utf-8') as f:
             f.write(report_content)
-        print(f"总结清单已保存到: {output_file}")
+        print(f"总结清单已保存到: {output_file}（共 {len(all_summaries)} 份文档）")
         return True
     
     def generate_single_summary_files(self, analyses, summary_dir):
@@ -857,7 +953,7 @@ class MarkdownFileSummarizer:
     
     def generate_summary_outputs(self, analyses, summary_list_file, summary_dir):
         """生成总结清单和单文件总结"""
-        list_result = self.generate_summary_list_report(analyses, summary_list_file)
+        list_result = self.generate_summary_list_report(analyses, summary_list_file, summary_dir)
         single_files = self.generate_single_summary_files(analyses, summary_dir)
         return list_result and bool(single_files)
     
