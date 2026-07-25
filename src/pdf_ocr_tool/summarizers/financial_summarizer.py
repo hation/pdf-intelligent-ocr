@@ -32,7 +32,7 @@ except ImportError:
 
 # 方舟模型配置
 ARK_MODEL = "doubao-seed-2.0-pro"
-ARK_BASE_URL = "https://ark.cn-beijing.volces.com/api/plan/v3"
+ARK_BASE_URL = "https://ark.cn-beijing.volces.com/api/coding/v3"
 
 
 class AIContentSummarizer:

@@ -148,6 +148,10 @@ python3 extract_topic_summary.py
 | `来了新的` | 执行标准流程 |
 | `今天的` | 执行标准流程 |
 
+**指定专题示例**：
+- 同时提取AI和新能源：`python3 daily_500_pdf_processor.py files output/daily/ --topic AI --topic 新能源`
+- 提取新能源+医药+消费：`python3 daily_500_pdf_processor.py files output/daily/ -t 新能源 -t 医药 -t 消费`
+
 ---
 
 ## 📋 标准流程（固定）
@@ -170,3 +174,39 @@ python3 extract_topic_summary.py
 - 筛选出多少份AI文档 + 占比
 - 关键词分布统计（Top 5）
 - 输出目录路径
+
+---
+
+## 🔍 提取其他专题的触发关键字（重要）
+
+如果用户提到以下专题名称，直接执行对应的专题提取：
+
+| 用户提示词 | 对应操作 |
+|-----------|---------|
+| `提取新能源专题` | `python3 extract_topic_summary.py --topic 新能源` |
+| `提取医药专题` | `python3 extract_topic_summary.py --topic 医药` |
+| `提取消费专题` | `python3 extract_topic_summary.py --topic 消费` |
+| `提取科技专题` | `python3 extract_topic_summary.py --topic 科技` |
+| `提取汽车专题` | `python3 extract_topic_summary.py --topic 汽车` |
+| `提取有色专题` | `python3 extract_topic_summary.py --topic 有色` |
+| `提取煤炭专题` | `python3 extract_topic_summary.py --topic 煤炭` |
+| `提取地产专题` | `python3 extract_topic_summary.py --topic 地产` |
+| `提取银行专题` | `python3 extract_topic_summary.py --topic 银行` |
+| `提取AI和新能源专题` | `python3 extract_topic_summary.py --topic AI --topic 新能源` |
+
+**支持的专题列表（10个）**：
+1. **AI** - 人工智能、大模型、算力、芯片、具身智能等
+2. **新能源** - 光伏、储能、锂电池、新能源车、氢能等
+3. **医药** - 创新药、生物医药、医疗器械、CXO等
+4. **消费** - 食品饮料、零售、电商、消费电子等
+5. **科技** - 半导体、电子、通信、计算机、软件等
+6. **汽车** - 整车、零部件、智能驾驶、自动驾驶等
+7. **有色** - 有色金属、贵金属、工业金属等
+8. **煤炭** - 煤炭、煤化工、火电、能源等
+9. **地产** - 房地产、物业、建材、家居等
+10. **银行** - 银行、金融、信贷、利率等
+
+**备注**：
+- 用户可以同时提多个专题（如"提取AI和新能源"）
+- 默认用当天日期的summaries目录
+- 输出目录：`output/topic_summaries/{专题名}/YYYYMMDD/`

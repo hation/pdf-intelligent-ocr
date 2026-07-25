@@ -6,6 +6,7 @@
 
 import os
 import sys
+import re
 import argparse
 import time
 import json
@@ -292,6 +293,19 @@ class DailyPDFProcessor:
             else:
                 self.logger.info("已跳过AI内容分析")
             
+            # 提取多个专题报告
+            if not self.config.get('no_ai', False):
+                from extract_topic_summary import extract_topic_by_keywords, TOPIC_CONFIGS
+                summaries_dir = os.path.join(self.config['output_dir'], 'summaries')
+                topics = self.config.get('topics', ['AI'])
+                
+                for topic in topics:
+                    if topic in TOPIC_CONFIGS:
+                        self.logger.info(f"正在提取【{topic}】专题报告...")
+                        extract_topic_by_keywords(summaries_dir, TOPIC_CONFIGS[topic])
+                    else:
+                        self.logger.warning(f"不支持的专题: {topic}，跳过")
+            
             # 运行优化分析
             self.logger.info("正在生成优化报告...")
             self.run_optimization_analysis()
@@ -329,7 +343,9 @@ def main():
     parser.add_argument('--strategy', choices=['auto', 'tesseract', 'liteparse', 'optimized'], 
                        default='auto', help='处理策略（默认: 自动选择）')
     parser.add_argument('--no-ai', action='store_true', 
-                       help='禁用AI内容分析')
+                       help='禁用AI内容分析和专题提取')
+    parser.add_argument('--topic', '-t', action='append', 
+                       help='要提取的专题（可多次指定，默认: AI），支持：AI/新能源/医药/消费/科技/汽车/有色/煤炭/地产/银行')
     parser.add_argument('--min-score', type=int, default=60,
                        help='进入总结的最低解析质量评分（默认: 60）')
     parser.add_argument('--force', action='store_true',
@@ -345,6 +361,9 @@ def main():
     if not re.search(r'\d{8}$', output_dir):
         output_dir = os.path.join(output_dir, today_str)
     
+    # 处理专题列表
+    topics = args.topic if args.topic else ['AI']
+    
     # 配置
     config = {
         'input_dir': args.input_dir,
@@ -353,7 +372,8 @@ def main():
         'strategy': args.strategy,
         'min_score': args.min_score,
         'force': args.force,
-        'no_ai': args.no_ai
+        'no_ai': args.no_ai,
+        'topics': topics
     }
     
     # 创建处理器实例
