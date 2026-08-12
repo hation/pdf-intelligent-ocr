@@ -768,17 +768,22 @@ class MarkdownFileSummarizer:
             print(f"Error processing file {file_path}: {e}")
             return None
     
-    def batch_process_markdown_files(self, directory, only_new=False, summaries_dir=None, workers=6):
-        """批量处理Markdown文件（支持只处理新文件+并行处理）
-        
+    def batch_process_markdown_files(self, directory, only_new=False, summaries_dir=None, workers=6, write_incrementally=True, batch_write_size=50):
+        """批量处理Markdown文件（支持只处理新文件+并行处理+批量增量写入）
+
         Args:
             directory: processed目录
             only_new: 是否只处理未生成总结的新文件
-            summaries_dir: summaries目录（用于判断是否已处理）
+            summaries_dir: summaries目录（用于判断是否已处理 + 增量写入目标）
             workers: 并行线程数（LLM是IO密集型，用线程池）
+            write_incrementally: 是否边处理边写入单文件总结（默认True）
+            batch_write_size: 每处理多少份批量写入一次（默认50份）
         """
         from concurrent.futures import ThreadPoolExecutor, as_completed
-        
+        import threading
+
+        write_lock = threading.Lock()
+
         # 收集需要处理的文件
         files_to_process = []
         for filename in os.listdir(directory):
@@ -786,26 +791,30 @@ class MarkdownFileSummarizer:
                 continue
             if filename.startswith(('structured_analysis', 'ai_analysis', 'daily_summary', 'content_analysis', 'optimization_report')):
                 continue
-            
+
             # 如果只处理新文件，检查是否已有总结
             if only_new and summaries_dir:
                 summary_name = self.sanitize_summary_filename(filename)
                 summary_path = os.path.join(summaries_dir, summary_name)
                 if os.path.exists(summary_path):
                     continue  # 已有总结，跳过
-            
+
             files_to_process.append(filename)
-        
+
         if not files_to_process:
             print(f"✓ 没有需要处理的文件（所有文件已有总结）")
             return []
-        
+
         print(f"📊 共 {len(files_to_process)} 个文件需要处理，使用 {workers} 个并行线程")
-        
+
+        if write_incrementally and summaries_dir:
+            os.makedirs(summaries_dir, exist_ok=True)
+
         results = []
         completed_count = 0
         total_count = len(files_to_process)
-        
+        batch_buffer = []  # 批量写入缓冲区
+
         # 使用多线程并行处理（LLM是IO密集型）
         with ThreadPoolExecutor(max_workers=workers) as executor:
             # 提交所有任务
@@ -813,23 +822,53 @@ class MarkdownFileSummarizer:
                 executor.submit(self.process_markdown_file, os.path.join(directory, filename)): filename
                 for filename in files_to_process
             }
-            
+
             # 按完成顺序收集结果
             for future in as_completed(future_to_filename):
                 filename = future_to_filename[future]
                 completed_count += 1
-                
+
                 try:
                     analysis = future.result()
                     if analysis:
                         analysis['filename'] = filename
                         results.append(analysis)
+                        batch_buffer.append(analysis)
                         print(f"  [{completed_count}/{total_count}] ✓ {filename[:50]}")
+
+                        # 每 batch_write_size 份批量写入一次
+                        if write_incrementally and summaries_dir and len(batch_buffer) >= batch_write_size:
+                            with write_lock:
+                                for ana in batch_buffer:
+                                    self._write_single_summary(ana, summaries_dir)
+                                batch_buffer.clear()
                 except Exception as e:
                     print(f"  [{completed_count}/{total_count}] ✗ {filename[:50]}: {e}")
-        
+
+        # 处理完后写入剩余的缓冲区
+        if write_incrementally and summaries_dir and batch_buffer:
+            for ana in batch_buffer:
+                self._write_single_summary(ana, summaries_dir)
+            batch_buffer.clear()
+
         print(f"\n✓ 并行处理完成: {len(results)}/{total_count} 成功")
         return results
+
+    def _write_single_summary(self, analysis, summary_dir):
+        """写入单个总结文件（用于增量写入）"""
+        filename = analysis['filename']
+        one_line, highlights = self.get_structured_fields(analysis)
+        output_file = os.path.join(summary_dir, self.sanitize_summary_filename(filename))
+        content = f"# {filename}\n\n"
+        content += f"## 一句话总结\n\n{one_line}\n\n"
+        content += "## 核心看点\n\n"
+        if highlights:
+            for item in highlights:
+                content += f"- {item}\n"
+        else:
+            content += "- 未提取到明确内容\n"
+        with open(output_file, 'w', encoding='utf-8') as f:
+            f.write(content)
     
     def format_list_section(self, title, items):
         """格式化结构化列表段落"""
@@ -900,14 +939,20 @@ class MarkdownFileSummarizer:
                 except Exception:
                     continue
         
-        # 2. 补充本次新处理的文档（去重）
+        # 2. 补充本次新处理的文档（去重，统一去掉后缀后比较）
         existing_names = {s['filename'] for s in all_summaries}
         for analysis in analyses:
             filename = analysis['filename']
             one_line, _ = self.get_structured_fields(analysis)
-            if filename not in existing_names:
+            # 统一命名格式：去掉 _hybrid/_tesseract/_liteparse 等后缀
+            clean_name = filename
+            for suffix in ['_hybrid', '_tesseract', '_liteparse']:
+                if clean_name.endswith(suffix):
+                    clean_name = clean_name[:-len(suffix)]
+                    break
+            if clean_name not in existing_names:
                 all_summaries.append({
-                    'filename': filename,
+                    'filename': clean_name,
                     'one_line': one_line
                 })
         
