@@ -315,8 +315,14 @@ def extract_topic_by_keywords(input_dir, topic_config, output_dir=None):
                 key_points_content += f"{i}. {point}\n\n"
         key_points_content += "---\n\n"
     
-    with open(os.path.join(date_dir, f'{topic_name}_核心论点汇总_{date_str}.md'), 'w', encoding='utf-8') as f:
+    key_points_file = os.path.join(date_dir, f'{topic_name}_核心论点汇总_{date_str}.md')
+    with open(key_points_file, 'w', encoding='utf-8') as f:
         f.write(key_points_content)
+    
+    summary_root_dir = os.path.join(output_dir, '核心论点')
+    os.makedirs(summary_root_dir, exist_ok=True)
+    root_copy_path = os.path.join(summary_root_dir, f'{topic_name}_核心论点汇总_{date_str}.md')
+    shutil.copy2(key_points_file, root_copy_path)
     
     return date_dir
 
