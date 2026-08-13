@@ -906,10 +906,8 @@ class MarkdownFileSummarizer:
         """
         os.makedirs(os.path.dirname(output_file) or '.', exist_ok=True)
         
-        # 收集所有已总结的文档（累积模式）
         all_summaries = []
         
-        # 1. 先从 summaries_dir 读取所有已存在的总结文件
         if summary_dir and os.path.exists(summary_dir):
             for fname in os.listdir(summary_dir):
                 if not fname.endswith('_summary.md'):
@@ -919,13 +917,11 @@ class MarkdownFileSummarizer:
                     with open(summary_path, 'r', encoding='utf-8') as f:
                         content = f.read()
                     
-                    # 提取一句话总结
                     one_sentence = "暂无"
                     one_sentence_match = re.search(r'##\s*一句话总结\s*\n\s*(.*?)(?=\n##|\Z)', content, re.DOTALL)
                     if one_sentence_match:
                         one_sentence = one_sentence_match.group(1).strip()
                     
-                    # 文档名（去掉 _summary.md 后缀）
                     doc_name = fname.replace('_summary.md', '')
                     for suffix in ['_hybrid', '_tesseract', '_liteparse']:
                         if doc_name.endswith(suffix):
@@ -938,19 +934,15 @@ class MarkdownFileSummarizer:
                     })
                 except Exception:
                     continue
-        
-        # 2. 补充本次新处理的文档（去重，统一去掉后缀后比较）
-        existing_names = {s['filename'] for s in all_summaries}
-        for analysis in analyses:
-            filename = analysis['filename']
-            one_line, _ = self.get_structured_fields(analysis)
-            # 统一命名格式：去掉 _hybrid/_tesseract/_liteparse 等后缀
-            clean_name = filename
-            for suffix in ['_hybrid', '_tesseract', '_liteparse']:
-                if clean_name.endswith(suffix):
-                    clean_name = clean_name[:-len(suffix)]
-                    break
-            if clean_name not in existing_names:
+        else:
+            for analysis in analyses:
+                filename = analysis['filename']
+                one_line, _ = self.get_structured_fields(analysis)
+                clean_name = filename
+                for suffix in ['_hybrid', '_tesseract', '_liteparse']:
+                    if clean_name.endswith(suffix):
+                        clean_name = clean_name[:-len(suffix)]
+                        break
                 all_summaries.append({
                     'filename': clean_name,
                     'one_line': one_line
