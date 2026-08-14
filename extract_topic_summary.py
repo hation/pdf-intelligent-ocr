@@ -22,6 +22,12 @@ import json
 import urllib.request
 from datetime import datetime
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
 # ========== 多专题配置 ==========
 TOPIC_CONFIGS = {
     'AI': {
