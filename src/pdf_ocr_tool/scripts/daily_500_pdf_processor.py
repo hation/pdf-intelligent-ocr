@@ -298,11 +298,12 @@ class DailyPDFProcessor:
                 from extract_topic_summary import extract_topic_by_keywords, TOPIC_CONFIGS
                 summaries_dir = os.path.join(self.config['output_dir'], 'summaries')
                 topics = self.config.get('topics', ['AI'])
+                topic_date_str = os.path.basename(os.path.normpath(self.config['output_dir']))
                 
                 for topic in topics:
                     if topic in TOPIC_CONFIGS:
                         self.logger.info(f"正在提取【{topic}】专题报告...")
-                        extract_topic_by_keywords(summaries_dir, TOPIC_CONFIGS[topic])
+                        extract_topic_by_keywords(summaries_dir, TOPIC_CONFIGS[topic], date_str=topic_date_str)
                     else:
                         self.logger.warning(f"不支持的专题: {topic}，跳过")
             

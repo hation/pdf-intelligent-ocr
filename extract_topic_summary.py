@@ -361,7 +361,7 @@ def extract_stocks_and_sectors(doc_data_list, topic_name, max_sectors=5, max_sto
     return top_sectors, top_stocks
 
 
-def extract_topic_by_keywords(input_dir, topic_config, output_dir=None):
+def extract_topic_by_keywords(input_dir, topic_config, output_dir=None, date_str=None):
     """
     按关键词配置提取指定专题文档并生成汇总报告
     
@@ -369,11 +369,13 @@ def extract_topic_by_keywords(input_dir, topic_config, output_dir=None):
         input_dir: summaries目录路径
         topic_config: 专题配置字典（含name、keywords等）
         output_dir: 输出目录（默认为 output/topic_summaries/{topic_name}）
+        date_str: 日期字符串（如 20260813），不传则使用当前日期
     """
     topic_name = topic_config['name']
     topic_keywords = topic_config['keywords']
     
-    date_str = datetime.now().strftime('%Y%m%d')
+    if date_str is None:
+        date_str = datetime.now().strftime('%Y%m%d')
     
     if output_dir is None:
         output_dir = os.path.join('output', 'topic_summaries', topic_name)
