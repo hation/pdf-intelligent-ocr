@@ -385,7 +385,12 @@ def extract_topic_by_keywords(input_dir, topic_config, output_dir=None, date_str
     os.makedirs(summaries_subdir, exist_ok=True)
     
     from datetime import datetime as dt
-    today_start = dt.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    # 用传入的 date_str 计算起始时间，而不是用当前日期
+    # 允许 date_str 前后 +1 天的宽容度（应对跨零点生成的文件或手动补跑）
+    target_day = dt.strptime(date_str, '%Y%m%d')
+    day_start = target_day.replace(hour=0, minute=0, second=0, microsecond=0)
+    from datetime import timedelta
+    window_start = day_start - timedelta(days=1)  # 前一天 0 点
     
     summary_files = []
     for f in os.listdir(input_dir):
@@ -393,12 +398,12 @@ def extract_topic_by_keywords(input_dir, topic_config, output_dir=None, date_str
             continue
         file_path = os.path.join(input_dir, f)
         mtime = dt.fromtimestamp(os.path.getmtime(file_path))
-        if mtime >= today_start:
+        if mtime >= window_start:
             summary_files.append(f)
     
     print(f"\n========== 提取【{topic_name}】专题 ==========")
-    print(f"  筛选条件: 只处理 {date_str} 生成的文件")
-    print(f"  今日文件数: {len(summary_files)}")
+    print(f"  日期基准: {date_str}（文件修改时间 >= {window_start.strftime('%Y-%m-%d')}）")
+    print(f"  筛选文件数: {len(summary_files)}")
     
     topic_files = []
     non_topic_files = []
