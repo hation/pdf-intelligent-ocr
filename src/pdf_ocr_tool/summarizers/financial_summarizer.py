@@ -227,6 +227,7 @@ class FinancialResearchSummarizer:
     
     def __init__(self, use_llm=True):
         self.use_llm = use_llm and LLM_AVAILABLE and os.environ.get('OPENAI_API_KEY')
+        self.summary_tool = "大模型(豆包)" if self.use_llm else "算法提取"
         
         if self.use_llm:
             self.llm_client = OpenAI(
@@ -234,7 +235,9 @@ class FinancialResearchSummarizer:
             )
             print("✅ LLM模式已启用（豆包-1.5-pro）")
         else:
-            print("ℹ️  使用纯算法模式")
+            import warnings
+            warnings.warn("⚠️  未检测到 OPENAI_API_KEY，当前使用纯算法模式，总结质量会显著下降！")
+            print("⚠️  ⚠️  ⚠️  未检测到 OPENAI_API_KEY，当前使用纯算法模式，总结质量会显著下降！ ⚠️  ⚠️  ⚠️")
         
         self.sections = {
             # ========== 核心看点（扩充） ==========
@@ -685,7 +688,8 @@ class FinancialResearchSummarizer:
                 'stocks': self.extract_stock_names(text),
                 'quotes': toc_items[:3],
                 'quality_score': quality_score,
-                'parser': parser
+                'parser': parser,
+                'summary_tool': self.summary_tool
             }
         
         sentences = self.split_sentences(text)
@@ -716,7 +720,8 @@ class FinancialResearchSummarizer:
             'stocks': self.extract_stock_names(text),
             'quotes': quotes,
             'quality_score': quality_score,
-            'parser': parser
+            'parser': parser,
+            'summary_tool': self.summary_tool
         }
 
 
@@ -859,7 +864,9 @@ class MarkdownFileSummarizer:
         filename = analysis['filename']
         one_line, highlights = self.get_structured_fields(analysis)
         output_file = os.path.join(summary_dir, self.sanitize_summary_filename(filename))
+        tool = analysis.get("structured_summary", {}).get("summary_tool", "未知")
         content = f"# {filename}\n\n"
+        content += f"**总结工具**：{tool}\n\n"
         content += f"## 一句话总结\n\n{one_line}\n\n"
         content += "## 核心看点\n\n"
         if highlights:
@@ -974,7 +981,9 @@ class MarkdownFileSummarizer:
             filename = analysis['filename']
             one_line, highlights = self.get_structured_fields(analysis)
             output_file = os.path.join(summary_dir, self.sanitize_summary_filename(filename))
+            tool = analysis.get("structured_summary", {}).get("summary_tool", "未知")
             content = f"# {filename}\n\n"
+            content += f"**总结工具**：{tool}\n\n"
             content += f"## 一句话总结\n\n{one_line}\n\n"
             content += "## 核心看点\n\n"
             if highlights:
