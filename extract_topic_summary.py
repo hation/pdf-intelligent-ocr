@@ -142,6 +142,11 @@ def read_summary_content(filepath):
         with open(filepath, 'r', encoding='utf-8') as f:
             content = f.read()
         
+        summary_tool = "未知"
+        tool_match = re.search(r'\*\*总结工具\*\*[:：]\s*(.+)', content)
+        if tool_match:
+            summary_tool = tool_match.group(1).strip()
+        
         one_sentence = "暂无"
         one_sentence_match = re.search(r'##\s*一句话总结\s*\n\s*(.*?)(?=\n##|\Z)', content, re.DOTALL)
         if one_sentence_match:
@@ -162,6 +167,7 @@ def read_summary_content(filepath):
         
         return {
             'one_sentence': one_sentence,
+        'summary_tool': summary_tool,
             'key_points': key_points
         }
     except Exception as e:
@@ -431,7 +437,8 @@ def extract_topic_by_keywords(input_dir, topic_config, output_dir=None, date_str
                 'filename': filename,
                 'keyword': matched_kw,
                 'one_sentence': content['one_sentence'],
-                'key_points': content['key_points']
+                'key_points': content['key_points'],
+                'summary_tool': content.get('summary_tool', '未知')
             })
             kw_match_counts[matched_kw] = kw_match_counts.get(matched_kw, 0) + 1
     
@@ -477,14 +484,19 @@ def extract_topic_by_keywords(input_dir, topic_config, output_dir=None, date_str
     
     one_sentence_content = f"# {topic_name}专题 · 一句话汇总 {date_str}\n\n"
     for doc in doc_data_list:
-        one_sentence_content += f"## {doc['name']}\n\n{doc['one_sentence']}\n\n"
+        tool = doc.get('summary_tool', '未知')
+        one_sentence_content += f"## {doc['name']}\n\n"
+        one_sentence_content += f"*总结工具：{tool}*\n\n"
+        one_sentence_content += f"{doc['one_sentence']}\n\n"
     
     with open(os.path.join(date_dir, f'{topic_name}_一句话汇总_{date_str}.md'), 'w', encoding='utf-8') as f:
         f.write(one_sentence_content)
     
     key_points_content = f"# {topic_name}专题 · 核心论点汇总 {date_str}\n\n"
     for doc in doc_data_list:
+        tool = doc.get('summary_tool', '未知')
         key_points_content += f"## {doc['name']}\n\n"
+        key_points_content += f"*总结工具：{tool}*\n\n"
         key_points_content += f"**一句话总结**：{doc['one_sentence']}\n\n"
         if doc['key_points']:
             key_points_content += f"**核心看点**：\n\n"
