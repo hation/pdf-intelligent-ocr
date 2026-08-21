@@ -262,6 +262,35 @@ class DailyPDFProcessor:
         
         self.logger.info(f"优化报告已生成: {os.path.basename(report_file)}")
     
+    def move_non_pdf_files(self):
+        """将输入目录中的非PDF文件移动到 Downloads 目录"""
+        move_to_dir = os.path.expanduser('~/Downloads')
+        moved_count = 0
+        
+        for filename in os.listdir(self.config['input_dir']):
+            src_path = os.path.join(self.config['input_dir'], filename)
+            if not os.path.isfile(src_path):
+                continue
+            if filename.lower().endswith('.pdf'):
+                continue
+            
+            dst_path = os.path.join(move_to_dir, filename)
+            # 处理重名文件
+            base, ext = os.path.splitext(filename)
+            counter = 1
+            while os.path.exists(dst_path):
+                dst_path = os.path.join(move_to_dir, f"{base}_{counter}{ext}")
+                counter += 1
+            
+            shutil.move(src_path, dst_path)
+            moved_count += 1
+            self.logger.info(f"移除非PDF文件: {filename} -> Downloads")
+        
+        if moved_count > 0:
+            self.logger.info(f"共移动 {moved_count} 个非PDF文件到 {move_to_dir}")
+        else:
+            self.logger.info("未检测到非PDF文件")
+    
     def run_all(self):
         """运行完整的每日处理流程"""
         self.logger.info("=== 开始每日PDF处理系统 ===")
@@ -269,6 +298,9 @@ class DailyPDFProcessor:
         try:
             # 准备目录
             self.prepare_directories()
+            
+            # 移除非PDF文件（默认流程）
+            self.move_non_pdf_files()
             
             # 验证输入
             if not self.validate_input():

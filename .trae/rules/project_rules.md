@@ -156,11 +156,12 @@ python3 extract_topic_summary.py
 
 ## 📋 标准流程（固定）
 
-1. **检查**：`files/` 目录的PDF数量
+1. **移除非PDF文件**（内置自动执行）：程序启动后自动将 `files/` 目录下所有非PDF文件移动到 `~/Downloads`
 2. **批量总结**：`python3 daily_500_pdf_processor.py files output/daily/ --workers 6`
    - 自动用当天日期
    - 自动加载 `OPENAI_API_KEY`（从环境变量或 `.env`）
    - 只处理新文件（不重复）
+   - 自动移除非PDF文件到 Downloads
 3. **提取AI专题**：`python3 extract_topic_summary.py`
    - 只提取当天生成的文档
    - 输出到 `output/topic_summaries/AI/YYYYMMDD/`
