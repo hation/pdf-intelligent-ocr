@@ -929,6 +929,11 @@ class MarkdownFileSummarizer:
                     if one_sentence_match:
                         one_sentence = one_sentence_match.group(1).strip()
                     
+                    summary_tool = ""
+                    tool_match = re.search(r'\*\*总结工具\*\*[:：]\s*(.+)', content)
+                    if tool_match:
+                        summary_tool = tool_match.group(1).strip()
+                    
                     doc_name = fname.replace('_summary.md', '')
                     for suffix in ['_hybrid', '_tesseract', '_liteparse']:
                         if doc_name.endswith(suffix):
@@ -937,7 +942,8 @@ class MarkdownFileSummarizer:
                     
                     all_summaries.append({
                         'filename': doc_name,
-                        'one_line': one_sentence
+                        'one_line': one_sentence,
+                        'summary_tool': summary_tool
                     })
                 except Exception:
                     continue
@@ -945,6 +951,7 @@ class MarkdownFileSummarizer:
             for analysis in analyses:
                 filename = analysis['filename']
                 one_line, _ = self.get_structured_fields(analysis)
+                tool = analysis.get("structured_summary", {}).get("summary_tool", "")
                 clean_name = filename
                 for suffix in ['_hybrid', '_tesseract', '_liteparse']:
                     if clean_name.endswith(suffix):
@@ -952,20 +959,22 @@ class MarkdownFileSummarizer:
                         break
                 all_summaries.append({
                     'filename': clean_name,
-                    'one_line': one_line
+                    'one_line': one_line,
+                    'summary_tool': tool
                 })
         
-        # 生成报告
-        report_content = f"# 总结清单 {datetime.now().strftime('%Y-%m-%d %H:%M')}\n\n"
-        report_content += f"**文档总数**：{len(all_summaries)} 份\n\n"
-        report_content += "| 文档名称 | 一句话总结 |\n"
-        report_content += "|---|---|\n"
+        # 生成报告（标题+段落格式，适配不支持表格的阅读器）
+        date_str = datetime.now().strftime('%Y%m%d')
+        report_content = f"# 总结清单 {date_str}\n\n"
+        report_content += f"**文档总数**：{len(all_summaries)} 份\n\n---\n\n"
         for summary in all_summaries:
             filename = summary['filename']
             one_line = summary['one_line']
-            escaped_filename = filename.replace('|', '\\|')
-            escaped_summary = one_line.replace('|', '\\|').replace('\n', ' ')
-            report_content += f"| {escaped_filename} | {escaped_summary} |\n"
+            tool = summary.get('summary_tool', '')
+            report_content += f"## {filename}\n\n"
+            if tool:
+                report_content += f"*总结工具：{tool}*\n\n"
+            report_content += f"{one_line}\n\n---\n\n"
         with open(output_file, 'w', encoding='utf-8') as f:
             f.write(report_content)
         print(f"总结清单已保存到: {output_file}（共 {len(all_summaries)} 份文档）")
