@@ -44,15 +44,26 @@ cd /Users/xingan/Documents/software/workspace/summary
 pip install -r requirements.txt
 ```
 
-### 配置豆包方舟密钥
+### 配置大模型（火山引擎方舟）
+
+所有配置统一放在 `.env` 文件（参考 `.env.example`），也可以用环境变量：
 
 ```bash
-# 方式1：创建 .env 文件
-echo "OPENAI_API_KEY=你的方舟密钥" > .env
+# 方式1：复制模板并填写
+cp .env.example .env
 
-# 方式2：设置环境变量
-export OPENAI_API_KEY="你的方舟密钥"
+# 方式2：手动创建 .env 文件
+echo "OPENAI_API_KEY=你的方舟密钥" > .env
 ```
+
+| 配置项 | 必填 | 默认值 | 说明 |
+|--------|------|--------|------|
+| `OPENAI_API_KEY` | ✅ 是 | — | 火山引擎方舟 API Key |
+| `ARK_MODEL` | 否 | `doubao-seed-2.0-pro` | 大模型名称（可切换其他模型） |
+| `ARK_BASE_URL` | 否 | `https://ark.cn-beijing.volces.com/api/coding/v3` | 方舟 API 地址（可切换其他兼容服务） |
+| `FEISHU_WEBHOOK` | 否 | — | 飞书群机器人 Webhook（用于推送每日核心要闻） |
+
+> `ARK_MODEL` / `ARK_BASE_URL` 不配置时使用默认值；未配置 `OPENAI_API_KEY` 时会降级为纯算法模式（总结质量显著下降）。
 
 ### 配置飞书推送（可选）
 
@@ -108,6 +119,23 @@ python3 extract_topic_summary.py --topic 医药 --topic 消费
 #   └── summaries/                       # 该专题相关文档单独总结
 ```
 
+### 历史日期补充每日重点汇总
+
+已处理过的历史日期如果缺少"每日重点汇总"，可用批量脚本一次性补齐：
+
+```bash
+# 为所有有 summaries 的历史日期生成每日重点汇总并推送飞书
+python3 scripts/generate_all_daily_highlights.py
+
+# 只处理指定日期区间（如只补2026年8月的数据）
+python3 scripts/generate_all_daily_highlights.py --start 20260801 --end 20260831
+
+# 生成结果：output/daily/YYYYMMDD/reports/每日重点汇总_YYYYMMDD.md
+# 特性：自动跳过已存在 / 无总结的日期，可重复运行不重复生成
+```
+
+> 每个日期会调用大模型二次提炼（约2-5分钟），并自动推送"今日核心要闻"到飞书（已配置 FEISHU_WEBHOOK 时）。
+
 ### 常用参数
 
 ```bash
@@ -127,6 +155,11 @@ python3 daily_500_pdf_processor.py files output/daily/ -t 新能源 -t 医药 -t
 -i, --input       # 指定输入summaries目录（自动找最新，一般不用）
 --topic, -t       # 提取的专题（可多次指定）
 --list-topics     # 列出所有支持的专题
+
+
+# generate_all_daily_highlights.py 参数
+--start YYYYMMDD  # 起始日期（可选）
+--end YYYYMMDD    # 结束日期（可选）
 ```
 
 ## 📂 完整目录结构
@@ -175,7 +208,15 @@ summary/
 │           └── daily_500_pdf_processor.py   # CLI 入口
 │
 ├── daily_500_pdf_processor.py    # 入口1：批量解析+总结+多专题提取
-└── extract_topic_summary.py       # 入口2：提取指定专题汇总
+├── extract_topic_summary.py       # 入口2：提取指定专题汇总
+│
+├── scripts/                       # 辅助工具脚本
+│   ├── generate_all_daily_highlights.py  # 批量补齐历史日期每日重点汇总
+│   ├── rerun_summaries.py                # 单日期强制重跑总结
+│   └── batch_rerun_dates.py              # 批量重跑多日期总结
+│
+├── run_llm_summary.py            # 单日LLM总结工具（已解析缺总结时用）
+└── batch_summarize.py            # 批量为已解析PDF生成总结
 ```
 
 ## 🎯 使用场景
@@ -223,11 +264,14 @@ python3 extract_topic_summary.py --list-topics
 
 ## 📝 输出文件说明
 
-### 每日重点汇总（reports/）
+### 每日批量处理结果（output/daily/YYYYMMDD/）
 
-| 文件名 | 内容 | 用途 |
-|--------|------|------|
-| `每日重点汇总_YYYYMMDD.md` | 大模型二次提炼的核心要闻 + 行业分类 + 深度报告精选 + 数据亮点 | 快速掌握当天最重要的信息 |
+| 文件/目录 | 内容 | 用途 |
+|-----------|------|------|
+| `processed/*.md` | PDF解析后的完整Markdown | 原始文本，供阅读或二次处理 |
+| `summaries/*_summary.md` | 每个文档的一句话总结 + 核心看点 | 快速了解每份研报核心内容 |
+| `reports/summary_list_YYYYMMDD.md` | 当日全部文档的一句话总结清单（标题+段落格式） | 快速浏览当天全部研报，适配不支持表格的阅读器 |
+| `reports/每日重点汇总_YYYYMMDD.md` | 大模型二次提炼的核心要闻 + 行业分类 + 深度报告精选 + 数据亮点 | 快速掌握当天最重要的信息 |
 
 ### 专题报告（topic_summaries/）
 
@@ -237,6 +281,16 @@ python3 extract_topic_summary.py --list-topics
 | `{专题名}_核心论点汇总_YYYYMMDD.md` | 每文档一句话+5条核心看点 | 深度研读，提取投资机会 |
 | `summaries/*.md` | 单个文档的完整总结 | 需要仔细研读某份文档时看 |
 | `READED_YYYYMMDD.md` | 文档列表+关键词统计 | 索引，快速定位感兴趣文档 |
+
+## 🛠️ 辅助工具脚本
+
+| 脚本 | 解决什么问题 | 用法 |
+|------|------------|------|
+| `scripts/generate_all_daily_highlights.py` | 历史日期缺少每日重点汇总时批量补齐 | `python3 scripts/generate_all_daily_highlights.py [--start YYYYMMDD] [--end YYYYMMDD]` |
+| `scripts/rerun_summaries.py` | 单日期总结质量不合格时强制重跑 | `python3 scripts/rerun_summaries.py <YYYYMMDD> [workers]` |
+| `scripts/batch_rerun_dates.py` | 多个历史日期总结质量不合格时批量重跑 | `python3 scripts/batch_rerun_dates.py <date1> <date2> ... [workers]` |
+| `run_llm_summary.py` | processed/ 已解析但缺少 summaries/ 时生成总结 | `python3 run_llm_summary.py` |
+| `batch_summarize.py` | 批量为已解析PDF生成总结（需修改日期） | `python3 batch_summarize.py` |
 
 ## 系统要求
 

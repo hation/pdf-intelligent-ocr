@@ -25,9 +25,9 @@ try:
 except ImportError:
     pass
 
-# 方舟模型配置
-ARK_MODEL = "doubao-seed-2.0-pro"
-ARK_BASE_URL = "https://ark.cn-beijing.volces.com/api/coding/v3"
+# 方舟模型配置（支持通过 .env / 环境变量覆盖）
+ARK_MODEL = os.environ.get("ARK_MODEL", "doubao-seed-2.0-pro")
+ARK_BASE_URL = os.environ.get("ARK_BASE_URL", "https://ark.cn-beijing.volces.com/api/coding/v3")
 
 
 class FinancialResearchSummarizer:
@@ -41,7 +41,7 @@ class FinancialResearchSummarizer:
             self.llm_client = OpenAI(
                 base_url=ARK_BASE_URL
             )
-            print("✅ LLM模式已启用（豆包-1.5-pro）")
+            print(f"✅ LLM模式已启用（{ARK_MODEL}）")
         else:
             import warnings
             warnings.warn("⚠️  未检测到 OPENAI_API_KEY，当前使用纯算法模式，总结质量会显著下降！")
