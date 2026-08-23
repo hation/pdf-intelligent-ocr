@@ -162,9 +162,11 @@ python3 extract_topic_summary.py
    - 自动加载 `OPENAI_API_KEY`（从环境变量或 `.env`）
    - 只处理新文件（不重复）
    - 自动移除非PDF文件到 Downloads
-3. **提取AI专题**：`python3 extract_topic_summary.py`
-   - 只提取当天生成的文档
+3. **提取AI专题**（内置自动执行）：主流程自动提取指定专题（默认 AI）
    - 输出到 `output/topic_summaries/AI/YYYYMMDD/`
+4. **生成每日重点汇总**（内置自动执行）：主流程自动用大模型二次提炼生成重点汇总
+   - 输出到 `output/daily/YYYYMMDD/reports/每日重点汇总_YYYYMMDD.md`
+   - 包含：核心要闻、行业分类速览、深度报告精选、数据亮点
 
 ---
 
@@ -174,6 +176,7 @@ python3 extract_topic_summary.py
 - 处理了多少份PDF
 - 筛选出多少份AI文档 + 占比
 - 关键词分布统计（Top 5）
+- 每日重点汇总是否生成成功
 - 输出目录路径
 
 ---

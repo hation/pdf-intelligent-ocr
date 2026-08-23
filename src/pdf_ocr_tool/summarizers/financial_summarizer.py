@@ -10,6 +10,7 @@ import argparse
 import re
 import json
 import time
+import urllib.request
 from collections import Counter
 import math
 from datetime import datetime
@@ -724,6 +725,203 @@ class FinancialResearchSummarizer:
             'summary_tool': self.summary_tool
         }
 
+    def generate_daily_highlight_report(self, summary_dir, output_file, date_str=None):
+        """生成每日重点汇总文档（大模型二次提炼）
+        
+        Args:
+            summary_dir: summaries目录
+            output_file: 输出文件路径
+            date_str: 日期字符串
+        """
+        if not self.use_llm:
+            print("⚠️  未启用大模型，跳过每日重点汇总生成")
+            return False
+        
+        if not os.path.isdir(summary_dir):
+            print(f"⚠️  summaries目录不存在: {summary_dir}")
+            return False
+        
+        if date_str is None:
+            date_str = datetime.now().strftime('%Y%m%d')
+        
+        summary_files = sorted([f for f in os.listdir(summary_dir) if f.endswith('_summary.md')])
+        if not summary_files:
+            print("⚠️  没有找到总结文件，跳过每日重点汇总")
+            return False
+        
+        all_content = ''
+        for sf in summary_files:
+            sf_path = os.path.join(summary_dir, sf)
+            try:
+                with open(sf_path, 'r', encoding='utf-8') as f:
+                    text = f.read()
+                
+                doc_name = sf.replace('_summary.md', '')
+                for suffix in ['_hybrid', '_tesseract', '_liteparse']:
+                    if doc_name.endswith(suffix):
+                        doc_name = doc_name[:-len(suffix)]
+                        break
+                
+                tool = ''
+                m = re.search(r'\*\*总结工具\*\*[:：]\s*(.+)', text)
+                if m:
+                    tool = m.group(1).strip()
+                
+                one_sentence = ''
+                m = re.search(r'##\s*一句话总结\s*\n\s*(.*?)(?=\n##|\Z)', text, re.DOTALL)
+                if m:
+                    one_sentence = m.group(1).strip()
+                
+                key_points = ''
+                m = re.search(r'##\s*核心看点\s*\n\s*(.*?)(?=\n##|\Z)', text, re.DOTALL)
+                if m:
+                    key_points = m.group(1).strip()
+                
+                all_content += f'【文档】{doc_name}\n'
+                all_content += f'【总结工具】{tool}\n'
+                all_content += f'【一句话总结】{one_sentence}\n'
+                all_content += f'【核心看点】{key_points}\n'
+                all_content += '---\n'
+            except Exception:
+                continue
+        
+        if not all_content.strip():
+            print("⚠️  无法收集总结内容，跳过每日重点汇总")
+            return False
+        
+        prompt = f"""你是一位专业的投研编辑，需要将一批研报和资讯的总结整合成一份"每日重点汇总"文档。
+
+请阅读以下{len(summary_files)}份文档的总结内容，生成一份结构清晰、重点突出的汇总文档。
+
+文档内容：
+{all_content}
+
+---
+
+请按照以下结构输出（Markdown格式）：
+
+# 每日重点汇总 {date_str}
+
+## 一、今日核心要闻（10-15条）
+从所有文档中提炼出最有价值、最值得关注的10~15条核心观点/事件/数据，每条用一句话概括，按重要性排序。每条标注所属行业标签（如【AI】【半导体】【机器人】【医药】【新能源】【消费】【宏观】等）。
+
+## 二、行业分类速览
+将所有文档按行业分类整理，每个行业下列出文档名称，以及1~2句核心内容摘要。分类包括但不限于：
+- AI与算力
+- 半导体与先进封装
+- 机器人与具身智能
+- 新能源与汽车
+- 医药与生物科技
+- 消费与白酒
+- 宏观与策略
+- 其他
+
+## 三、深度报告精选（5~10份）
+从所有文档中挑选出5~10份最有深度、最值得花时间细读的研报/行业报告，每份给出：
+- 文档名称
+- 推荐理由（为什么值得读）
+- 3~5条核心看点
+
+## 四、今日数据亮点
+提取文档中出现的关键数据（增速、规模、估值、订单等），用列表形式呈现。
+
+注意：
+1. 内容要客观、精炼，基于原文总结，不要凭空编造
+2. 不要用表格格式，全部用标题+段落+列表
+3. 语言风格偏向投资研究报告风格，专业但不晦涩
+4. 总字数控制在5000字以内
+"""
+        
+        try:
+            response = self.llm_client.chat.completions.create(
+                model=ARK_MODEL,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.3,
+                max_tokens=8000,
+            )
+            result = response.choices[0].message.content
+            
+            os.makedirs(os.path.dirname(output_file) or '.', exist_ok=True)
+            with open(output_file, 'w', encoding='utf-8') as f:
+                f.write(result)
+            
+            print(f"每日重点汇总已保存到: {output_file}")
+            
+            # 推送今日核心要闻到飞书
+            self.push_highlight_to_feishu(result, date_str, len(summary_files), output_file)
+            
+            return True
+        except Exception as e:
+            print(f"❌ 生成每日重点汇总失败: {e}")
+            return False
+    
+    def push_highlight_to_feishu(self, highlight_content, date_str, total_docs, output_file):
+        """将今日核心要闻推送到飞书
+        
+        Args:
+            highlight_content: 每日重点汇总全文
+            date_str: 日期
+            total_docs: 总文档数
+            output_file: 输出文件路径
+        """
+        feishu_webhook = os.environ.get("FEISHU_WEBHOOK", "")
+        if not feishu_webhook:
+            print("⚠️  未配置FEISHU_WEBHOOK，跳过飞书推送")
+            return False
+        
+        core_news = ''
+        m = re.search(
+            r'##\s*一、今日核心要闻.*?\n\s*(.*?)(?=\n##|\Z)',
+            highlight_content, re.DOTALL
+        )
+        if m:
+            core_news = m.group(1).strip()
+        
+        if not core_news:
+            print("⚠️  未找到今日核心要闻内容，跳过飞书推送")
+            return False
+        
+        lines = core_news.split('\n')
+        news_items = []
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
+            line = re.sub(r'^\d+[\.、]\s*', '', line)
+            line = re.sub(r'^[-*]\s*', '', line)
+            if line:
+                news_items.append(line)
+                if len(news_items) >= 12:
+                    break
+        
+        if not news_items:
+            print("⚠️  核心要闻解析为空，跳过飞书推送")
+            return False
+        
+        news_text = '\n'.join([f'{i+1}. {item}' for i, item in enumerate(news_items)])
+        
+        feishu_text = (
+            f'📰 每日重点汇总 {date_str}\n\n'
+            f'今日处理PDF：{total_docs} 份\n'
+            f'核心要闻：{len(news_items)} 条\n\n'
+            f'{news_text}\n\n'
+            f'📂 完整报告：{output_file}'
+        )
+        
+        try:
+            data = json.dumps({"msg_type": "text", "content": {"text": feishu_text}}).encode('utf-8')
+            req = urllib.request.Request(feishu_webhook, data=data, headers={'Content-Type': 'application/json'})
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                result = json.loads(resp.read().decode('utf-8'))
+                success = result.get('code') == 0 or result.get('StatusCode') == 0
+                if success:
+                    print("📨 飞书推送成功（每日核心要闻）")
+                else:
+                    print(f"⚠️  飞书推送返回异常: {result}")
+                return success
+        except Exception as e:
+            print(f"❌ 飞书推送失败: {e}")
+            return False
 
 class MarkdownFileSummarizer:
     """Markdown文件分析器"""
@@ -979,6 +1177,7 @@ class MarkdownFileSummarizer:
             f.write(report_content)
         print(f"总结清单已保存到: {output_file}（共 {len(all_summaries)} 份文档）")
         return True
+    
     
     def generate_single_summary_files(self, analyses, summary_dir):
         """为每个Markdown生成单独总结文件"""

@@ -339,6 +339,23 @@ class DailyPDFProcessor:
                     else:
                         self.logger.warning(f"不支持的专题: {topic}，跳过")
             
+            # 生成每日重点汇总
+            if not self.config.get('no_ai', False):
+                summaries_dir = os.path.join(self.config['output_dir'], 'summaries')
+                reports_dir = os.path.join(self.config['output_dir'], 'reports')
+                topic_date_str = os.path.basename(os.path.normpath(self.config['output_dir']))
+                highlight_file = os.path.join(reports_dir, f'每日重点汇总_{topic_date_str}.md')
+                
+                self.logger.info("正在生成每日重点汇总...")
+                try:
+                    from pdf_ocr_tool.summarizers.financial_summarizer import FinancialResearchSummarizer
+                    summarizer = FinancialResearchSummarizer(use_llm=True)
+                    summarizer.generate_daily_highlight_report(
+                        summaries_dir, highlight_file, date_str=topic_date_str
+                    )
+                except Exception as e:
+                    self.logger.warning(f"生成每日重点汇总失败: {e}")
+            
             # 运行优化分析
             self.logger.info("正在生成优化报告...")
             self.run_optimization_analysis()
