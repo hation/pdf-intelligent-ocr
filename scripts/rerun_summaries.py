@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
 """
-重跑指定日期的 AI 总结（从 processed 目录重新生成 summaries）
-用法: python3 scripts/rerun_summaries.py <日期> <workers>
+重跑指定日期的 AI 总结（临时工具）
+
+解决什么问题：
+  某个日期的 summaries/ 总结缺失或质量不合格时，从已解析的 processed/ 目录
+  重新调用大模型生成总结。使用 only_new=False 强制覆盖重跑（默认只处理新文件）。
+
+用法: python3 scripts/rerun_summaries.py <YYYYMMDD> [workers]
+示例: python3 scripts/rerun_summaries.py 20260810 6
 """
 import sys
 import os
@@ -26,7 +32,8 @@ def rerun(date_str, workers=6):
     analyses = summarizer.batch_process_markdown_files(
         processed_dir,
         summaries_dir=summaries_dir,
-        workers=workers
+        workers=workers,
+        only_new=False
     )
     
     print(f"✅ 完成：{len(analyses)} 份总结")
