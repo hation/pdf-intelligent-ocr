@@ -9,11 +9,16 @@
 - **质量评分**: 自动评估识别质量，确保输出可靠性
 - **LLM智能总结**: 使用豆包模型生成一句话总结和核心看点
 - **10大专题自动提取**: 从所有文档中筛选专题相关文档，生成专题报告
+- **每日重点汇总**: 大模型二次提炼生成"每日重点汇总"（核心要闻 / 行业分类 / 深度报告精选 / 数据亮点）
+- **飞书自动推送**: 总结完成后自动将"今日核心要闻"推送到飞书群
 
 ### ⚡ 每日批量处理
 - **固定目录**: `files/` 放入新PDF，`files_processed/` 存放已处理文件
 - **日期隔离输出**: 自动按日期创建输出目录，每天的数据不混淆
 - **文件自动移动**: 处理完成后自动归档源文件
+- **非PDF自动清理**: 启动时自动将 `files/` 中的非PDF文件移动到 `~/Downloads`
+- **自动专题提取**: 主流程自动提取AI专题（默认）并生成每日重点汇总
+- **去重处理**: 只处理新文件，已处理过的文件不会重复总结
 
 ### 🤖 支持的10大专题
 
@@ -49,6 +54,20 @@ echo "OPENAI_API_KEY=你的方舟密钥" > .env
 export OPENAI_API_KEY="你的方舟密钥"
 ```
 
+### 配置飞书推送（可选）
+
+如需在总结完成后自动推送"今日核心要闻"到飞书群，需要配置飞书群机器人 Webhook：
+
+```bash
+# 方式1：追加到 .env 文件
+echo "FEISHU_WEBHOOK=https://open.feishu.cn/open-apis/bot/v2/hook/你的机器人地址" >> .env
+
+# 方式2：设置环境变量
+export FEISHU_WEBHOOK="https://open.feishu.cn/open-apis/bot/v2/hook/你的机器人地址"
+```
+
+> 未配置时不影响主流程，仅跳过飞书推送步骤。
+
 ### 日常使用流程
 
 ```bash
@@ -58,9 +77,18 @@ export OPENAI_API_KEY="你的方舟密钥"
 # 默认提取AI专题
 python3 daily_500_pdf_processor.py files output/daily/
 
+# 主流程自动执行：
+#   1. 移除非PDF文件到 ~/Downloads
+#   2. 解析PDF -> processed/
+#   3. LLM总结 -> summaries/
+#   4. 提取AI专题 -> output/topic_summaries/AI/YYYYMMDD/
+#   5. 生成每日重点汇总 -> reports/每日重点汇总_YYYYMMDD.md
+#   6. 推送今日核心要闻到飞书（已配置FEISHU_WEBHOOK时）
+
 # 输出目录： output/daily/YYYYMMDD/
 #   ├── processed/    # PDF解析后的Markdown
-#   └── summaries/    # 单文件总结（一句话总结 + 核心看点）
+#   ├── summaries/    # 单文件总结（一句话总结 + 核心看点）
+#   └── reports/      # 每日重点汇总 + 总结清单
 
 
 # 提取多个专题（支持10大专题）
@@ -113,7 +141,7 @@ summary/
 │   │   └── 20260720/
 │   │       ├── processed/       # PDF解析Markdown (138个)
 │   │       ├── summaries/       # 单文件总结（一句话 + 核心看点）
-│   │       └── reports/         # 当日汇总报告
+│   │       └── reports/         # 每日重点汇总 + summary_list + 优化报告
 │   │
 │   └── topic_summaries/         # 专题报告（按主题隔离）
 │       ├── AI/
@@ -130,9 +158,21 @@ summary/
 │
 ├── src/
 │   └── pdf_ocr_tool/
-│       ├── parsers/          # PDF解析器
-│       ├── pipeline/         # 处理管道
-│       └── summarizers/      # 总结生成器（含LLM调用）
+│       ├── parsers/             # PDF解析器
+│       ├── pipeline/            # 处理管道
+│       ├── summarizers/         # 总结生成器（按类拆分）
+│       │   ├── aicontent_summarizer.py        # 基础NLP算法
+│       │   ├── financial_research_summarizer.py # 财经结构化总结 + 每日重点汇总 + 飞书推送
+│       │   ├── markdown_file_summarizer.py    # 批量处理 + CLI
+│       │   └── financial_summarizer.py        # 聚合导出（兼容旧导入路径）
+│       ├── topics/              # 专题提取模块
+│       │   ├── config.py        # 10大专题关键词配置
+│       │   ├── utils.py         # 文件读取 / 文档判断 / 飞书推送
+│       │   ├── analyzers.py     # 主题 / 观点 / 受益方向分析
+│       │   └── extractor.py     # 专题提取主函数
+│       └── scripts/             # 主流程
+│           ├── daily_processor.py           # DailyPDFProcessor 核心类
+│           └── daily_500_pdf_processor.py   # CLI 入口
 │
 ├── daily_500_pdf_processor.py    # 入口1：批量解析+总结+多专题提取
 └── extract_topic_summary.py       # 入口2：提取指定专题汇总
@@ -182,6 +222,14 @@ python3 extract_topic_summary.py --list-topics
 ```
 
 ## 📝 输出文件说明
+
+### 每日重点汇总（reports/）
+
+| 文件名 | 内容 | 用途 |
+|--------|------|------|
+| `每日重点汇总_YYYYMMDD.md` | 大模型二次提炼的核心要闻 + 行业分类 + 深度报告精选 + 数据亮点 | 快速掌握当天最重要的信息 |
+
+### 专题报告（topic_summaries/）
 
 | 文件名 | 内容 | 用途 |
 |--------|------|------|
