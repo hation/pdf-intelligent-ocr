@@ -11,6 +11,7 @@
 - **10大专题自动提取**: 从所有文档中筛选专题相关文档，生成专题报告
 - **每日重点汇总**: 大模型二次提炼生成"每日重点汇总"（核心要闻 / 行业分类 / 深度报告精选 / 数据亮点）
 - **飞书自动推送**: 总结完成后自动将"今日核心要闻"推送到飞书群
+- **汇总文档自动归档**: 每日重点汇总复制到 `daily/重点汇总/`，一句话总结清单复制到 `daily/一句话总结/`，跨日期集中浏览
 
 ### ⚡ 每日批量处理
 - **固定目录**: `files/` 放入新PDF，`files_processed/` 存放已处理文件
@@ -95,11 +96,15 @@ python3 daily_500_pdf_processor.py files output/daily/
 #   4. 提取AI专题 -> output/topic_summaries/AI/YYYYMMDD/
 #   5. 生成每日重点汇总 -> reports/每日重点汇总_YYYYMMDD.md
 #   6. 推送今日核心要闻到飞书（已配置FEISHU_WEBHOOK时）
+#   7. 复制汇总文档 -> daily/重点汇总/ + daily/一句话总结/（参考核心论点复制规则）
 
 # 输出目录： output/daily/YYYYMMDD/
 #   ├── processed/    # PDF解析后的Markdown
 #   ├── summaries/    # 单文件总结（一句话总结 + 核心看点）
 #   └── reports/      # 每日重点汇总 + 总结清单
+# 另外复制到 output/daily/（跨日期集中浏览）：
+#   ├── 重点汇总/     # 每日重点汇总_YYYYMMDD.md
+#   └── 一句话总结/   # summary_list_YYYYMMDD.md
 
 
 # 提取多个专题（支持10大专题）
@@ -173,6 +178,8 @@ summary/
 │
 ├── output/
 │   ├── daily/                   # 每日批量处理结果
+│   │   ├── 重点汇总/              # 每日重点汇总集中归档（跨日期）
+│   │   ├── 一句话总结/            # 一句话总结清单集中归档（跨日期）
 │   │   └── 20260720/
 │   │       ├── processed/       # PDF解析Markdown (138个)
 │   │       ├── summaries/       # 单文件总结（一句话 + 核心看点）
@@ -274,6 +281,8 @@ python3 extract_topic_summary.py --list-topics
 | `summaries/*_summary.md` | 每个文档的一句话总结 + 核心看点 | 快速了解每份研报核心内容 |
 | `reports/summary_list_YYYYMMDD.md` | 当日全部文档的一句话总结清单（标题+段落格式） | 快速浏览当天全部研报，适配不支持表格的阅读器 |
 | `reports/每日重点汇总_YYYYMMDD.md` | 大模型二次提炼的核心要闻 + 行业分类 + 深度报告精选 + 数据亮点 | 快速掌握当天最重要的信息 |
+| `daily/重点汇总/每日重点汇总_YYYYMMDD.md` | 每日重点汇总的跨日期集中副本 | 不进入具体日期目录即可浏览历史重点 |
+| `daily/一句话总结/summary_list_YYYYMMDD.md` | 一句话总结清单的跨日期集中副本 | 不进入具体日期目录即可浏览历史总结 |
 
 ### 专题报告（topic_summaries/）
 
@@ -289,6 +298,7 @@ python3 extract_topic_summary.py --list-topics
 | 脚本 | 解决什么问题 | 用法 |
 |------|------------|------|
 | `scripts/generate_all_daily_highlights.py` | 历史日期缺少每日重点汇总时批量补齐 | `python3 scripts/generate_all_daily_highlights.py [--start YYYYMMDD] [--end YYYYMMDD]` |
+| `scripts/copy_reports_to_collections.py` | 历史日期的每日重点汇总/一句话总结未归档时批量复制到集合文件夹 | `python3 scripts/copy_reports_to_collections.py [--start YYYYMMDD] [--end YYYYMMDD]` |
 | `scripts/rerun_summaries.py` | 单日期总结质量不合格时强制重跑 | `python3 scripts/rerun_summaries.py <YYYYMMDD> [workers]` |
 | `scripts/batch_rerun_dates.py` | 多个历史日期总结质量不合格时批量重跑 | `python3 scripts/batch_rerun_dates.py <date1> <date2> ... [workers]` |
 | `run_llm_summary.py` | processed/ 已解析但缺少 summaries/ 时生成总结 | `python3 run_llm_summary.py` |

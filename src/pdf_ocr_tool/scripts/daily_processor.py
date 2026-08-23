@@ -19,6 +19,45 @@ from pdf_ocr_tool.pipeline import pdf_processing_pipeline
 from pdf_ocr_tool.summarizers import financial_summarizer as ai_content_summarizer
 
 
+def copy_reports_to_collections(date_dir):
+    """把日期目录 reports/ 下的汇总文档复制到 daily 根目录的集合文件夹
+
+    参考 topics/extractor.py 中"核心论点汇总"的复制规则：
+    将文件用 shutil.copy2 复制到固定根目录下的文件夹，扁平结构 + 保留日期后缀命名。
+      - 每日重点汇总_*.md -> 重点汇总/
+      - summary_list_*.md -> 一句话总结/
+
+    Args:
+        date_dir: 日期目录，如 output/daily/20260823
+
+    Returns:
+        list[(src, dst)]: 成功复制的 (源文件, 目标文件) 列表
+    """
+    reports_dir = os.path.join(date_dir, 'reports')
+    if not os.path.isdir(reports_dir):
+        return []
+
+    daily_root = os.path.dirname(os.path.abspath(date_dir))
+    copies = []
+
+    for fname in sorted(os.listdir(reports_dir)):
+        if not fname.endswith('.md'):
+            continue
+        src = os.path.join(reports_dir, fname)
+        if fname.startswith('每日重点汇总_'):
+            dst_dir = os.path.join(daily_root, '重点汇总')
+        elif fname.startswith('summary_list_'):
+            dst_dir = os.path.join(daily_root, '一句话总结')
+        else:
+            continue
+        os.makedirs(dst_dir, exist_ok=True)
+        dst = os.path.join(dst_dir, fname)
+        shutil.copy2(src, dst)
+        copies.append((src, dst))
+
+    return copies
+
+
 class DailyPDFProcessor:
     """每日PDF处理系统类"""
     
@@ -354,6 +393,17 @@ class DailyPDFProcessor:
                     )
                 except Exception as e:
                     self.logger.warning(f"生成每日重点汇总失败: {e}")
+            
+            # 复制每日重点汇总和一句话总结到集合文件夹
+            self.logger.info("正在复制汇总文档到集合文件夹...")
+            try:
+                copied = copy_reports_to_collections(self.config['output_dir'])
+                for src, dst in copied:
+                    self.logger.info(f"已复制: {os.path.basename(src)} -> {dst}")
+                if not copied:
+                    self.logger.info("无可复制的汇总文档")
+            except Exception as e:
+                self.logger.warning(f"复制汇总文档失败: {e}")
             
             # 运行优化分析
             self.logger.info("正在生成优化报告...")
