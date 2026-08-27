@@ -75,7 +75,7 @@ tesseract_ocr_on_pdf("/path/to/your/difficult.pdf")
 
 1. **`daily_500_pdf_processor.py`**
    - 用途：完整处理新PDF
-   - 流程：`files/` 目录 → PDF解析 → 生成Markdown → 生成AI总结 → 文件移动到 `files_processed/`
+   - 流程：`files/` 目录 → PDF解析 + Word转换（docx/doc） → 生成Markdown → 生成AI总结 → 文件移动到 `files_processed/`
    - 输出位置：`output/daily/YYYYMMDD/`（包含 `processed/` + `summaries/` + `reports/`）
 
 2. **`batch_summarize.py`**
@@ -156,12 +156,14 @@ python3 extract_topic_summary.py
 
 ## 📋 标准流程（固定）
 
-1. **移除非PDF文件**（内置自动执行）：程序启动后自动将 `files/` 目录下所有非PDF文件移动到 `~/Downloads`
+1. **Word文档转换 + 移除非文档文件**（内置自动执行）：
+   - `.docx/.doc` 会自动转换为 Markdown 纳入总结流程（docx 用 markitdown，doc 用 macOS 自带 textutil），转换后源文件归档到 `files_processed/`
+   - 其余非文档文件（xlsx/pptx/图片等）移动到 `~/Downloads`
 2. **批量总结**：`python3 daily_500_pdf_processor.py files output/daily/ --workers 6`
    - 自动用当天日期
    - 自动加载 `OPENAI_API_KEY`（从环境变量或 `.env`）
    - 只处理新文件（不重复）
-   - 自动移除非PDF文件到 Downloads
+   - Word文档（docx/doc）自动转换纳入总结流程
 3. **提取AI专题**（内置自动执行）：主流程自动提取指定专题（默认 AI）
    - 输出到 `output/topic_summaries/AI/YYYYMMDD/`
 4. **生成每日重点汇总**（内置自动执行）：主流程自动用大模型二次提炼生成重点汇总
@@ -182,7 +184,7 @@ python3 extract_topic_summary.py
 ## 📊 固定输出格式
 
 执行完成后必须告诉我：
-- 处理了多少份PDF
+- 处理了多少份文档（PDF 数量 + Word 转换数量）
 - 筛选出多少份AI文档 + 占比
 - 关键词分布统计（Top 5）
 - 每日重点汇总是否生成成功
