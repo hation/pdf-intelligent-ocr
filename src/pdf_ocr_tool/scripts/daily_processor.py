@@ -301,10 +301,10 @@ class DailyPDFProcessor:
         self.logger.info(f"优化报告已生成: {os.path.basename(report_file)}")
     
     def convert_office_documents(self):
-        """将输入目录中的 docx/doc 文件转换为 Markdown，纳入总结流程
+        """将输入目录中的 Office 文档（docx/doc/xlsx/xls）转换为 Markdown，纳入总结流程
 
-        - .docx: 使用 markitdown (mammoth) 转换，保留标题/表格结构
-        - .doc:  使用 macOS 自带 textutil 转换（零依赖）
+        - .docx/.xlsx/.xls: 使用 markitdown 转换（.xls 依赖 xlrd）
+        - .doc:            使用 macOS 自带 textutil 转换（零依赖）
         转换成功后源文件移动到 files_processed/
         """
         input_dir = self.config['input_dir']
@@ -317,19 +317,19 @@ class DailyPDFProcessor:
         converted_count = 0
         for filename in sorted(os.listdir(input_dir)):
             ext = os.path.splitext(filename)[1].lower()
-            if ext not in ('.docx', '.doc'):
+            if ext not in ('.docx', '.doc', '.xlsx', '.xls'):
                 continue
             src_path = os.path.join(input_dir, filename)
             if not os.path.isfile(src_path):
                 continue
 
             try:
-                content = self._convert_word_to_markdown(src_path, ext)
+                content = self._convert_office_to_markdown(src_path, ext)
                 if not content or not content.strip():
                     self.logger.warning(f"转换后内容为空: {filename}，跳过")
                     continue
 
-                md_name = os.path.splitext(filename)[0] + '_doc.md'
+                md_name = os.path.splitext(filename)[0] + '_office.md'
                 md_path = os.path.join(processed_dir, md_name)
                 with open(md_path, 'w', encoding='utf-8') as f:
                     f.write(content)
@@ -348,20 +348,15 @@ class DailyPDFProcessor:
                 self.logger.error(f"转换失败 {filename}: {e}")
 
         if converted_count > 0:
-            self.logger.info(f"共转换 {converted_count} 个 Word 文档")
+            self.logger.info(f"共转换 {converted_count} 个 Office 文档")
         else:
-            self.logger.info("未检测到 Word 文档")
+            self.logger.info("未检测到 Office 文档")
 
         return converted_count
 
-    def _convert_word_to_markdown(self, file_path, ext):
-        """转换 Word 文档为 Markdown 文本"""
-        if ext == '.docx':
-            from markitdown import MarkItDown
-            md = MarkItDown()
-            result = md.convert(file_path)
-            return result.text_content
-        else:
+    def _convert_office_to_markdown(self, file_path, ext):
+        """转换 Office 文档（Word/Excel）为 Markdown 文本"""
+        if ext == '.doc':
             result = subprocess.run(
                 ['/usr/bin/textutil', '-convert', 'txt', '-stdout', file_path],
                 capture_output=True, text=True, encoding='utf-8', errors='replace'
@@ -369,6 +364,10 @@ class DailyPDFProcessor:
             if result.returncode != 0:
                 raise RuntimeError(f"textutil 转换失败: {result.stderr}")
             return result.stdout
+        from markitdown import MarkItDown
+        md = MarkItDown()
+        result = md.convert(file_path)
+        return result.text_content
 
     def move_non_pdf_files(self):
         """将输入目录中的非PDF文件移动到 Downloads 目录"""

@@ -4,8 +4,9 @@ pytesseract>=0.3.13
 Pillow>=10.2.0
 PyPDF2>=3.0.0
 
-# Word 文档转换（docx）
+# Office 文档转换（docx/xlsx/xls）
 markitdown[docx]>=0.1.5
+xlrd>=2.0.1
 
 # 可选依赖（用于进度监控）
 # tqdm>=4.66.0
