@@ -6,7 +6,7 @@
 
 ### 🎯 核心功能
 - **智能混合解析**: 自动选择最优解析策略（可选择文本 / Tesseract OCR）
-- **Office 文档支持**: 自动转换 `.docx`/`.xlsx`/`.xls`（markitdown）和 `.doc`（macOS textutil）为 Markdown，与 PDF 一样纳入总结流程
+- **Office 文档支持**: 自动转换 `.docx`/`.xlsx`/`.xls`（markitdown）、`.doc`（macOS textutil）和 `.pptx`（markitdown 文本 + 图片 Tesseract OCR 合并）为 Markdown，与 PDF 一样纳入总结流程
 - **质量评分**: 自动评估识别质量，确保输出可靠性
 - **LLM智能总结**: 使用大模型（火山引擎方舟，模型可配置）生成一句话总结和核心看点
 - **10大专题自动提取**: 从所有文档中筛选专题相关文档，生成专题报告
@@ -18,7 +18,7 @@
 - **固定目录**: `files/` 放入新PDF，`files_processed/` 存放已处理文件
 - **日期隔离输出**: 自动按日期创建输出目录，每天的数据不混淆
 - **文件自动移动**: 处理完成后自动归档源文件
-- **非PDF自动清理**: 启动时自动将 `files/` 中的非文档文件（pptx/图片等）移动到 `~/Downloads`；Office 文档（docx/doc/xlsx/xls）会被转换为 Markdown 纳入总结流程，转换后源文件归档到 `files_processed/`
+- **非PDF自动清理**: 启动时自动将 `files/` 中的非文档文件（图片等）移动到 `~/Downloads`；Office 文档（docx/doc/xlsx/xls/pptx）会被转换为 Markdown 纳入总结流程，转换后源文件归档到 `files_processed/`
 - **自动专题提取**: 主流程自动提取AI专题（默认）并生成每日重点汇总
 - **去重处理**: 只处理新文件，已处理过的文件不会重复总结
 

@@ -75,7 +75,7 @@ tesseract_ocr_on_pdf("/path/to/your/difficult.pdf")
 
 1. **`daily_500_pdf_processor.py`**
    - 用途：完整处理新PDF
-   - 流程：`files/` 目录 → PDF解析 + Office转换（docx/doc/xlsx/xls） → 生成Markdown → 生成AI总结 → 文件移动到 `files_processed/`
+   - 流程：`files/` 目录 → PDF解析 + Office转换（docx/doc/xlsx/xls/pptx） → 生成Markdown → 生成AI总结 → 文件移动到 `files_processed/`
    - 输出位置：`output/daily/YYYYMMDD/`（包含 `processed/` + `summaries/` + `reports/`）
 
 2. **`batch_summarize.py`**
@@ -157,13 +157,13 @@ python3 extract_topic_summary.py
 ## 📋 标准流程（固定）
 
 1. **Office文档转换 + 移除非文档文件**（内置自动执行）：
-   - `.docx/.doc/.xlsx/.xls` 会自动转换为 Markdown 纳入总结流程（docx/xlsx/xls 用 markitdown，doc 用 macOS 自带 textutil；xls 需要 xlrd），转换后源文件归档到 `files_processed/`
-   - 其余非文档文件（pptx/图片等）移动到 `~/Downloads`
+   - `.docx/.doc/.xlsx/.xls/.pptx` 会自动转换为 Markdown 纳入总结流程（docx/xlsx/xls 用 markitdown，doc 用 macOS 自带 textutil，pptx 用 markitdown 文本 + 图片 Tesseract OCR 合并；xls 需要 xlrd），转换后源文件归档到 `files_processed/`
+   - 其余非文档文件（图片等）移动到 `~/Downloads`
 2. **批量总结**：`python3 daily_500_pdf_processor.py files output/daily/ --workers 6`
    - 自动用当天日期
    - 自动加载 `OPENAI_API_KEY`（从环境变量或 `.env`）
    - 只处理新文件（不重复）
-   - Office文档（docx/doc/xlsx/xls）自动转换纳入总结流程
+   - Office文档（docx/doc/xlsx/xls/pptx）自动转换纳入总结流程
 3. **提取AI专题**（内置自动执行）：主流程自动提取指定专题（默认 AI）
    - 输出到 `output/topic_summaries/AI/YYYYMMDD/`
 4. **生成每日重点汇总**（内置自动执行）：主流程自动用大模型二次提炼生成重点汇总

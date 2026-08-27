@@ -301,10 +301,11 @@ class DailyPDFProcessor:
         self.logger.info(f"优化报告已生成: {os.path.basename(report_file)}")
     
     def convert_office_documents(self):
-        """将输入目录中的 Office 文档（docx/doc/xlsx/xls）转换为 Markdown，纳入总结流程
+        """将输入目录中的 Office 文档（docx/doc/xlsx/xls/pptx）转换为 Markdown，纳入总结流程
 
         - .docx/.xlsx/.xls: 使用 markitdown 转换（.xls 依赖 xlrd）
         - .doc:            使用 macOS 自带 textutil 转换（零依赖）
+        - .pptx:           markitdown 提取文本 + 图片 Tesseract OCR 合并
         转换成功后源文件移动到 files_processed/
         """
         input_dir = self.config['input_dir']
@@ -317,7 +318,7 @@ class DailyPDFProcessor:
         converted_count = 0
         for filename in sorted(os.listdir(input_dir)):
             ext = os.path.splitext(filename)[1].lower()
-            if ext not in ('.docx', '.doc', '.xlsx', '.xls'):
+            if ext not in ('.docx', '.doc', '.xlsx', '.xls', '.pptx'):
                 continue
             src_path = os.path.join(input_dir, filename)
             if not os.path.isfile(src_path):
@@ -355,7 +356,7 @@ class DailyPDFProcessor:
         return converted_count
 
     def _convert_office_to_markdown(self, file_path, ext):
-        """转换 Office 文档（Word/Excel）为 Markdown 文本"""
+        """转换 Office 文档（Word/Excel/PPT）为 Markdown 文本"""
         if ext == '.doc':
             result = subprocess.run(
                 ['/usr/bin/textutil', '-convert', 'txt', '-stdout', file_path],
@@ -364,10 +365,68 @@ class DailyPDFProcessor:
             if result.returncode != 0:
                 raise RuntimeError(f"textutil 转换失败: {result.stderr}")
             return result.stdout
+        if ext == '.pptx':
+            return self._convert_pptx_to_markdown(file_path)
         from markitdown import MarkItDown
         md = MarkItDown()
         result = md.convert(file_path)
         return result.text_content
+
+    def _convert_pptx_to_markdown(self, file_path):
+        """转换 PPTX：markitdown 提取文本元素 + python-pptx 提取图片做 Tesseract OCR，合并输出
+
+        文字型 PPT 通过 markitdown 提取标题/文本框/备注；
+        图片型 PPT（文字在图片里）通过提取嵌入图片 + OCR 补充文字。
+        """
+        import hashlib
+        from markitdown import MarkItDown
+        md = MarkItDown()
+        text = md.convert(file_path).text_content
+
+        ocr_parts = []
+        try:
+            from pptx import Presentation
+            from pptx.enum.shapes import MSO_SHAPE_TYPE
+            import pytesseract
+            import PIL.ImageOps
+            from PIL import Image
+
+            prs = Presentation(file_path)
+            seen = set()
+            for slide_idx, slide in enumerate(prs.slides, 1):
+                for shape in slide.shapes:
+                    if shape.shape_type != MSO_SHAPE_TYPE.PICTURE:
+                        continue
+                    try:
+                        img = shape.image
+                        data = img.blob
+                        digest = hashlib.md5(data).hexdigest()
+                        if digest in seen:
+                            continue
+                        seen.add(digest)
+                        with tempfile.NamedTemporaryFile(suffix=f".{img.ext}", delete=False) as tmp:
+                            tmp.write(data)
+                            tmp_path = tmp.name
+                        try:
+                            pil_img = Image.open(tmp_path)
+                            w, h = pil_img.size
+                            if w < 80 or h < 80:
+                                continue
+                            enhanced = PIL.ImageOps.autocontrast(pil_img.convert('L'), cutoff=2)
+                            enhanced = enhanced.point(lambda x: 0 if x < 150 else 255, '1')
+                            ocr_text = pytesseract.image_to_string(enhanced, lang='chi_sim+eng').strip()
+                            if ocr_text:
+                                ocr_parts.append(f"=== PPT 第 {slide_idx} 页图片 ===\n{ocr_text}")
+                        finally:
+                            os.remove(tmp_path)
+                    except Exception as e:
+                        self.logger.warning(f"PPT 图片 OCR 失败: {e}")
+        except Exception as e:
+            self.logger.warning(f"PPT 图片提取失败: {e}")
+
+        if ocr_parts:
+            text = (text + "\n\n" + "\n\n".join(ocr_parts)).strip()
+        return text
 
     def move_non_pdf_files(self):
         """将输入目录中的非PDF文件移动到 Downloads 目录"""
