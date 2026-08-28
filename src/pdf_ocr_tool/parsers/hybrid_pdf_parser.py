@@ -12,6 +12,11 @@ import sys
 import time
 from datetime import datetime
 
+try:
+    import fcntl
+except ImportError:
+    fcntl = None
+
 import PIL.ImageOps
 import pytesseract
 from pdf2image import convert_from_path
@@ -78,19 +83,6 @@ def load_cache_from_file(cache_file):
             return json.load(f)
     except Exception:
         return {}
-
-
-def save_cache_to_file(cache, cache_file):
-    """保存缓存到指定文件"""
-    ensure_dir(os.path.dirname(cache_file))
-    with open(cache_file, "w", encoding="utf-8") as f:
-        json.dump(cache, f, ensure_ascii=False, indent=2)
-
-
-def save_cache(output_dir, cache):
-    path = cache_path(output_dir)
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(cache, f, ensure_ascii=False, indent=2)
 
 
 def extract_content_from_markdown(markdown):
@@ -388,6 +380,22 @@ def select_best_attempt(attempts):
     return max(candidates, key=lambda item: item["quality"]["score"])
 
 
+def _acquire_cache_lock(cache_file):
+    """获取缓存文件排他锁，串行化多进程的读-改-写，避免覆盖丢失缓存记录"""
+    if fcntl is None:
+        return None
+    ensure_dir(os.path.dirname(cache_file))
+    lock_file = open(cache_file + ".lock", "w")
+    fcntl.flock(lock_file, fcntl.LOCK_EX)
+    return lock_file
+
+
+def _release_cache_lock(lock_file):
+    if lock_file is not None:
+        fcntl.flock(lock_file, fcntl.LOCK_UN)
+        lock_file.close()
+
+
 def save_parse_cache(cache, cache_key, pdf_hash, md_path, parser, quality, started_at, attempts, cache_file, success=True):
     entry = {
         "pdf_hash": pdf_hash,
@@ -400,12 +408,20 @@ def save_parse_cache(cache, cache_key, pdf_hash, md_path, parser, quality, start
         "updated_at": datetime.now().isoformat(),
         "elapsed_seconds": round(time.time() - started_at, 2),
     }
+    final_cache_file = cache_path(cache_file) if os.path.isdir(cache_file) else cache_file
+    # 加锁后重新读取最新缓存并合并写入，防止多进程并发覆盖导致缓存记录丢失
+    lock_file = _acquire_cache_lock(final_cache_file)
+    try:
+        latest = load_cache_from_file(final_cache_file)
+        latest[cache_key] = entry
+        ensure_dir(os.path.dirname(final_cache_file))
+        tmp_path = final_cache_file + ".tmp"
+        with open(tmp_path, "w", encoding="utf-8") as f:
+            json.dump(latest, f, ensure_ascii=False, indent=2)
+        os.replace(tmp_path, final_cache_file)
+    finally:
+        _release_cache_lock(lock_file)
     cache[cache_key] = entry
-    # 使用指定的缓存文件或默认路径
-    if os.path.isdir(cache_file):
-        save_cache(cache_file, cache)
-    else:
-        save_cache_to_file(cache, cache_file)
     return {
         "success": success,
         "md_path": md_path,
