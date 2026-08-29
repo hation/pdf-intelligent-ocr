@@ -58,6 +58,63 @@ def copy_reports_to_collections(date_dir):
     return copies
 
 
+def collect_daily_summaries(date_dir):
+    """把当日汇总文档收集到 output/汇总/YYYYMMDD/（微信读书导入用）
+
+    将分散在多个目录的当日汇总文档统一复制到 output/汇总/YYYYMMDD/，
+    按日期区分，方便整体导入微信读书。收集内容：
+      - 每日重点汇总_YYYYMMDD.md    （当日重点总结）
+      - summary_list_YYYYMMDD.md    （一句话总结）
+      - {专题}_核心论点汇总_YYYYMMDD.md（所有已提取专题的核心论点汇总，
+        遍历 output/topic_summaries/*/核心论点/ 自动收集）
+
+    Args:
+        date_dir: 日期目录，如 output/daily/20260823
+
+    Returns:
+        list[(src, dst)]: 成功复制的 (源文件, 目标文件) 列表
+    """
+    daily_root = os.path.dirname(os.path.abspath(date_dir))
+    output_root = os.path.dirname(os.path.abspath(daily_root))
+    date_str = os.path.basename(os.path.normpath(date_dir))
+
+    target_dir = os.path.join(output_root, '汇总', date_str)
+    os.makedirs(target_dir, exist_ok=True)
+
+    candidates = []
+
+    reports_dir = os.path.join(date_dir, 'reports')
+    if os.path.isdir(reports_dir):
+        for fname in os.listdir(reports_dir):
+            if not fname.endswith('.md'):
+                continue
+            if fname.startswith('每日重点汇总_') or fname.startswith('summary_list_'):
+                candidates.append(os.path.join(reports_dir, fname))
+
+    topics_root = os.path.join(output_root, 'topic_summaries')
+    if os.path.isdir(topics_root):
+        for topic_name in sorted(os.listdir(topics_root)):
+            core_dir = os.path.join(topics_root, topic_name, '核心论点')
+            if not os.path.isdir(core_dir):
+                continue
+            for fname in os.listdir(core_dir):
+                if fname.endswith('.md') and fname.endswith(f'核心论点汇总_{date_str}.md'):
+                    candidates.append(os.path.join(core_dir, fname))
+
+    copies = []
+    seen = set()
+    for src in sorted(candidates):
+        src_abs = os.path.abspath(src)
+        if src_abs in seen:
+            continue
+        seen.add(src_abs)
+        dst = os.path.join(target_dir, os.path.basename(src))
+        shutil.copy2(src, dst)
+        copies.append((src, dst))
+
+    return copies
+
+
 class DailyPDFProcessor:
     """每日PDF处理系统类"""
     
@@ -535,6 +592,17 @@ class DailyPDFProcessor:
                     self.logger.info("无可复制的汇总文档")
             except Exception as e:
                 self.logger.warning(f"复制汇总文档失败: {e}")
+            
+            # 收集当日汇总文档到 output/汇总/YYYYMMDD/（微信读书导入用）
+            self.logger.info("正在收集当日汇总文档到汇总文件夹...")
+            try:
+                collected = collect_daily_summaries(self.config['output_dir'])
+                for src, dst in collected:
+                    self.logger.info(f"已收集: {os.path.basename(src)} -> {dst}")
+                if not collected:
+                    self.logger.info("无可收集的汇总文档")
+            except Exception as e:
+                self.logger.warning(f"收集汇总文档失败: {e}")
             
             # 运行优化分析
             self.logger.info("正在生成优化报告...")
