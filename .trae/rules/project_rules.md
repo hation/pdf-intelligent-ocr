@@ -169,6 +169,8 @@ python3 extract_topic_summary.py
 4. **生成每日重点汇总**（内置自动执行）：主流程自动用大模型二次提炼生成重点汇总
    - 输出到 `output/daily/YYYYMMDD/reports/每日重点汇总_YYYYMMDD.md`
    - 包含：核心要闻、行业分类速览、深度报告精选、数据亮点
+5. **收集微信读书汇总**（内置自动执行）：主流程自动把当日重点汇总、一句话总结、各专题核心论点汇总收集到 `output/汇总/YYYYMMDD/`
+   - 用于整体导入微信读书，按日期隔离
 
 ---
 
@@ -215,9 +217,10 @@ python3 extract_topic_summary.py
 | `提取煤炭专题` | `python3 extract_topic_summary.py --topic 煤炭` |
 | `提取地产专题` | `python3 extract_topic_summary.py --topic 地产` |
 | `提取银行专题` | `python3 extract_topic_summary.py --topic 银行` |
+| `提取运动专题` | `python3 extract_topic_summary.py --topic 运动` |
 | `提取AI和新能源专题` | `python3 extract_topic_summary.py --topic AI --topic 新能源` |
 
-**支持的专题列表（10个）**：
+**支持的专题列表（11个）**：
 1. **AI** - 人工智能、大模型、算力、芯片、具身智能等
 2. **新能源** - 光伏、储能、锂电池、新能源车、氢能等
 3. **医药** - 创新药、生物医药、医疗器械、CXO等
@@ -228,6 +231,7 @@ python3 extract_topic_summary.py
 8. **煤炭** - 煤炭、煤化工、火电、能源等
 9. **地产** - 房地产、物业、建材、家居等
 10. **银行** - 银行、金融、信贷、利率等
+11. **运动** - 体育、运动服饰、健身、户外、电竞等
 
 **备注**：
 - 用户可以同时提多个专题（如"提取AI和新能源"）

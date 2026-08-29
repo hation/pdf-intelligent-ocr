@@ -95,6 +95,12 @@ output/daily/YYYYMMDD/
     ├── filename1_summary.md
     ├── filename2_summary.md
     └── ...
+
+# 微信读书导入用（主流程自动收集到 output/汇总/YYYYMMDD/）
+output/汇总/YYYYMMDD/
+├── 每日重点汇总_YYYYMMDD.md         # 当日重点总结
+├── summary_list_YYYYMMDD.md         # 一句话总结
+└── {专题}_核心论点汇总_YYYYMMDD.md   # 各专题核心论点（自动包含当天所有已提取专题）
 ```
 
 ## 报告说明
