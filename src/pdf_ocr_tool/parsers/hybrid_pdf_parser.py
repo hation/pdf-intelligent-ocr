@@ -8,6 +8,7 @@ import hashlib
 import json
 import os
 import re
+import shutil
 import sys
 import time
 from datetime import datetime
@@ -286,9 +287,19 @@ def parse_pdf_to_markdown(pdf_path, output_dir, min_score=60, force=False, cache
     cached = cache.get(cache_key)
 
     if not force and validate_cached_result(cached, pdf_hash):
+        md_path = cached["md_path"]
+        # 缓存命中的 md 若不在当前输出目录，复制一份到当前批次。
+        # 保证每批次 processed/ 自包含，且 move_processed_files 能识别并移动源文件，
+        # 避免"缓存命中不生成新 md -> 文件永久滞留 files/"的问题。
+        if os.path.dirname(os.path.abspath(md_path)) != os.path.abspath(output_dir):
+            ensure_dir(output_dir)
+            new_md_path = os.path.join(output_dir, os.path.basename(md_path))
+            if not os.path.exists(new_md_path):
+                shutil.copy2(md_path, new_md_path)
+            md_path = new_md_path
         return {
             "success": True,
-            "md_path": cached["md_path"],
+            "md_path": md_path,
             "parser": cached.get("parser", "cached"),
             "quality_score": cached.get("quality_score", 0),
             "from_cache": True,
