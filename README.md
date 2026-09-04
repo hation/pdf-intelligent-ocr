@@ -13,7 +13,7 @@
 - **每日重点汇总**: 大模型二次提炼生成"每日重点汇总"（核心要闻 / 行业分类 / 深度报告精选 / 数据亮点）
 - **飞书自动推送**: 总结完成后自动将"今日核心要闻"推送到飞书群
 - **汇总文档自动归档**: 每日重点汇总复制到 `daily/重点汇总/`，一句话总结清单复制到 `daily/一句话总结/`，跨日期集中浏览
-- **微信读书汇总收集**: 将当日重点汇总、一句话总结、所有专题核心论点汇总自动收集到 `output/汇总/YYYYMMDD/`，按日期隔离，方便整体导入微信读书
+- **微信读书汇总收集**: 将当日重点汇总、一句话总结、所有专题核心论点汇总自动收集到 `output/汇总/YYYYMMDDHH/`，按日期隔离，方便整体导入微信读书
 
 ### ⚡ 每日批量处理
 - **固定目录**: `files/` 放入新PDF，`files_processed/` 存放已处理文件
@@ -96,23 +96,23 @@ python3 daily_500_pdf_processor.py files output/daily/
 #   1. 移除非PDF文件到 ~/Downloads
 #   2. 解析PDF -> processed/
 #   3. LLM总结 -> summaries/
-#   4. 提取AI专题 -> output/topic_summaries/AI/YYYYMMDD/
-#   5. 生成每日重点汇总 -> reports/每日重点汇总_YYYYMMDD.md
+#   4. 提取AI专题 -> output/topic_summaries/AI/YYYYMMDDHH/
+#   5. 生成每日重点汇总 -> reports/每日重点汇总_YYYYMMDDHH.md
 #   6. 推送今日核心要闻到飞书（已配置FEISHU_WEBHOOK时）
 #   7. 复制汇总文档 -> daily/重点汇总/ + daily/一句话总结/（参考核心论点复制规则）
-#   8. 收集当日汇总文档 -> 汇总/YYYYMMDD/（重点汇总+一句话总结+各专题核心论点，微信读书导入用）
+#   8. 收集当日汇总文档 -> 汇总/YYYYMMDDHH/（重点汇总+一句话总结+各专题核心论点，微信读书导入用）
 
-# 输出目录： output/daily/YYYYMMDD/
+# 输出目录： output/daily/YYYYMMDDHH/
 #   ├── processed/    # PDF解析后的Markdown
 #   ├── summaries/    # 单文件总结（一句话总结 + 核心看点）
 #   └── reports/      # 每日重点汇总 + 总结清单
 # 另外复制到 output/daily/（跨日期集中浏览）：
-#   ├── 重点汇总/     # 每日重点汇总_YYYYMMDD.md
-#   └── 一句话总结/   # summary_list_YYYYMMDD.md
-# 另外收集到 output/汇总/YYYYMMDD/（微信读书导入用）：
-#   ├── 每日重点汇总_YYYYMMDD.md
-#   ├── summary_list_YYYYMMDD.md
-#   └── {专题}_核心论点汇总_YYYYMMDD.md（当天所有专题）
+#   ├── 重点汇总/     # 每日重点汇总_YYYYMMDDHH.md
+#   └── 一句话总结/   # summary_list_YYYYMMDDHH.md
+# 另外收集到 output/汇总/YYYYMMDDHH/（微信读书导入用）：
+#   ├── 每日重点汇总_YYYYMMDDHH.md
+#   ├── summary_list_YYYYMMDDHH.md
+#   └── {专题}_核心论点汇总_YYYYMMDDHH.md（当天所有专题）
 
 
 # 提取多个专题（支持11大专题）
@@ -125,10 +125,10 @@ python3 daily_500_pdf_processor.py files output/daily/ --topic AI --topic 新能
 python3 extract_topic_summary.py --topic 新能源
 python3 extract_topic_summary.py --topic 医药 --topic 消费
 
-# 输出目录： output/topic_summaries/{专题名}/YYYYMMDD/
-#   ├── READED_YYYYMMDD.md               # 文档索引
-#   ├── {专题名}_一句话汇总_YYYYMMDD.md   # 快速浏览版
-#   ├── {专题名}_核心论点汇总_YYYYMMDD.md # 完整专题报告
+# 输出目录： output/topic_summaries/{专题名}/YYYYMMDDHH/
+#   ├── READED_YYYYMMDDHH.md               # 文档索引
+#   ├── {专题名}_一句话汇总_YYYYMMDDHH.md   # 快速浏览版
+#   ├── {专题名}_核心论点汇总_YYYYMMDDHH.md # 完整专题报告
 #   └── summaries/                       # 该专题相关文档单独总结
 ```
 
@@ -250,8 +250,8 @@ summary/
 python3 daily_500_pdf_processor.py files output/daily/ --workers 6
 
 # 3. 查看结果
-# 所有文档总结在 output/daily/YYYYMMDD/summaries/
-# AI专题汇总在 output/topic_summaries/AI/YYYYMMDD/
+# 所有文档总结在 output/daily/YYYYMMDDHH/summaries/
+# AI专题汇总在 output/topic_summaries/AI/YYYYMMDDHH/
 ```
 
 ### 场景2：同时提取AI+新能源+医药三个专题
@@ -261,9 +261,9 @@ python3 daily_500_pdf_processor.py files output/daily/ --workers 6
 python3 daily_500_pdf_processor.py files output/daily/ -t AI -t 新能源 -t 医药
 
 # 查看专题汇总：
-# output/topic_summaries/AI/YYYYMMDD/
-# output/topic_summaries/新能源/YYYYMMDD/
-# output/topic_summaries/医药/YYYYMMDD/
+# output/topic_summaries/AI/YYYYMMDDHH/
+# output/topic_summaries/新能源/YYYYMMDDHH/
+# output/topic_summaries/医药/YYYYMMDDHH/
 ```
 
 ### 场景3：先解析，后续再总结
@@ -273,7 +273,7 @@ python3 daily_500_pdf_processor.py files output/daily/ -t AI -t 新能源 -t 医
 python3 daily_500_pdf_processor.py files output/daily/ --no-ai
 
 # Day 2：后续补充提取某专题
-python3 extract_topic_summary.py -i output/daily/YYYYMMDD/summaries/ --topic 科技
+python3 extract_topic_summary.py -i output/daily/YYYYMMDDHH/summaries/ --topic 科技
 ```
 
 ### 场景4：查看所有支持的专题
@@ -284,28 +284,28 @@ python3 extract_topic_summary.py --list-topics
 
 ## 📝 输出文件说明
 
-### 每日批量处理结果（output/daily/YYYYMMDD/）
+### 每日批量处理结果（output/daily/YYYYMMDDHH/）
 
 | 文件/目录 | 内容 | 用途 |
 |-----------|------|------|
 | `processed/*.md` | PDF解析后的完整Markdown | 原始文本，供阅读或二次处理 |
 | `summaries/*_summary.md` | 每个文档的一句话总结 + 核心看点 | 快速了解每份研报核心内容 |
-| `reports/summary_list_YYYYMMDD.md` | 当日全部文档的一句话总结清单（标题+段落格式） | 快速浏览当天全部研报，适配不支持表格的阅读器 |
-| `reports/每日重点汇总_YYYYMMDD.md` | 大模型二次提炼的核心要闻 + 行业分类 + 深度报告精选 + 数据亮点 | 快速掌握当天最重要的信息 |
-| `daily/重点汇总/每日重点汇总_YYYYMMDD.md` | 每日重点汇总的跨日期集中副本 | 不进入具体日期目录即可浏览历史重点 |
-| `daily/一句话总结/summary_list_YYYYMMDD.md` | 一句话总结清单的跨日期集中副本 | 不进入具体日期目录即可浏览历史总结 |
-| `汇总/YYYYMMDD/每日重点汇总_YYYYMMDD.md` | 当日重点总结（微信读书导入用） | 与一句话总结、各专题核心论点一并整体导入微信读书 |
-| `汇总/YYYYMMDD/summary_list_YYYYMMDD.md` | 当日一句话总结清单（微信读书导入用） | 与重点汇总、各专题核心论点一并整体导入微信读书 |
-| `汇总/YYYYMMDD/{专题}_核心论点汇总_YYYYMMDD.md` | 当日各专题核心论点汇总（微信读书导入用） | 自动收集当天所有已提取专题 |
+| `reports/summary_list_YYYYMMDDHH.md` | 当日全部文档的一句话总结清单（标题+段落格式） | 快速浏览当天全部研报，适配不支持表格的阅读器 |
+| `reports/每日重点汇总_YYYYMMDDHH.md` | 大模型二次提炼的核心要闻 + 行业分类 + 深度报告精选 + 数据亮点 | 快速掌握当天最重要的信息 |
+| `daily/重点汇总/每日重点汇总_YYYYMMDDHH.md` | 每日重点汇总的跨日期集中副本 | 不进入具体日期目录即可浏览历史重点 |
+| `daily/一句话总结/summary_list_YYYYMMDDHH.md` | 一句话总结清单的跨日期集中副本 | 不进入具体日期目录即可浏览历史总结 |
+| `汇总/YYYYMMDDHH/每日重点汇总_YYYYMMDDHH.md` | 当日重点总结（微信读书导入用） | 与一句话总结、各专题核心论点一并整体导入微信读书 |
+| `汇总/YYYYMMDDHH/summary_list_YYYYMMDDHH.md` | 当日一句话总结清单（微信读书导入用） | 与重点汇总、各专题核心论点一并整体导入微信读书 |
+| `汇总/YYYYMMDDHH/{专题}_核心论点汇总_YYYYMMDDHH.md` | 当日各专题核心论点汇总（微信读书导入用） | 自动收集当天所有已提取专题 |
 
 ### 专题报告（topic_summaries/）
 
 | 文件名 | 内容 | 用途 |
 |--------|------|------|
-| `{专题名}_一句话汇总_YYYYMMDD.md` | 该专题所有文档的一句话总结 | 快速浏览，了解行业全貌 |
-| `{专题名}_核心论点汇总_YYYYMMDD.md` | 每文档一句话+5条核心看点 | 深度研读，提取投资机会 |
+| `{专题名}_一句话汇总_YYYYMMDDHH.md` | 该专题所有文档的一句话总结 | 快速浏览，了解行业全貌 |
+| `{专题名}_核心论点汇总_YYYYMMDDHH.md` | 每文档一句话+5条核心看点 | 深度研读，提取投资机会 |
 | `summaries/*.md` | 单个文档的完整总结 | 需要仔细研读某份文档时看 |
-| `READED_YYYYMMDD.md` | 文档列表+关键词统计 | 索引，快速定位感兴趣文档 |
+| `READED_YYYYMMDDHH.md` | 文档列表+关键词统计 | 索引，快速定位感兴趣文档 |
 
 ## 🛠️ 辅助工具脚本
 
