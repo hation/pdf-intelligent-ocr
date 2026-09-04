@@ -234,9 +234,9 @@ class PDFProcessingPipeline:
         # 生成汇总报告到reports目录
         reports_dir = os.path.join(os.path.dirname(output_dir), 'reports')
         os.makedirs(reports_dir, exist_ok=True)
-        summary_file = os.path.join(reports_dir, f"daily_summary_{datetime.now().strftime('%Y%m%d')}.md")
+        summary_file = os.path.join(reports_dir, f"daily_summary_{datetime.now().strftime('%Y%m%d%H')}.md")
         
-        summary_content = f"# 每日PDF处理报告 {datetime.now().strftime('%Y-%m-%d')}\n\n"
+        summary_content = f"# 每日PDF处理报告 {datetime.now().strftime('%Y-%m-%d %H:%M')}\n\n"
         summary_content += f"## 总体统计\n"
         summary_content += f"- 总文件数: {self.stats['total_files']}\n"
         summary_content += f"- 成功处理: {self.stats['success_count']}\n"

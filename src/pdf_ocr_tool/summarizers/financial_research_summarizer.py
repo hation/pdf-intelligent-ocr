@@ -549,7 +549,7 @@ class FinancialResearchSummarizer:
             return False
         
         if date_str is None:
-            date_str = datetime.now().strftime('%Y%m%d')
+            date_str = datetime.now().strftime('%Y%m%d%H')
         
         summary_files = sorted([f for f in os.listdir(summary_dir) if f.endswith('_summary.md')])
         if not summary_files:

@@ -338,9 +338,9 @@ class DailyPDFProcessor:
     
     def generate_optimization_report(self, report, reports_dir):
         """生成优化报告"""
-        report_file = os.path.join(reports_dir, f"optimization_report_{datetime.now().strftime('%Y%m%d')}.md")
+        report_file = os.path.join(reports_dir, f"optimization_report_{datetime.now().strftime('%Y%m%d%H')}.md")
         
-        content = f"# 每日处理优化报告 {datetime.now().strftime('%Y-%m-%d')}\n\n"
+        content = f"# 每日处理优化报告 {datetime.now().strftime('%Y-%m-%d %H:%M')}\n\n"
         
         content += f"## 处理统计\n"
         content += f"- 成功处理文件: {report['total_files']}\n"

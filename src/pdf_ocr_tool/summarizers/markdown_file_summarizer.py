@@ -333,7 +333,7 @@ def main():
             return 1
         
         # 生成总结清单和单文件总结
-        output_file = args.output or os.path.join(args.input, f"summary_list_{datetime.now().strftime('%Y%m%d')}.md")
+        output_file = args.output or os.path.join(args.input, f"summary_list_{datetime.now().strftime('%Y%m%d%H')}.md")
         summary_dir = args.summary_dir or os.path.join(os.path.dirname(args.input), 'summaries')
         summarizer.generate_summary_outputs(analyses, output_file, summary_dir)
     

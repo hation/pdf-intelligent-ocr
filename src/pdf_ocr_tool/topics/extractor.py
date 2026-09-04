@@ -34,7 +34,7 @@ def extract_topic_by_keywords(input_dir, topic_config, output_dir=None, date_str
     topic_keywords = topic_config['keywords']
     
     if date_str is None:
-        date_str = datetime.now().strftime('%Y%m%d')
+        date_str = datetime.now().strftime('%Y%m%d%H')
     
     if output_dir is None:
         output_dir = os.path.join('output', 'topic_summaries', topic_name)
@@ -46,7 +46,12 @@ def extract_topic_by_keywords(input_dir, topic_config, output_dir=None, date_str
     from datetime import datetime as dt
     # 用传入的 date_str 计算起始时间，而不是用当前日期
     # 允许 date_str 前后 +1 天的宽容度（应对跨零点生成的文件或手动补跑）
-    target_day = dt.strptime(date_str, '%Y%m%d')
+    # 兼容 8 位（YYYYMMDD）与 10 位（YYYYMMDDHH）日期字符串，窗口按天计算
+    try:
+        target_dt = dt.strptime(date_str, '%Y%m%d%H')
+    except ValueError:
+        target_dt = dt.strptime(date_str, '%Y%m%d')
+    target_day = target_dt.replace(hour=0, minute=0, second=0, microsecond=0)
     day_start = target_day.replace(hour=0, minute=0, second=0, microsecond=0)
     from datetime import timedelta
     window_start = day_start - timedelta(days=1)  # 前一天 0 点

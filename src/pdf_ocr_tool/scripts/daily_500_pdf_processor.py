@@ -34,12 +34,12 @@ def main():
     
     args = parser.parse_args()
     
-    # 自动追加当天日期作为输出子目录
-    # 用户传 output/daily/ -> 实际输出 output/daily/YYYYMMDD/
-    today_str = datetime.now().strftime('%Y%m%d')
+    # 自动追加当天日期作为输出子目录（精确到小时，支持一天多次总结）
+    # 用户传 output/daily/ -> 实际输出 output/daily/YYYYMMDDHH/
+    today_str = datetime.now().strftime('%Y%m%d%H')
     output_dir = args.output_dir.rstrip('/')
     # 如果末尾不是日期格式，自动追加当天日期
-    if not re.search(r'\d{8}$', output_dir):
+    if not re.search(r'\d{10}$', output_dir):
         output_dir = os.path.join(output_dir, today_str)
     
     # 处理专题列表
