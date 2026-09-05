@@ -283,7 +283,7 @@ python3 extract_topic_summary.py
 | `提取运动专题`     | `python3 extract_topic_summary.py --topic 运动`             |
 | `提取AI和新能源专题` | `python3 extract_topic_summary.py --topic AI --topic 新能源` |
 
-**支持的专题列表（11个）**：
+**支持的专题列表（12个）**：
 
 1. **AI** - 人工智能、大模型、算力、芯片、具身智能等
 2. **新能源** - 光伏、储能、锂电池、新能源车、氢能等
@@ -296,6 +296,7 @@ python3 extract_topic_summary.py
 9. **地产** - 房地产、物业、建材、家居等
 10. **银行** - 银行、金融、信贷、利率等
 11. **运动** - 体育、运动服饰、健身、户外、电竞等
+12. **健康** - 大健康、健康管理、保健养生、康养、心理健康等
 
 **备注**：
 
