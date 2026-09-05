@@ -148,7 +148,7 @@ class DailyPDFProcessor:
         log_dir = os.path.join(self.config['output_dir'], 'logs')
         os.makedirs(log_dir, exist_ok=True)
         
-        log_file = os.path.join(log_dir, f"daily_processor_{datetime.now().strftime('%Y%m%d')}.log")
+        log_file = os.path.join(log_dir, f"daily_processor_{datetime.now().strftime('%Y%m%d%H')}.log")
         
         logging.basicConfig(
             level=logging.INFO,
@@ -258,7 +258,7 @@ class DailyPDFProcessor:
         """运行AI内容分析（只处理新文件，并行处理）"""
         processed_dir = os.path.join(self.config['output_dir'], 'processed')
         summary_list_file = os.path.join(self.config['output_dir'], 'reports', 
-                                     f"summary_list_{datetime.now().strftime('%Y%m%d')}.md")
+                                     f"summary_list_{datetime.now().strftime('%Y%m%d%H')}.md")
         summary_dir = os.path.join(self.config['output_dir'], 'summaries')
         
         # 设置API Key（从环境变量或.env读取）

@@ -37,7 +37,7 @@ class PDFProcessingPipeline:
         log_dir = "logs"
         os.makedirs(log_dir, exist_ok=True)
         
-        log_file = os.path.join(log_dir, f"processing_{datetime.now().strftime('%Y%m%d')}.log")
+        log_file = os.path.join(log_dir, f"processing_{datetime.now().strftime('%Y%m%d%H')}.log")
         
         logging.basicConfig(
             level=logging.INFO,

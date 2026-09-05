@@ -251,7 +251,7 @@ class MarkdownFileSummarizer:
                 })
         
         # 生成报告（标题+段落格式，适配不支持表格的阅读器）
-        date_str = datetime.now().strftime('%Y%m%d')
+        date_str = datetime.now().strftime('%Y%m%d%H')
         report_content = f"# 总结清单 {date_str}\n\n"
         report_content += f"**文档总数**：{len(all_summaries)} 份\n\n---\n\n"
         for summary in all_summaries:
