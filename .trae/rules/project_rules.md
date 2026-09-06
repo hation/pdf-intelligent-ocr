@@ -97,9 +97,9 @@ tesseract_ocr_on_pdf("/path/to/your/difficult.pdf")
 
    * 用途：完整处理新PDF
 
-   * 流程：`files/` 目录 → PDF解析 + Office转换（docx/doc/xlsx/xls/pptx） → 生成Markdown → 生成AI总结 → 文件移动到 `files_processed/`
+   * 流程：`files/` 目录（平铺，按文件名开头的星球名自动分类，不移动文件） → 各批次独立解析 + Office转换（docx/doc/xlsx/xls/pptx） → 生成Markdown → 生成AI总结 → 文件移动到主题化归档目录（`invest_files_processed/` / `media_files_processed/` / `other_files_processed/`）
 
-   * 输出位置：`output/daily/YYYYMMDDHH/`（包含 `processed/` + `summaries/` + `reports/`）
+   * 输出位置：`output/daily/YYYYMMDDHH/`（投资）、`output/daily_media/YYYYMMDDHH/`（自媒体）、`output/daily_other/YYYYMMDDHH/`（其他）（均包含 `processed/` + `summaries/` + `reports/`）
 
 2. **`batch_summarize.py`**
 
@@ -201,10 +201,11 @@ python3 extract_topic_summary.py
 
 1. **Office文档转换 + 移除非文档文件**（内置自动执行）：
 
-   * `.docx/.doc/.xlsx/.xls/.pptx` 会自动转换为 Markdown 纳入总结流程（docx/xlsx/xls 用 markitdown，doc 用 macOS 自带 textutil，pptx 用 markitdown 文本 + 图片 Tesseract OCR 合并；xls 需要 xlrd），转换后源文件归档到 `files_processed/`
+   * `.docx/.doc/.xlsx/.xls/.pptx` 会自动转换为 Markdown 纳入总结流程（docx/xlsx/xls 用 markitdown，doc 用 macOS 自带 textutil，pptx 用 markitdown 文本 + 图片 Tesseract OCR 合并；xls 需要 xlrd），转换后源文件归档到本类别主题化归档目录（`invest_files_processed/` / `media_files_processed/`）
 
-   * 其余非文档文件（图片等）移动到 `~/Downloads`
-2. **批量总结**：`python3 daily_500_pdf_processor.py files output/daily/ --workers 6`
+   * 其余不属于任何星球类别的非文档文件（图片等）移动到 `~/Downloads`
+2. **按星球名自动分类批次**：主流程按文件名开头识别 —— 投资（全球资讯精读/速查报告库）→ `output/daily`；自媒体（知否 私域运营研习社/运营研究社）→ `output/daily_media`；其余 → `output/daily_other`。各批次专题与微信读书汇总隔离（`topic_summaries`/`topic_summaries_media`、`汇总`/`汇总_media`）
+3. **批量总结**：`python3 daily_500_pdf_processor.py files output/daily/ --workers 6`
 
    * 自动用当天日期
 
@@ -213,15 +214,15 @@ python3 extract_topic_summary.py
    * 只处理新文件（不重复）
 
    * Office文档（docx/doc/xlsx/xls/pptx）自动转换纳入总结流程
-3. **提取AI专题**（内置自动执行）：主流程自动提取指定专题（默认 AI）
+4. **提取专题**（内置自动执行）：主流程自动提取各批次默认专题（投资 AI/运动/健康；自媒体 抖音/小红书/快手/B站/视频号/公众号/运营；其他 AI）
 
-   * 输出到 `output/topic_summaries/AI/YYYYMMDDHH/`
-4. **生成每日重点汇总**（内置自动执行）：主流程自动用大模型二次提炼生成重点汇总
+   * 投资输出到 `output/topic_summaries/{专题}/YYYYMMDDHH/`，自媒体输出到 `output/topic_summaries_media/{专题}/YYYYMMDDHH/`
+5. **生成每日重点汇总**（内置自动执行）：主流程自动用大模型二次提炼生成重点汇总
 
-   * 输出到 `output/daily/YYYYMMDDHH/reports/每日重点汇总_YYYYMMDDHH.md`
+   * 输出到 `output/daily*/YYYYMMDDHH/reports/每日重点汇总_YYYYMMDDHH.md`
 
    * 包含：核心要闻、行业分类速览、深度报告精选、数据亮点
-5. **收集微信读书汇总**（内置自动执行）：主流程自动把当日重点汇总、一句话总结、各专题核心论点汇总收集到 `output/汇总/YYYYMMDDHH/`
+6. **收集微信读书汇总**（内置自动执行）：主流程自动把当日重点汇总、一句话总结、各专题核心论点汇总收集到 `output/汇总*/YYYYMMDDHH/`（投资 `汇总/`，自媒体 `汇总_media/`）
 
    * 用于整体导入微信读书，按日期隔离
 
@@ -267,7 +268,7 @@ python3 extract_topic_summary.py
 
 ## 🔍 提取其他专题的触发关键字（重要）
 
-如果用户提到以下专题名称，直接执行对应的专题提取：
+**投资批次**：
 
 | 用户提示词        | 对应操作                                                      |
 | ------------ | --------------------------------------------------------- |
@@ -283,7 +284,16 @@ python3 extract_topic_summary.py
 | `提取运动专题`     | `python3 extract_topic_summary.py --topic 运动`             |
 | `提取AI和新能源专题` | `python3 extract_topic_summary.py --topic AI --topic 新能源` |
 
-**支持的专题列表（12个）**：
+**自媒体批次（用户提到抖音/小红书/快手等即对 media 批次执行主流程，自动提取7个自媒体专题）**：
+
+| 用户提示词        | 对应操作                                                      |
+| ------------ | --------------------------------------------------------- |
+| `总结自媒体` / `总结抖音` / `来了自媒体文档` | `python3 daily_500_pdf_processor.py files output/daily/ --workers 6`（media 批次自动提取 抖音/小红书/快手/B站/视频号/公众号/运营） |
+| `提取抖音专题`     | 对 `output/daily_media/YYYYMMDDHH/summaries/` 执行 `extract_topic_summary.py` 相关专题 |
+
+**支持的专题列表（19个）**：
+
+**投资批次（12个）**：
 
 1. **AI** - 人工智能、大模型、算力、芯片、具身智能等
 2. **新能源** - 光伏、储能、锂电池、新能源车、氢能等
@@ -298,11 +308,21 @@ python3 extract_topic_summary.py
 11. **运动** - 体育、运动服饰、健身、户外、电竞等
 12. **健康** - 大健康、健康管理、保健养生、康养、心理健康等
 
+**自媒体批次（7个）**：
+
+1. **抖音** - 抖音、短视频、直播、直播电商、信息流投放等
+2. **小红书** - 小红书、种草笔记、买手电商、博主营销等
+3. **快手** - 快手、磁力引擎、快手电商、直播带货等
+4. **B站** - B站、哔哩哔哩、UP主、弹幕、中视频等
+5. **视频号** - 微信视频号、视频号直播、微信生态营销等
+6. **公众号** - 微信公众号、订阅号/服务号、10w+内容等
+7. **运营** - 增长、裂变、转化、流量运营方法等
+
 **备注**：
 
 * 用户可以同时提多个专题（如"提取AI和新能源"）
 
-* 默认用当天日期的summaries目录
+* 投资批次默认用当天日期的summaries目录，自媒体批次用 `output/daily_media/YYYYMMDDHH/summaries/`
 
-* 输出目录：`output/topic_summaries/{专题名}/YYYYMMDDHH/`
+* 输出目录：投资 `output/topic_summaries/{专题名}/YYYYMMDDHH/`，自媒体 `output/topic_summaries_media/{专题名}/YYYYMMDDHH/`
 
