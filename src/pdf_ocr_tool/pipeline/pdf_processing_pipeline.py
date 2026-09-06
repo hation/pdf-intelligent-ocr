@@ -6,6 +6,7 @@ PDF 自动化处理管道 - 每天处理500个PDF文件的高效解决方案
 
 import os
 import sys
+import re
 import argparse
 import time
 import logging
@@ -49,14 +50,30 @@ class PDFProcessingPipeline:
         )
         self.logger = logging.getLogger(__name__)
     
+    def _match_class(self, filename):
+        """按文件名前缀判断文件是否属于本批次类别（文件平铺时按类别过滤）"""
+        if 'class_patterns' not in self.config:
+            return True  # 兼容直接调用（不分类）
+        from pdf_ocr_tool.topics.config import FILENAME_CLASSIFIER
+        norm = re.sub(r'\s+', ' ', filename)
+        patterns = self.config.get('class_patterns')
+        if patterns is None:  # other：不属于任何已知星球前缀
+            known = [p for c in FILENAME_CLASSIFIER for p in c['patterns']]
+            return not any(norm.startswith(p) for p in known)
+        return any(norm.startswith(p) for p in patterns)
+
     def find_pdf_files(self, input_dir):
-        """查找所有PDF文件"""
+        """查找所有PDF文件（只扫输入目录顶层，避免扫到归档子目录；按类别过滤）"""
         pdf_files = []
-        for root, dirs, files in os.walk(input_dir):
-            for file in files:
-                if file.lower().endswith('.pdf'):
-                    file_path = os.path.join(root, file)
-                    pdf_files.append(file_path)
+        for file in sorted(os.listdir(input_dir)):
+            if not file.lower().endswith('.pdf'):
+                continue
+            file_path = os.path.join(input_dir, file)
+            if not os.path.isfile(file_path):
+                continue
+            if not self._match_class(file):
+                continue
+            pdf_files.append(file_path)
         
         self.logger.info(f"找到 {len(pdf_files)} 个PDF文件需要处理")
         self.stats['total_files'] = len(pdf_files)

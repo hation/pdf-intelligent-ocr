@@ -17,6 +17,7 @@ import tempfile
 
 from pdf_ocr_tool.pipeline import pdf_processing_pipeline
 from pdf_ocr_tool.summarizers import financial_summarizer as ai_content_summarizer
+from pdf_ocr_tool.topics.config import FILENAME_CLASSIFIER, CLASS_LAYOUT
 
 
 def copy_reports_to_collections(date_dir):
@@ -131,14 +132,32 @@ class DailyPDFProcessor:
         # 固定缓存位置（在输出根目录）
         self.cache_file = self._get_cache_file()
     
+    def _is_class_match(self, filename):
+        """判断文件名是否属于本批次类别（按文件名前缀识别，文件平铺不移动）"""
+        if 'class_name' not in self.config:
+            return True  # 兼容直接调用（不分类）
+        norm = re.sub(r'\s+', ' ', filename)
+        cls = self.config['class_name']
+        if cls == 'other':
+            known = [p for c in FILENAME_CLASSIFIER for p in c['patterns']]
+            return not any(norm.startswith(p) for p in known)
+        patterns = self.config.get('class_patterns') or []
+        return any(norm.startswith(p) for p in patterns)
+
+    def _archive_dir(self):
+        """本类别主题化归档目录（项目根，与 files_processed/ 同级，如 ./media_files_processed）"""
+        cls = self.config.get('class_name', 'invest')
+        archive_name = CLASS_LAYOUT.get(cls, {}).get('archive_dir', f'{cls}_files_processed')
+        return archive_name
+
     def _get_cache_file(self):
         """获取固定的缓存文件路径"""
-        # 找到 output 根目录
-        output_dir = self.config['output_dir']
-        # 向上查找直到找到 daily 目录的父目录（output）
+        # 找到 output 根目录（daily/daily_media/daily_other 的父目录）
+        # 用绝对路径防止相对路径向上遍历到空串（如 output/daily_media 找不到 'daily' 时会越界）
+        output_dir = os.path.abspath(self.config['output_dir'])
         while True:
             parent = os.path.dirname(output_dir)
-            if os.path.basename(output_dir) == 'daily' or parent == output_dir:
+            if os.path.basename(output_dir) in ('daily', 'output') or parent == output_dir:
                 break
             output_dir = parent
         
@@ -180,7 +199,10 @@ class DailyPDFProcessor:
             self.logger.error(f"输入目录不存在: {self.config['input_dir']}")
             return False
         
-        pdf_files = [f for f in os.listdir(self.config['input_dir']) if f.lower().endswith('.pdf')]
+        pdf_files = [f for f in os.listdir(self.config['input_dir'])
+                     if f.lower().endswith('.pdf')
+                     and os.path.isfile(os.path.join(self.config['input_dir'], f))
+                     and self._is_class_match(f)]
         
         if not pdf_files:
             self.logger.warning("输入目录中没有找到PDF文件")
@@ -210,14 +232,9 @@ class DailyPDFProcessor:
         return success, pipeline
     
     def move_processed_files(self):
-        """将已处理的PDF文件移动到归档目录"""
+        """将已处理的PDF文件移动到主题化归档目录（如 files/media_files_processed）"""
         input_dir = self.config['input_dir']
-        # 归档目录：输入目录同级，命名为 {输入目录名}_processed
-        # files/ -> files_processed；files/media/ -> files/media_processed（分类批次各自归档）
-        processed_dir = os.path.join(
-            os.path.dirname(os.path.normpath(input_dir)),
-            os.path.basename(os.path.normpath(input_dir)) + "_processed"
-        )
+        processed_dir = self._archive_dir()
         
         os.makedirs(processed_dir, exist_ok=True)
         
@@ -369,13 +386,13 @@ class DailyPDFProcessor:
         - .docx/.xlsx/.xls: 使用 markitdown 转换（.xls 依赖 xlrd）
         - .doc:            使用 macOS 自带 textutil 转换（零依赖）
         - .pptx:           markitdown 提取文本 + 图片 Tesseract OCR 合并
-        转换成功后源文件移动到 files_processed/
+        转换成功后源文件移动到本类别主题化归档目录（如 ./media_files_processed）
         """
         input_dir = self.config['input_dir']
         processed_dir = os.path.join(self.config['output_dir'], 'processed')
         os.makedirs(processed_dir, exist_ok=True)
 
-        processed_dir_out = os.path.join(os.path.dirname(input_dir), "files_processed")
+        processed_dir_out = self._archive_dir()
         os.makedirs(processed_dir_out, exist_ok=True)
 
         converted_count = 0
@@ -385,6 +402,9 @@ class DailyPDFProcessor:
                 continue
             src_path = os.path.join(input_dir, filename)
             if not os.path.isfile(src_path):
+                continue
+            # 只转换本批次的 Office 文档（平铺时可能混有其他类别的文件）
+            if not self._is_class_match(filename):
                 continue
 
             try:
@@ -492,15 +512,21 @@ class DailyPDFProcessor:
         return text
 
     def move_non_pdf_files(self):
-        """将输入目录中的非PDF文件移动到 Downloads 目录"""
+        """将输入目录中不属于任何星球类别的非PDF文件移动到 Downloads 目录"""
         move_to_dir = os.path.expanduser('~/Downloads')
         moved_count = 0
-        
+
+        # 平铺时混有各批次文档：只移走不属于任何已知星球前缀的非文档杂物
+        known = [p for c in FILENAME_CLASSIFIER for p in c['patterns']]
+
         for filename in os.listdir(self.config['input_dir']):
             src_path = os.path.join(self.config['input_dir'], filename)
             if not os.path.isfile(src_path):
                 continue
             if filename.lower().endswith('.pdf'):
+                continue
+            norm = re.sub(r'\s+', ' ', filename)
+            if any(norm.startswith(p) for p in known):
                 continue
             
             dst_path = os.path.join(move_to_dir, filename)

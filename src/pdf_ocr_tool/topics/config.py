@@ -128,6 +128,66 @@ TOPIC_CONFIGS = {
             '心理健康', '睡眠健康', '营养健康', '健康食品', '功能食品',
             '慢病管理', '健康服务', '健康消费', '健康保险', '智慧健康'
         ]
+    },
+    '抖音': {
+        'name': '抖音',
+        'description': '抖音、短视频、直播电商、信息流投放等',
+        'keywords': [
+            '抖音', '短视频', '直播', '直播带货', '直播间', '巨量引擎', '千川',
+            '抖加', 'Dou+', '抖音电商', '信息流', '投流', '本地生活', '团购',
+            '达人直播', '星图', '内容场', '货架场', '中视频', '短剧'
+        ]
+    },
+    '运营': {
+        'name': '运营',
+        'description': '增长、裂变、转化、流量运营方法等',
+        'keywords': [
+            '增长', '用户增长', '裂变', '流量', '转化', '转化率', '投放',
+            '获客', '留存', '促活', '拉新', '复购', '种草', '矩阵', '账号',
+            'KOL', 'KOC', '达人', 'MCN', '商业化', 'IP'
+        ]
+    },
+    '小红书': {
+        'name': '小红书',
+        'description': '小红书、种草笔记、买手电商、博主营销等',
+        'keywords': [
+            '小红书', '红书', '薯条', '蒲公英', '聚光', '小红书电商',
+            '买手电商', '种草笔记', '爆文', '笔记排名', '素人', '博主',
+            '图文笔记', '探店', '社区电商', '买手', '笔记'
+        ]
+    },
+    '快手': {
+        'name': '快手',
+        'description': '快手、磁力引擎、快手电商、直播带货等',
+        'keywords': [
+            '快手', '磁力', '磁力金牛', '磁力引擎', '快分销', '快手电商',
+            '辛选', '老铁', '快手小店', '电商直播', '直播带货'
+        ]
+    },
+    'B站': {
+        'name': 'B站',
+        'description': 'B站、哔哩哔哩、UP主、弹幕、中视频等',
+        'keywords': [
+            'B站', 'Bilibili', '哔哩哔哩', 'UP主', '弹幕', '二创', '破圈',
+            '会员购', '中视频', 'B站直播', 'B站电商'
+        ]
+    },
+    '视频号': {
+        'name': '视频号',
+        'description': '微信视频号、视频号直播、微信生态营销等',
+        'keywords': [
+            '视频号', '微信视频号', '视频号直播', '微信生态', '朋友圈',
+            '小程序', '企业微信', '微信社群', '微信营销', '视频号小店',
+            '微信短视频', '微信好友'
+        ]
+    },
+    '公众号': {
+        'name': '公众号',
+        'description': '微信公众号、订阅号/服务号、10w+内容等',
+        'keywords': [
+            '公众号', '微信公众号', '订阅号', '服务号', '公众号运营',
+            '公众号矩阵', '10w+', '十万加', '爆文', '内容营销', '图文'
+        ]
     }
 }
 
@@ -144,11 +204,13 @@ FILENAME_CLASSIFIER = [
     {'class': 'media', 'patterns': ['知否 私域运营研习社', '运营研究社']},
 ]
 
-# 类别 -> 输入子目录名（'' 表示留在输入目录顶层）+ 输出根目录
-# input_sub 决定归档目录（{输入目录}/{input_sub}_processed）；output_root 决定
-# 专题根（topic_summaries{suffix}）与微信读书收集根（汇总{suffix}）。
+# 类别 -> 归档目录名（主题化，项目根与 invest_files_processed 同级，如 ./media_files_processed）+ 输出根目录 + 默认专题
+# 文件始终平铺在 files/ 顶层，不做物理分类移动；处理时按文件名前缀识别类别。
+# archive_dir 决定归档目录（{输入目录}/{archive_dir}）；output_root 决定
+# 专题根（topic_summaries{suffix}）与微信读书收集根（汇总{suffix}）；
+# topics 为该类别默认提取的专题，命令行 --topic 仅覆盖 invest 类（向后兼容）。
 CLASS_LAYOUT = {
-    'invest': {'input_sub': '', 'output_root': 'output/daily'},
-    'media': {'input_sub': 'media', 'output_root': 'output/daily_media'},
-    'other': {'input_sub': 'other', 'output_root': 'output/daily_other'},
+    'invest': {'archive_dir': 'invest_files_processed', 'output_root': 'output/daily', 'topics': ['AI', '运动', '健康']},
+    'media': {'archive_dir': 'media_files_processed', 'output_root': 'output/daily_media', 'topics': ['抖音', '小红书', '快手', 'B站', '视频号', '公众号', '运营']},
+    'other': {'archive_dir': 'other_files_processed', 'output_root': 'output/daily_other', 'topics': ['AI']},
 }

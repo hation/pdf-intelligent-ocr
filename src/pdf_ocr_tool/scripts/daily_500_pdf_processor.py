@@ -6,7 +6,6 @@
 
 import os
 import re
-import shutil
 import argparse
 from datetime import datetime
 
@@ -15,11 +14,11 @@ from pdf_ocr_tool.topics.config import FILENAME_CLASSIFIER, CLASS_LAYOUT
 
 
 def classify_and_dispatch(input_dir):
-    """按文件名开头的星球名把文档分类，移到对应类别子目录。
+    """按文件名开头的星球名对文档分类（只分类，不移动文件）。
 
-    只处理输入目录顶层的文档文件（PDF + Office 可转换文档）；
-    invest 类留在输入目录顶层（不移动）；media/other 类移到
-    {input_dir}/{input_sub}/ 子目录。返回 {class_name: [文件名]}。
+    文件始终平铺在输入目录顶层（如 files/），各类别不建子目录；
+    处理时按文件名前缀在内存中区分 invest/media/other，各自输出到
+    独立批次目录（output/daily、output/daily_media、output/daily_other）。
 
     Args:
         input_dir: 用户放置文档的目录（如 files/）
@@ -44,14 +43,6 @@ def classify_and_dispatch(input_dir):
                 matched = c['class']
                 break
         cls = matched if matched else 'other'
-        sub = CLASS_LAYOUT[cls]['input_sub']
-        if sub:
-            sub_dir = os.path.join(input_dir, sub)
-            os.makedirs(sub_dir, exist_ok=True)
-            src = os.path.join(input_dir, fname)
-            dst = os.path.join(sub_dir, fname)
-            if os.path.abspath(src) != os.path.abspath(dst):
-                shutil.move(src, dst)
         classes[cls].append(fname)
 
     return classes
@@ -79,9 +70,6 @@ def main():
     
     args = parser.parse_args()
     
-    # 处理专题列表
-    topics = args.topic if args.topic else ['AI']
-    
     # 按文件名开头的星球名自动分流：投资/自媒体/其他各自独立批次，
     # 输出与专题、微信读书收集均隔离，避免混在一起
     classes = classify_and_dispatch(args.input_dir)
@@ -92,7 +80,8 @@ def main():
             continue
         
         layout = CLASS_LAYOUT[cls]
-        input_dir = os.path.join(args.input_dir, layout['input_sub']) if layout['input_sub'] else args.input_dir
+        # 文件平铺在输入目录顶层，不做物理分类移动；按类别过滤处理
+        input_dir = args.input_dir
         
         # 自动追加当天日期作为输出子目录（精确到小时，支持一天多次总结）
         today_str = datetime.now().strftime('%Y%m%d%H')
@@ -100,9 +89,23 @@ def main():
         if not re.search(r'\d{10}$', output_dir):
             output_dir = os.path.join(output_dir, today_str)
         
+        # 各类别独立专题：media/other 用配置默认；--topic 仅覆盖 invest（向后兼容现有命令）
+        if args.topic and cls == 'invest':
+            topics = args.topic
+        else:
+            topics = layout.get('topics', args.topic or ['AI'])
+        
+        # 该类别的文件名前缀（other=None，表示匹配所有不属于任何已知星球前缀的文件）
+        class_patterns = None
+        for c in FILENAME_CLASSIFIER:
+            if c['class'] == cls:
+                class_patterns = c['patterns']
+                break
+        
         print(f"\n===== 处理【{cls}】批次: {len(classes[cls])} 个文档 =====")
         print(f"  输入目录: {input_dir}")
         print(f"  输出目录: {output_dir}")
+        print(f"  专题: {topics}")
         
         config = {
             'input_dir': input_dir,
@@ -113,6 +116,8 @@ def main():
             'force': args.force,
             'no_ai': args.no_ai,
             'topics': topics,
+            'class_name': cls,
+            'class_patterns': class_patterns,
         }
         
         processor = DailyPDFProcessor(config)
