@@ -6,10 +6,55 @@
 
 import os
 import re
+import shutil
 import argparse
 from datetime import datetime
 
 from pdf_ocr_tool.scripts.daily_processor import DailyPDFProcessor
+from pdf_ocr_tool.topics.config import FILENAME_CLASSIFIER, CLASS_LAYOUT
+
+
+def classify_and_dispatch(input_dir):
+    """按文件名开头的星球名把文档分类，移到对应类别子目录。
+
+    只处理输入目录顶层的文档文件（PDF + Office 可转换文档）；
+    invest 类留在输入目录顶层（不移动）；media/other 类移到
+    {input_dir}/{input_sub}/ 子目录。返回 {class_name: [文件名]}。
+
+    Args:
+        input_dir: 用户放置文档的目录（如 files/）
+
+    Returns:
+        dict: {类别名: 该类别文件名列表}
+    """
+    doc_exts = ('.pdf', '.docx', '.doc', '.xlsx', '.xls', '.pptx')
+    files = [f for f in os.listdir(input_dir)
+             if f.lower().endswith(doc_exts)
+             and os.path.isfile(os.path.join(input_dir, f))]
+
+    classes = {c['class']: [] for c in FILENAME_CLASSIFIER}
+    classes['other'] = []
+
+    for fname in files:
+        # 归一化连续空格为单个空格再匹配，避免星球名/标题间空格数量差异导致漏分
+        norm_name = re.sub(r'\s+', ' ', fname)
+        matched = None
+        for c in FILENAME_CLASSIFIER:
+            if any(norm_name.startswith(p) for p in c['patterns']):
+                matched = c['class']
+                break
+        cls = matched if matched else 'other'
+        sub = CLASS_LAYOUT[cls]['input_sub']
+        if sub:
+            sub_dir = os.path.join(input_dir, sub)
+            os.makedirs(sub_dir, exist_ok=True)
+            src = os.path.join(input_dir, fname)
+            dst = os.path.join(sub_dir, fname)
+            if os.path.abspath(src) != os.path.abspath(dst):
+                shutil.move(src, dst)
+        classes[cls].append(fname)
+
+    return classes
 
 
 def main():
@@ -34,39 +79,47 @@ def main():
     
     args = parser.parse_args()
     
-    # 自动追加当天日期作为输出子目录（精确到小时，支持一天多次总结）
-    # 用户传 output/daily/ -> 实际输出 output/daily/YYYYMMDDHH/
-    today_str = datetime.now().strftime('%Y%m%d%H')
-    output_dir = args.output_dir.rstrip('/')
-    # 如果末尾不是日期格式，自动追加当天日期
-    if not re.search(r'\d{10}$', output_dir):
-        output_dir = os.path.join(output_dir, today_str)
-    
     # 处理专题列表
     topics = args.topic if args.topic else ['AI']
     
-    # 配置
-    config = {
-        'input_dir': args.input_dir,
-        'output_dir': output_dir,
-        'workers': args.workers,
-        'strategy': args.strategy,
-        'min_score': args.min_score,
-        'force': args.force,
-        'no_ai': args.no_ai,
-        'topics': topics
-    }
+    # 按文件名开头的星球名自动分流：投资/自媒体/其他各自独立批次，
+    # 输出与专题、微信读书收集均隔离，避免混在一起
+    classes = classify_and_dispatch(args.input_dir)
     
-    # 创建处理器实例
-    processor = DailyPDFProcessor(config)
+    any_success = False
+    for cls in ['invest', 'media', 'other']:
+        if not classes.get(cls):
+            continue
+        
+        layout = CLASS_LAYOUT[cls]
+        input_dir = os.path.join(args.input_dir, layout['input_sub']) if layout['input_sub'] else args.input_dir
+        
+        # 自动追加当天日期作为输出子目录（精确到小时，支持一天多次总结）
+        today_str = datetime.now().strftime('%Y%m%d%H')
+        output_dir = layout['output_root'].rstrip('/')
+        if not re.search(r'\d{10}$', output_dir):
+            output_dir = os.path.join(output_dir, today_str)
+        
+        print(f"\n===== 处理【{cls}】批次: {len(classes[cls])} 个文档 =====")
+        print(f"  输入目录: {input_dir}")
+        print(f"  输出目录: {output_dir}")
+        
+        config = {
+            'input_dir': input_dir,
+            'output_dir': output_dir,
+            'workers': args.workers,
+            'strategy': args.strategy,
+            'min_score': args.min_score,
+            'force': args.force,
+            'no_ai': args.no_ai,
+            'topics': topics,
+        }
+        
+        processor = DailyPDFProcessor(config)
+        ok = processor.run_all()
+        any_success = any_success or ok
     
-    # 运行处理
-    success = processor.run_all()
-    
-    if success:
-        return 0
-    else:
-        return 1
+    return 0 if any_success else 1
 
 
 if __name__ == "__main__":

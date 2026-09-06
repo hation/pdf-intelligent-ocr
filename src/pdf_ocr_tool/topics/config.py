@@ -130,3 +130,25 @@ TOPIC_CONFIGS = {
         ]
     }
 }
+
+# ============================================================
+# 知识星球文档分类规则：按文件名开头的星球名自动分流到不同批次
+# 文档名格式：星球名-标题（如 "全球资讯精读-XXX.pdf"）
+# 目的：避免自媒体/运营类文档与投资宏观文档混在同一批次总结，
+#       各类别独立解析/总结/专题/重点汇总/微信读书收集。
+# 匹配规则：文件名以 patterns 中任一星球名开头即归入该类；
+#           未匹配任何星球的文档归入 other 类。
+# ============================================================
+FILENAME_CLASSIFIER = [
+    {'class': 'invest', 'patterns': ['全球资讯精读', '速查报告库']},
+    {'class': 'media', 'patterns': ['知否 私域运营研习社', '运营研究社']},
+]
+
+# 类别 -> 输入子目录名（'' 表示留在输入目录顶层）+ 输出根目录
+# input_sub 决定归档目录（{输入目录}/{input_sub}_processed）；output_root 决定
+# 专题根（topic_summaries{suffix}）与微信读书收集根（汇总{suffix}）。
+CLASS_LAYOUT = {
+    'invest': {'input_sub': '', 'output_root': 'output/daily'},
+    'media': {'input_sub': 'media', 'output_root': 'output/daily_media'},
+    'other': {'input_sub': 'other', 'output_root': 'output/daily_other'},
+}
