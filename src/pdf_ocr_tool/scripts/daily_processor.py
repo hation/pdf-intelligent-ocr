@@ -77,8 +77,10 @@ def collect_daily_summaries(date_dir):
     daily_root = os.path.dirname(os.path.abspath(date_dir))
     output_root = os.path.dirname(os.path.abspath(daily_root))
     date_str = os.path.basename(os.path.normpath(date_dir))
-
-    target_dir = os.path.join(output_root, '汇总', date_str)
+    # 独立批次（如 output/daily_media/）收集到独立根目录（output/汇总_media/），
+    # 避免自媒体/运营等批次与投资宏观批次混在一起
+    batch_suffix = os.path.basename(daily_root)[len('daily'):]
+    target_dir = os.path.join(output_root, '汇总' + batch_suffix, date_str)
     os.makedirs(target_dir, exist_ok=True)
 
     candidates = []
@@ -91,7 +93,7 @@ def collect_daily_summaries(date_dir):
             if fname.startswith('每日重点汇总_') or fname.startswith('summary_list_'):
                 candidates.append(os.path.join(reports_dir, fname))
 
-    topics_root = os.path.join(output_root, 'topic_summaries')
+    topics_root = os.path.join(output_root, 'topic_summaries' + batch_suffix)
     if os.path.isdir(topics_root):
         for topic_name in sorted(os.listdir(topics_root)):
             core_dir = os.path.join(topics_root, topic_name, '核心论点')
@@ -208,10 +210,14 @@ class DailyPDFProcessor:
         return success, pipeline
     
     def move_processed_files(self):
-        """将已处理的PDF文件移动到B文件夹"""
+        """将已处理的PDF文件移动到归档目录"""
         input_dir = self.config['input_dir']
-        # B文件夹路径：input_dir的同级目录，命名为 files_processed
-        processed_dir = os.path.join(os.path.dirname(input_dir), "files_processed")
+        # 归档目录：输入目录同级，命名为 {输入目录名}_processed
+        # files/ -> files_processed；files/media/ -> files/media_processed（分类批次各自归档）
+        processed_dir = os.path.join(
+            os.path.dirname(os.path.normpath(input_dir)),
+            os.path.basename(os.path.normpath(input_dir)) + "_processed"
+        )
         
         os.makedirs(processed_dir, exist_ok=True)
         
@@ -557,11 +563,21 @@ class DailyPDFProcessor:
                 summaries_dir = os.path.join(self.config['output_dir'], 'summaries')
                 topics = self.config.get('topics', ['AI'])
                 topic_date_str = os.path.basename(os.path.normpath(self.config['output_dir']))
-                
+                # 独立批次（如 output/daily_media/）用独立专题输出根，避免与投资宏观批次互相覆盖
+                batch_suffix = os.path.basename(
+                    os.path.dirname(os.path.abspath(self.config['output_dir']))
+                )[len('daily'):]
+                topic_output_root = os.path.join('output', 'topic_summaries' + batch_suffix)
+
                 for topic in topics:
                     if topic in TOPIC_CONFIGS:
                         self.logger.info(f"正在提取【{topic}】专题报告...")
-                        extract_topic_by_keywords(summaries_dir, TOPIC_CONFIGS[topic], date_str=topic_date_str)
+                        extract_topic_by_keywords(
+                            summaries_dir,
+                            TOPIC_CONFIGS[topic],
+                            output_dir=os.path.join(topic_output_root, topic),
+                            date_str=topic_date_str,
+                        )
                     else:
                         self.logger.warning(f"不支持的专题: {topic}，跳过")
             
