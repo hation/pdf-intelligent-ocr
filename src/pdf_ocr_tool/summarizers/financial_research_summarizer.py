@@ -29,6 +29,16 @@ except ImportError:
 ARK_MODEL = os.environ.get("ARK_MODEL", "doubao-seed-2.0-pro")
 ARK_BASE_URL = os.environ.get("ARK_BASE_URL", "https://ark.cn-beijing.volces.com/api/coding/v3")
 
+# 提示词集中配置（修改 prompts_config.py 即可调整总结效果）
+from pdf_ocr_tool.prompts_config import (
+    render_prompt,
+    ONE_LINE_SUMMARY_SYSTEM,
+    ONE_LINE_SUMMARY_PROMPT,
+    HIGHLIGHTS_SYSTEM,
+    HIGHLIGHTS_PROMPT,
+    DAILY_HIGHLIGHT_PROMPT,
+)
+
 
 class FinancialResearchSummarizer:
     """财经研报结构化总结器"""
@@ -366,31 +376,53 @@ class FinancialResearchSummarizer:
             return f"该电子书围绕{cleaned_title}展开，主要覆盖{'、'.join(topics[:4])}等内容。"
         return f"该电子书围绕{cleaned_title}展开，主要内容可从目录结构把握。"
     
+    def _extract_core_text(self, text, max_len=5000):
+        """提取正文核心片段：跳过封面/目录/页码等噪声，供LLM总结使用"""
+        lines = text.split('\n')
+        kept = []
+        for ln in lines:
+            s = ln.strip()
+            if not s:
+                continue
+            # 跳过纯数字/符号短行（页码、日期碎片、目录编号如 "1 /"、"2026-08-24"）
+            if re.fullmatch(r'[\d\s\-—./%()①-⑩a-zA-Z]{0,12}', s) and len(s) <= 12:
+                continue
+            kept.append(s)
+        core = '\n'.join(kept).strip()
+        if len(core) <= max_len:
+            return core
+        # 超长时优先跳过目录段，从正文起点开始取
+        for marker in ('目录', 'Contents', 'Table of Contents'):
+            idx = core.find(marker)
+            if 0 <= idx < len(core) // 3:
+                core = core[idx + len(marker):].strip()
+                break
+        return core[:max_len]
+    
     def llm_generate_one_line_summary(self, title, text):
         """使用LLM生成真正的一句话总结"""
         if not self.use_llm:
             return None
         
         try:
-            # 取前5000字符，避免token超限
-            short_text = text[:5000] if len(text) > 5000 else text
+            # 取正文核心片段（跳过封面/目录噪声），避免token超限
+            short_text = self._extract_core_text(text)
             
             # 清理文件名
             clean_title = re.sub(r'_hybrid|_tesseract|_liteparse|\.md$', '', title)
             
-            prompt = f"""文档标题：{clean_title}
-
-文档内容：
-{short_text}
-
-请用200字左右总结核心，必须含1个关键数据/结论，不要背景，不要评价，直接输出。"""
+            prompt = render_prompt(
+                ONE_LINE_SUMMARY_PROMPT,
+                title=clean_title,
+                text=short_text,
+            )
             
             response = self.llm_client.chat.completions.create(
                 model=ARK_MODEL,
                 temperature=0.3,
                 max_tokens=300,
                 messages=[
-                    {"role": "system", "content": "你是一位专业的财经研报分析师，擅长用一句话概括研报核心。"},
+                    {"role": "system", "content": ONE_LINE_SUMMARY_SYSTEM},
                     {"role": "user", "content": prompt}
                 ]
             )
@@ -408,25 +440,24 @@ class FinancialResearchSummarizer:
             return None
         
         try:
-            # 取前5000字符，避免token超限
-            short_text = text[:5000] if len(text) > 5000 else text
+            # 取正文核心片段（跳过封面/目录噪声），避免token超限
+            short_text = self._extract_core_text(text)
             
             # 清理文件名
             clean_title = re.sub(r'_hybrid|_tesseract|_liteparse|\.md$', '', title)
             
-            prompt = f"""文档标题：{clean_title}
-
-文档内容：
-{short_text}
-
-请提取本文的5个核心论点，每点用一句话概括，不要背景铺垫，直接列出。"""
+            prompt = render_prompt(
+                HIGHLIGHTS_PROMPT,
+                title=clean_title,
+                text=short_text,
+            )
             
             response = self.llm_client.chat.completions.create(
                 model=ARK_MODEL,
                 temperature=0.3,
                 max_tokens=500,
                 messages=[
-                    {"role": "system", "content": "你是一位专业的财经研报分析师，擅长提取核心论点。"},
+                    {"role": "system", "content": HIGHLIGHTS_SYSTEM},
                     {"role": "user", "content": prompt}
                 ]
             )
@@ -596,48 +627,12 @@ class FinancialResearchSummarizer:
             print("⚠️  无法收集总结内容，跳过每日重点汇总")
             return False
         
-        prompt = f"""你是一位专业的投研编辑，需要将一批研报和资讯的总结整合成一份"每日重点汇总"文档。
-
-请阅读以下{len(summary_files)}份文档的总结内容，生成一份结构清晰、重点突出的汇总文档。
-
-文档内容：
-{all_content}
-
----
-
-请按照以下结构输出（Markdown格式）：
-
-# 每日重点汇总 {date_str}
-
-## 一、今日核心要闻（10-15条）
-从所有文档中提炼出最有价值、最值得关注的10~15条核心观点/事件/数据，每条用一句话概括，按重要性排序。每条标注所属行业标签（如【AI】【半导体】【机器人】【医药】【新能源】【消费】【宏观】等）。
-
-## 二、行业分类速览
-将所有文档按行业分类整理，每个行业下列出文档名称，以及1~2句核心内容摘要。分类包括但不限于：
-- AI与算力
-- 半导体与先进封装
-- 机器人与具身智能
-- 新能源与汽车
-- 医药与生物科技
-- 消费与白酒
-- 宏观与策略
-- 其他
-
-## 三、深度报告精选（5~10份）
-从所有文档中挑选出5~10份最有深度、最值得花时间细读的研报/行业报告，每份给出：
-- 文档名称
-- 推荐理由（为什么值得读）
-- 3~5条核心看点
-
-## 四、今日数据亮点
-提取文档中出现的关键数据（增速、规模、估值、订单等），用列表形式呈现。
-
-注意：
-1. 内容要客观、精炼，基于原文总结，不要凭空编造
-2. 不要用表格格式，全部用标题+段落+列表
-3. 语言风格偏向投资研究报告风格，专业但不晦涩
-4. 总字数控制在5000字以内
-"""
+        prompt = render_prompt(
+            DAILY_HIGHLIGHT_PROMPT,
+            doc_count=len(summary_files),
+            all_content=all_content,
+            date_str=date_str,
+        )
         
         try:
             response = self.llm_client.chat.completions.create(

@@ -90,10 +90,12 @@ output/daily/YYYYMMDD/
 ├── reports/
 │   ├── summary_list_YYYYMMDD.md        # 一句话总结清单
 │   ├── daily_summary_YYYYMMDD.md        # 每日报告
+│   ├── 识别困难文档清单_YYYYMMDD.md      # 乱码/不可读文档清单及原因
 │   └── optimization_report_YYYYMMDD.md  # 优化报告
 └── summaries/
     ├── filename1_summary.md
     ├── filename2_summary.md
+    ├── 识别困难归档/                    # 乱码/不可读文档占位标记（不进入总结清单）
     └── ...
 
 # 微信读书导入用（主流程自动收集到 output/汇总/YYYYMMDD/）
@@ -127,6 +129,10 @@ output/汇总/YYYYMMDD/
 包含：
 - 一句话总结
 - 核心看点
+
+### 5. 识别困难文档清单 (`识别困难文档清单_YYYYMMDD.md`)
+
+被过滤的乱码/不可读文档列表（OCR识别乱码、Excel未命名列、内容为空等），含每份文档识别失败的原因。此类文档不生成AI总结，需重新提供清晰源文件后再处理。
 
 ## 系统特点
 

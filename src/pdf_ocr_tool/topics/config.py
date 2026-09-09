@@ -200,7 +200,7 @@ TOPIC_CONFIGS = {
 #           未匹配任何星球的文档归入 other 类。
 # ============================================================
 FILENAME_CLASSIFIER = [
-    {'class': 'invest', 'patterns': ['全球资讯精读', '速查报告库']},
+    {'class': 'invest', 'patterns': ['全球资讯精读', '速查报告库', '通往AGI之路']},
     {'class': 'media', 'patterns': ['知否 私域运营研习社', '运营研究社']},
 ]
 

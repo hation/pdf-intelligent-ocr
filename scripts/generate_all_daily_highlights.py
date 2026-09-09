@@ -50,7 +50,8 @@ def main():
 
     summarizer = FinancialResearchSummarizer(use_llm=True)
 
-    dates = sorted(d for d in os.listdir(base_dir) if re.match(r'^\d{8}$', d))
+    # 匹配 8 位（20260903）或 10 位（2026090615，含小时）日期目录
+    dates = sorted(d for d in os.listdir(base_dir) if re.fullmatch(r'\d{8}|\d{10}', d))
     if args.start:
         dates = [d for d in dates if d >= args.start]
     if args.end:

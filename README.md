@@ -8,9 +8,10 @@
 - **智能混合解析**: 自动选择最优解析策略（可选择文本 / Tesseract OCR）
 - **Office 文档支持**: 自动转换 `.docx`/`.xlsx`/`.xls`（markitdown）、`.doc`（macOS textutil）和 `.pptx`（markitdown 文本 + 图片 Tesseract OCR 合并）为 Markdown，与 PDF 一样纳入总结流程
 - **质量评分**: 自动评估识别质量，确保输出可靠性
+- **识别困难过滤**: 乱码/不可读文档（扫描件 OCR 失败、Excel 未命名列、内容为空等）自动检测并过滤，不产生无效总结；同时生成"识别困难文档清单"报告，说明每份文档识别失败的原因，便于人工重新提供源文件
 - **LLM智能总结**: 使用大模型（火山引擎方舟，模型可配置）生成一句话总结和核心看点
 - **19大专题自动提取**: 投资类 12 个 + 自媒体类 7 个，各批次自动匹配对应专题集
-- **批次隔离**: 按文件名开头的星球名自动分类 —— 投资（全球资讯精读/速查报告库）→ `output/daily`；自媒体（知否 私域运营研习社/运营研究社）→ `output/daily_media`；其余 → `output/daily_other`。专题根（`topic_summaries`/`topic_summaries_media`）与微信读书收集（`汇总`/`汇总_media`）同样隔离
+- **批次隔离**: 按文件名开头的星球名自动分类 —— 投资（全球资讯精读/速查报告库/通往AGI之路）→ `output/daily`；自媒体（知否 私域运营研习社/运营研究社）→ `output/daily_media`；其余 → `output/daily_other`。专题根（`topic_summaries`/`topic_summaries_media`）与微信读书收集（`汇总`/`汇总_media`）同样隔离
 - **每日重点汇总**: 大模型二次提炼生成"每日重点汇总"（核心要闻 / 行业分类 / 深度报告精选 / 数据亮点）
 - **飞书自动推送**: 总结完成后自动将"今日核心要闻"推送到飞书群
 - **汇总文档自动归档**: 每日重点汇总复制到 `daily/重点汇总/`，一句话总结清单复制到 `daily/一句话总结/`，跨日期集中浏览
@@ -112,7 +113,7 @@ python3 daily_500_pdf_processor.py files output/daily/
 # 主流程自动执行：
 #   1. 移除非PDF文件到 ~/Downloads
 #   2. 解析PDF -> processed/
-#   3. LLM总结 -> summaries/
+#   3. LLM总结 -> summaries/（乱码/不可读文档自动过滤，归档到 summaries/识别困难归档/，并生成识别困难文档清单）
 #   4. 提取AI专题 -> output/topic_summaries/AI/YYYYMMDDHH/
 #   5. 生成每日重点汇总 -> reports/每日重点汇总_YYYYMMDDHH.md
 #   6. 推送今日核心要闻到飞书（已配置FEISHU_WEBHOOK时）
@@ -122,7 +123,8 @@ python3 daily_500_pdf_processor.py files output/daily/
 # 输出目录： output/daily/YYYYMMDDHH/
 #   ├── processed/    # PDF解析后的Markdown
 #   ├── summaries/    # 单文件总结（一句话总结 + 核心看点）
-#   └── reports/      # 每日重点汇总 + 总结清单
+#   │   └── 识别困难归档/   # 乱码/不可读文档的占位标记（不进入总结清单，避免重复处理）
+#   └── reports/      # 每日重点汇总 + 总结清单 + 识别困难文档清单
 # 另外复制到 output/daily/（跨日期集中浏览）：
 #   ├── 重点汇总/     # 每日重点汇总_YYYYMMDDHH.md
 #   └── 一句话总结/   # summary_list_YYYYMMDDHH.md
@@ -211,7 +213,8 @@ summary/
 │   │   └── 20260720/
 │   │       ├── processed/       # PDF解析Markdown
 │   │       ├── summaries/       # 单文件总结（一句话 + 核心看点）
-│   │       └── reports/         # 每日重点汇总 + summary_list + 优化报告
+│   │       │   └── 识别困难归档/   # 乱码/不可读文档占位标记（不进入总结清单）
+│   │       └── reports/         # 每日重点汇总 + summary_list + 识别困难文档清单 + 优化报告
 │   │
 │   ├── daily_media/             # 自媒体批次每日处理结果（结构与 daily/ 相同）
 │   │   └── 2026090616/          # processed/ + summaries/ + reports/
@@ -318,8 +321,10 @@ python3 extract_topic_summary.py --list-topics
 |-----------|------|------|
 | `processed/*.md` | PDF解析后的完整Markdown | 原始文本，供阅读或二次处理 |
 | `summaries/*_summary.md` | 每个文档的一句话总结 + 核心看点 | 快速了解每份研报核心内容 |
+| `summaries/识别困难归档/*.md` | 乱码/不可读文档的占位标记（含失败原因） | 被过滤文档不进入总结清单；重新提供清晰源文件后可再次处理 |
 | `reports/summary_list_YYYYMMDDHH.md` | 当日全部文档的一句话总结清单（标题+段落格式） | 快速浏览当天全部研报，适配不支持表格的阅读器 |
 | `reports/每日重点汇总_YYYYMMDDHH.md` | 大模型二次提炼的核心要闻 + 行业分类 + 深度报告精选 + 数据亮点 | 快速掌握当天最重要的信息 |
+| `reports/识别困难文档清单_YYYYMMDDHH.md` | 当日因识别质量差被过滤的文档清单及原因（OCR乱码 / Excel未命名列 / 内容为空） | 定位需人工重新提供的源文件 |
 | `daily/重点汇总/每日重点汇总_YYYYMMDDHH.md` | 每日重点汇总的跨日期集中副本 | 不进入具体日期目录即可浏览历史重点 |
 | `daily/一句话总结/summary_list_YYYYMMDDHH.md` | 一句话总结清单的跨日期集中副本 | 不进入具体日期目录即可浏览历史总结 |
 | `汇总/YYYYMMDDHH/每日重点汇总_YYYYMMDDHH.md` | 当日重点总结（微信读书导入用） | 与一句话总结、各专题核心论点一并整体导入微信读书 |

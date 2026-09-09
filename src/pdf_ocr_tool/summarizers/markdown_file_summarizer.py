@@ -15,9 +15,73 @@ from pdf_ocr_tool.summarizers.financial_research_summarizer import FinancialRese
 class MarkdownFileSummarizer:
     """Markdown文件分析器"""
     
+    GARBLED_ARCHIVE_DIR = "识别困难归档"  # 识别困难文档的归档子目录（不参与总结清单）
+    
+    # 英文句子的结构词：用于区分"真实英文内容"与"OCR字母乱码堆砌"
+    ENGLISH_STRUCTURE_WORDS = {
+        'is', 'are', 'was', 'were', 'be', 'been', 'for', 'with', 'from', 'the',
+        'and', 'of', 'to', 'in', 'on', 'we', 'you', 'our', 'this', 'that', 'a',
+        'an', 'as', 'by', 'at', 'it', 'its', 'their', 'your', 'not', 'but', 'or',
+        'so', 'can', 'will', 'would', 'should', 'may', 'have', 'has', 'had',
+        'do', 'does', 'did', 'about', 'into', 'than', 'then', 'when', 'what',
+        'how', 'why', 'who', 'which', 'there', 'here',
+    }
+    
     def __init__(self):
         self.summarizer = AIContentSummarizer()
         self.financial_summarizer = FinancialResearchSummarizer()
+        self.garbled_files = []  # 本次处理中识别为困难（乱码/不可读）的文档清单
+    
+    @staticmethod
+    def _is_real_english(text):
+        """判断文本是否为真实英文内容（有句子结构），而非字母乱码堆砌。
+
+        真实英文须满足：英文词覆盖>=40% 且 至少2个结构词（is/for/the等）。
+        OCR字母乱码（如 "HHS ie ae ere CBE 个 HE So Th"）不含结构词，会被判乱码。
+        """
+        words = re.findall(r'[A-Za-z]{3,}', text)
+        if not words:
+            return False
+        struct = len(re.findall(
+            r'\b(?:is|are|was|were|be|been|for|with|from|the|and|of|to|in|on|we|you|our|'
+            r'this|that|a|an|as|by|at|it|its|their|your|not|but|or|so|can|will|would|should|'
+            r'may|have|has|had|do|does|did|about|into|than|then|when|what|how|why|who|which|'
+            r'there|here)\b', text, re.IGNORECASE))
+        total = len(re.sub(r'\s+', '', text))
+        if not total:
+            return False
+        word_char = sum(len(w) for w in words)
+        return struct >= 2 and word_char / total >= 0.4
+    
+    def _garbled_check(self, text):
+        """单段文本乱码检测，返回原因字符串；正常返回None"""
+        t = (text or '').strip()
+        if not t:
+            return "总结内容为空"
+        if '乱码内容，无法总结' in t or '乱码内容' in t[:20]:
+            return "OCR识别乱码（大模型确认无法阅读）"
+        compact = re.sub(r'\s+', '', t)
+        total = len(compact)
+        if total < 10:
+            return "总结内容过短"
+        if re.search(r'Unnamed\s*[:：]?\s*\d|NaN', t):
+            return "表格转换未命名列（Excel表格内容不可读）"
+        cn_runs = re.findall(r'[\u4e00-\u9fff]{2,}', compact)
+        cn_density = sum(len(x) for x in cn_runs) / total
+        alpha_ratio = len(re.findall(r'[A-Za-z]', compact)) / total
+        if MarkdownFileSummarizer._is_real_english(t):
+            return None  # 正常英文内容
+        if alpha_ratio > 0.3 and cn_density < 0.25:
+            return "OCR识别乱码（字母符号堆砌，无法阅读）"
+        return None
+    
+    def garbled_reason(self, one_line, highlights):
+        """对一句话总结+核心看点做乱码检测，返回原因；正常返回None"""
+        for txt in [one_line] + (highlights or [])[:2]:
+            reason = self._garbled_check(txt)
+            if reason:
+                return reason
+        return None
     
     def extract_markdown_content(self, md_text):
         """提取Markdown正文内容"""
@@ -54,6 +118,10 @@ class MarkdownFileSummarizer:
                 raw_text
             )
             
+            # 乱码检测：一句话总结+核心看点若为OCR乱码则标记，由调用方过滤
+            one_line, highlights = self.get_structured_fields(analysis)
+            analysis['garbled'] = self.garbled_reason(one_line, highlights)
+            
             return analysis
         
         except Exception as e:
@@ -88,8 +156,9 @@ class MarkdownFileSummarizer:
             if only_new and summaries_dir:
                 summary_name = self.sanitize_summary_filename(filename)
                 summary_path = os.path.join(summaries_dir, summary_name)
-                if os.path.exists(summary_path):
-                    continue  # 已有总结，跳过
+                garbled_path = os.path.join(summaries_dir, self.GARBLED_ARCHIVE_DIR, summary_name)
+                if os.path.exists(summary_path) or os.path.exists(garbled_path):
+                    continue  # 已有总结或已识别为困难，跳过
 
             files_to_process.append(filename)
 
@@ -124,6 +193,17 @@ class MarkdownFileSummarizer:
                     analysis = future.result()
                     if analysis:
                         analysis['filename'] = filename
+                        # 识别困难（乱码）文档：不生成总结、不进清单，归档标记并记录原因
+                        if analysis.get('garbled'):
+                            self.garbled_files.append({
+                                'filename': filename,
+                                'reason': analysis['garbled'],
+                            })
+                            if write_incrementally and summaries_dir:
+                                with write_lock:
+                                    self._write_garbled_marker(analysis, summaries_dir)
+                            print(f"  [{completed_count}/{total_count}] ⚠️ 识别困难，跳过总结: {filename[:50]} ({analysis['garbled']})")
+                            continue
                         results.append(analysis)
                         batch_buffer.append(analysis)
                         print(f"  [{completed_count}/{total_count}] ✓ {filename[:50]}")
@@ -163,6 +243,83 @@ class MarkdownFileSummarizer:
             content += "- 未提取到明确内容\n"
         with open(output_file, 'w', encoding='utf-8') as f:
             f.write(content)
+    
+    def _write_garbled_marker(self, analysis, summaries_dir):
+        """为识别困难文档写入归档标记文件（占位，避免重复处理，不进入总结清单）"""
+        filename = analysis['filename']
+        archive_dir = os.path.join(summaries_dir, self.GARBLED_ARCHIVE_DIR)
+        os.makedirs(archive_dir, exist_ok=True)
+        output_file = os.path.join(archive_dir, self.sanitize_summary_filename(filename))
+        reason = analysis.get('garbled', '未知原因')
+        content = f"# {filename}\n\n"
+        content += f"**状态**：识别困难，未生成AI总结\n\n"
+        content += f"**原因**：{reason}\n\n"
+        content += "**处理建议**：请重新提供清晰版本的源文档（扫描件请提高清晰度）。\n"
+        with open(output_file, 'w', encoding='utf-8') as f:
+            f.write(content)
+    
+    def scan_garbled_summaries(self, summaries_dir):
+        """扫描已有summaries目录中的乱码总结（用于历史清理/报告）。
+
+        返回: list of {filename, reason}
+        """
+        garbled = []
+        if not summaries_dir or not os.path.exists(summaries_dir):
+            return garbled
+        for fname in os.listdir(summaries_dir):
+            if not fname.endswith('_summary.md'):
+                continue
+            path = os.path.join(summaries_dir, fname)
+            try:
+                with open(path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                m = re.search(r'##\s*一句话总结\s*\n\s*(.*?)(?=\n##|\Z)', content, re.DOTALL)
+                one_line = m.group(1).strip() if m else ''
+                reason = self._garbled_check(one_line)
+                if reason:
+                    garbled.append({'filename': fname, 'reason': reason})
+            except Exception:
+                continue
+        return garbled
+    
+    def write_difficult_report(self, report_path, extra_items=None):
+        """生成识别困难文档清单报告
+
+        Args:
+            report_path: 报告输出路径
+            extra_items: 额外条目（如历史扫描结果），格式与self.garbled_files一致
+        Returns:
+            写入的报告路径；无条目时返回None
+        """
+        items = list(self.garbled_files)
+        if extra_items:
+            items = items + list(extra_items)
+        # 按文件名去重
+        seen, unique = set(), []
+        for it in items:
+            if it['filename'] in seen:
+                continue
+            seen.add(it['filename'])
+            unique.append(it)
+        if not unique:
+            return None
+        os.makedirs(os.path.dirname(report_path) or '.', exist_ok=True)
+        date_str = datetime.now().strftime('%Y%m%d%H')
+        content = f"# 识别困难文档清单 {date_str}\n\n"
+        content += f"**共 {len(unique)} 份文档因解析/识别质量问题被过滤，未生成AI总结。**\n\n"
+        content += "以下文档的源文件识别质量差（扫描件/低分辨率/复杂表格等），请处理后重新放入 `files/` 目录：\n\n---\n\n"
+        for it in unique:
+            fn = it['filename']
+            for suffix in ('_summary.md', '_hybrid', '_tesseract', '_liteparse', '_office', '.md'):
+                if fn.endswith(suffix):
+                    fn = fn[: -len(suffix)]
+                    break
+            content += f"## {fn}\n\n"
+            content += f"- 原因：{it['reason']}\n\n"
+            content += f"- 解析文件：`{it['filename']}`\n\n---\n\n"
+        with open(report_path, 'w', encoding='utf-8') as f:
+            f.write(content)
+        return report_path
     
     def format_list_section(self, title, items):
         """格式化结构化列表段落"""

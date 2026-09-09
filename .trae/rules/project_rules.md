@@ -204,7 +204,7 @@ python3 extract_topic_summary.py
    * `.docx/.doc/.xlsx/.xls/.pptx` 会自动转换为 Markdown 纳入总结流程（docx/xlsx/xls 用 markitdown，doc 用 macOS 自带 textutil，pptx 用 markitdown 文本 + 图片 Tesseract OCR 合并；xls 需要 xlrd），转换后源文件归档到本类别主题化归档目录（`invest_files_processed/` / `media_files_processed/`）
 
    * 其余不属于任何星球类别的非文档文件（图片等）移动到 `~/Downloads`
-2. **按星球名自动分类批次**：主流程按文件名开头识别 —— 投资（全球资讯精读/速查报告库）→ `output/daily`；自媒体（知否 私域运营研习社/运营研究社）→ `output/daily_media`；其余 → `output/daily_other`。各批次专题与微信读书汇总隔离（`topic_summaries`/`topic_summaries_media`、`汇总`/`汇总_media`）
+2. **按星球名自动分类批次**：主流程按文件名开头识别 —— 投资（全球资讯精读/速查报告库/通往AGI之路）→ `output/daily`；自媒体（知否 私域运营研习社/运营研究社）→ `output/daily_media`；其余 → `output/daily_other`。各批次专题与微信读书汇总隔离（`topic_summaries`/`topic_summaries_media`、`汇总`/`汇总_media`）
 3. **批量总结**：`python3 daily_500_pdf_processor.py files output/daily/ --workers 6`
 
    * 自动用当天日期
@@ -214,6 +214,8 @@ python3 extract_topic_summary.py
    * 只处理新文件（不重复）
 
    * Office文档（docx/doc/xlsx/xls/pptx）自动转换纳入总结流程
+
+   * **识别困难文档自动过滤**（重要）：乱码/不可读文档（OCR字母乱码、Excel未命名列 `Unnamed`、解析内容为空等）不会生成无效总结，自动归档到 `summaries/识别困难归档/` 占位标记，不进入总结清单；同时自动生成 `reports/识别困难文档清单_YYYYMMDDHH.md`，逐份说明识别失败原因（OCR识别乱码 / Excel表格未命名列 / 解析内容为空），供用户重新提供清晰源文件后再次处理
 4. **提取专题**（内置自动执行）：主流程自动提取各批次默认专题（投资 AI/运动/健康；自媒体 抖音/小红书/快手/B站/视频号/公众号/运营；其他 AI）
 
    * 投资输出到 `output/topic_summaries/{专题}/YYYYMMDDHH/`，自媒体输出到 `output/topic_summaries_media/{专题}/YYYYMMDDHH/`
@@ -225,6 +227,33 @@ python3 extract_topic_summary.py
 6. **收集微信读书汇总**（内置自动执行）：主流程自动把当日重点汇总、一句话总结、各专题核心论点汇总收集到 `output/汇总*/YYYYMMDDHH/`（投资 `汇总/`，自媒体 `汇总_media/`）
 
    * 用于整体导入微信读书，按日期隔离
+
+***
+
+## 🚫 识别困难文档的处理（乱码自动过滤）
+
+**现象**：总结清单里出现乱码，如 "HHS ie ae ere CBE 个 HE So Th"（字母符号堆砌）、"Unnamed: 0，Unnamed: 1"（Excel未命名列）、"该文件主要围绕…展开"（内容为空）
+
+**自动行为**（内置，无需手动干预）：
+
+* 总结时自动检测乱码/不可读内容，不生成无效总结、不进入总结清单
+* 归档到 `summaries/识别困难归档/` 占位标记（避免重复处理）
+* 自动生成 `reports/识别困难文档清单_YYYYMMDDHH.md`，逐份说明识别失败原因
+
+**用户反馈"清单有乱码 / 过滤不好识别的文档"时**：
+
+1. 扫描该批次 `summaries/` 顶层 `*_summary.md`，用乱码检测（字母堆砌 / Unnamed / 内容过短 / 回退模板）找出乱码总结
+2. 将乱码总结移动到 `summaries/识别困难归档/`（可调用 `MarkdownFileSummarizer` 的 `scan_garbled_summaries` + 重新生成清单）
+3. 重新生成一句话总结清单，同步到 `一句话总结/` 副本目录
+4. 按原因分类汇报（见下），提醒用户重新提供清晰源文件
+
+**常见原因分类**：
+
+| 原因 | 特征 | 用户处理建议 |
+| ---- | ---- | ---- |
+| OCR识别乱码（字母符号堆砌） | 扫描件/截图型PPT，Tesseract认不出画面文字 | 重新提供清晰版或原始文件 |
+| Excel表格转换未命名列 | 总结出现 `Unnamed: n` / `NaN` | 提供列名完整/转为PDF的版本 |
+| 解析内容为空或过少 | 质量分0，总结为"该文件主要围绕…展开" | 原文件损坏或无可识别内容 |
 
 ***
 

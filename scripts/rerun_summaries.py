@@ -11,9 +11,9 @@
 """
 import sys
 import os
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '../src/pdf_ocr_tool'))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '../src'))
 
-from summarizers.financial_summarizer import MarkdownFileSummarizer
+from pdf_ocr_tool.summarizers.financial_summarizer import MarkdownFileSummarizer
 
 def rerun(date_str, workers=6):
     processed_dir = f"output/daily/{date_str}/processed"

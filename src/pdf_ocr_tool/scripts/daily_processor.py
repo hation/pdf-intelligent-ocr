@@ -312,6 +312,14 @@ class DailyPDFProcessor:
             self.logger.info(f"本次共处理 {len(analyses)} 个新文件")
         else:
             self.logger.info("没有新文件需要处理（所有文件已有总结）")
+        
+        # 生成识别困难文档清单报告（乱码/不可读文档被过滤，不产生总结）
+        if summarizer.garbled_files:
+            report_path = os.path.join(self.config['output_dir'], 'reports',
+                                       f"识别困难文档清单_{datetime.now().strftime('%Y%m%d%H')}.md")
+            written = summarizer.write_difficult_report(report_path)
+            if written:
+                self.logger.warning(f"识别困难文档清单已保存到: {written}（{len(summarizer.garbled_files)} 份文档被过滤）")
     
     def clean_up(self):
         """清理临时文件"""
