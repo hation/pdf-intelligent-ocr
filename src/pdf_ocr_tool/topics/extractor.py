@@ -79,6 +79,18 @@ def extract_topic_by_keywords(input_dir, topic_config, output_dir=None, date_str
         else:
             non_topic_files.append(filename)
     
+    # 0 份时按需跳过：不建目录/不生成文件，仍推送飞书提示（须在 copy 前判断）
+    if skip_if_empty and not topic_files:
+        total = len(summary_files)
+        feishu_zero_text = (
+            f'📊 {topic_name}专题：今日无相关文档（0/{total} 份），已跳过专题报告生成。'
+        )
+        send_feishu_message(feishu_zero_text)
+        print(f"  ⚠️ 【{topic_name}】0 份相关文档，跳过专题生成（已推送飞书 0 份提示）")
+        return None
+    
+    os.makedirs(summaries_subdir, exist_ok=True)
+    
     doc_data_list = []
     kw_match_counts = {}
     for filename, matched_kw in topic_files:
@@ -103,18 +115,6 @@ def extract_topic_by_keywords(input_dir, topic_config, output_dir=None, date_str
     doc_data_list.sort(key=lambda x: (x['keyword'], x['name']))
     
     sorted_keywords = sorted(kw_match_counts.items(), key=lambda x: x[1], reverse=True)
-    
-    # 0 份时按需跳过：不建目录/不生成文件，仍推送飞书提示
-    if skip_if_empty and not doc_data_list:
-        total = len(summary_files)
-        feishu_zero_text = (
-            f'📊 {topic_name}专题：今日无相关文档（0/{total} 份），已跳过专题报告生成。'
-        )
-        send_feishu_message(feishu_zero_text)
-        print(f"  ⚠️ 【{topic_name}】0 份相关文档，跳过专题生成（已推送飞书 0 份提示）")
-        return None
-    
-    os.makedirs(summaries_subdir, exist_ok=True)
     
     print(f"\n============================================================")
     print(f"✅ 【{topic_name}】专题提取完成")
