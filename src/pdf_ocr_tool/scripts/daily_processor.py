@@ -611,6 +611,7 @@ class DailyPDFProcessor:
                             TOPIC_CONFIGS[topic],
                             output_dir=os.path.join(topic_output_root, topic),
                             date_str=topic_date_str,
+                            skip_if_empty=True,
                         )
                     else:
                         self.logger.warning(f"不支持的专题: {topic}，跳过")

@@ -20,7 +20,7 @@ from pdf_ocr_tool.topics.analyzers import (
 )
 
 
-def extract_topic_by_keywords(input_dir, topic_config, output_dir=None, date_str=None):
+def extract_topic_by_keywords(input_dir, topic_config, output_dir=None, date_str=None, skip_if_empty=False):
     """
     按关键词配置提取指定专题文档并生成汇总报告
     
@@ -29,6 +29,7 @@ def extract_topic_by_keywords(input_dir, topic_config, output_dir=None, date_str
         topic_config: 专题配置字典（含name、keywords等）
         output_dir: 输出目录（默认为 output/topic_summaries/{topic_name}）
         date_str: 日期字符串（如 20260813），不传则使用当前日期
+        skip_if_empty: 匹配文档为 0 份时是否跳过生成（不建目录/不生成文件，仍推送飞书提示）
     """
     topic_name = topic_config['name']
     topic_keywords = topic_config['keywords']
@@ -41,7 +42,6 @@ def extract_topic_by_keywords(input_dir, topic_config, output_dir=None, date_str
     
     date_dir = os.path.join(output_dir, date_str)
     summaries_subdir = os.path.join(date_dir, 'summaries')
-    os.makedirs(summaries_subdir, exist_ok=True)
     
     from datetime import datetime as dt
     # 用传入的 date_str 计算起始时间，而不是用当前日期
@@ -103,6 +103,18 @@ def extract_topic_by_keywords(input_dir, topic_config, output_dir=None, date_str
     doc_data_list.sort(key=lambda x: (x['keyword'], x['name']))
     
     sorted_keywords = sorted(kw_match_counts.items(), key=lambda x: x[1], reverse=True)
+    
+    # 0 份时按需跳过：不建目录/不生成文件，仍推送飞书提示
+    if skip_if_empty and not doc_data_list:
+        total = len(summary_files)
+        feishu_zero_text = (
+            f'📊 {topic_name}专题：今日无相关文档（0/{total} 份），已跳过专题报告生成。'
+        )
+        send_feishu_message(feishu_zero_text)
+        print(f"  ⚠️ 【{topic_name}】0 份相关文档，跳过专题生成（已推送飞书 0 份提示）")
+        return None
+    
+    os.makedirs(summaries_subdir, exist_ok=True)
     
     print(f"\n============================================================")
     print(f"✅ 【{topic_name}】专题提取完成")
