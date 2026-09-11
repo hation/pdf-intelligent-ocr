@@ -7,6 +7,7 @@ PDF 自动化处理管道 - 每天处理500个PDF文件的高效解决方案
 import os
 import sys
 import re
+import shutil
 import argparse
 import time
 import logging
@@ -17,6 +18,52 @@ import json
 
 # 导入项目核心功能
 from pdf_ocr_tool.parsers.hybrid_pdf_parser import parse_pdf_to_markdown
+
+# ========== 问题PDF预检（避免OCR卡死） ==========
+# 渲染位图像素阈值：超过则跳过OCR。管线用 pdf2image(poppler) 把每页按
+# dpi=300/400 渲染成位图再交给 PIL/Tesseract，PIL 默认解压炸弹阈值约
+# 8948万像素，达到该量级的位图解码+Tesseract会极慢甚至卡死。
+HUGEPIXEL_THRESHOLD = 80_000_000      # 8000万像素
+# 超大文件阈值（字节）：辅助拦截极端大文件
+HUGEFILE_THRESHOLD = 80 * 1024 * 1024  # 80MB
+# 预检按最坏情况估算的渲染 DPI（hybrid 解析器最高尝试档位）
+PRECHECK_DPI = 400
+PROBLEMATIC_DIR = os.path.abspath('problematic_pdfs')
+
+
+def detect_problematic_pdf(pdf_path):
+    """OCR前快速预检：检测超大文件/超大页面PDF，避免poppler渲染卡死。
+
+    卡死根因：某些PDF页面 MediaBox/CropBox 异常巨大（如横幅/海报页，
+    Ciklum.pdf 每页 2550x3600pt），convert_from_path 渲染时位图可达
+    数亿像素。这里只读页面尺寸字典（不解码任何图像数据），按 PRECHECK_DPI
+    估算每页渲染位图像素，超过阈值即判为问题PDF。速度快，可安全用于
+    批处理流水线。返回 (is_problematic, reason)。
+    """
+    try:
+        file_size = os.path.getsize(pdf_path)
+        if file_size > HUGEFILE_THRESHOLD:
+            return True, f"超大文件({file_size / 1024 / 1024:.0f}MB)"
+
+        from PyPDF2 import PdfReader
+        reader = PdfReader(pdf_path)
+        max_px = 0
+        for page in reader.pages:
+            try:
+                # poppler 按 CropBox 渲染，默认同 MediaBox，取两者中较大者
+                box = page.cropbox
+                w = float(box.width)
+                h = float(box.height)
+                px = (w / 72.0 * PRECHECK_DPI) * (h / 72.0 * PRECHECK_DPI)
+                max_px = max(max_px, px)
+            except Exception:
+                continue
+        if max_px > HUGEPIXEL_THRESHOLD:
+            return True, f"超大页面渲染位图({max_px / 1000000:.0f}百万像素)"
+        return False, ''
+    except Exception:
+        # 预检失败不阻塞流程，交给正式解析
+        return False, ''
 
 
 class PDFProcessingPipeline:
@@ -98,6 +145,13 @@ class PDFProcessingPipeline:
     def process_single_file(self, filename, output_dir):
         """处理单个PDF文件的统一接口"""
         try:
+            # 预检：超大文件/超图PDF直接跳过OCR，避免Tesseract卡死
+            problematic, reason = detect_problematic_pdf(filename)
+            if problematic:
+                self.logger.warning(f"⚠️ 检测到问题PDF，跳过OCR（{reason}）: {os.path.basename(filename)}")
+                self._move_to_problematic(filename)
+                return False, 'skipped_problematic', 0
+
             min_score = self.config.get('min_score', 60)
             force = self.config.get('force', False)
             cache_file = self.config.get('cache_file')
@@ -121,6 +175,17 @@ class PDFProcessingPipeline:
         except Exception as e:
             self.logger.error(f"处理文件失败 {os.path.basename(filename)}: {e}")
             return False, 'error', 0
+
+    def _move_to_problematic(self, filename):
+        """把预检出的问题PDF移到 problematic_pdfs/ 暂存，避免每次批处理都重新扫描它"""
+        try:
+            os.makedirs(PROBLEMATIC_DIR, exist_ok=True)
+            dst = os.path.join(PROBLEMATIC_DIR, os.path.basename(filename))
+            if os.path.abspath(filename) != os.path.abspath(dst):
+                shutil.move(filename, dst)
+                self.logger.info(f"已移至 {dst}")
+        except Exception as e:
+            self.logger.error(f"移动问题PDF失败: {e}")
     
     def run_pipeline(self, input_dir, output_dir):
         """运行完整的处理管道"""
