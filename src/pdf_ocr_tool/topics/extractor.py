@@ -20,7 +20,7 @@ from pdf_ocr_tool.topics.analyzers import (
 )
 
 
-def extract_topic_by_keywords(input_dir, topic_config, output_dir=None, date_str=None, skip_if_empty=False):
+def extract_topic_by_keywords(input_dir, topic_config, output_dir=None, date_str=None, skip_if_empty=False, ignore_mtime=False):
     """
     按关键词配置提取指定专题文档并生成汇总报告
     
@@ -30,6 +30,7 @@ def extract_topic_by_keywords(input_dir, topic_config, output_dir=None, date_str
         output_dir: 输出目录（默认为 output/topic_summaries/{topic_name}）
         date_str: 日期字符串（如 20260813），不传则使用当前日期
         skip_if_empty: 匹配文档为 0 份时是否跳过生成（不建目录/不生成文件，仍推送飞书提示）
+        ignore_mtime: 是否忽略文件修改时间窗口（用于历史批次全量提取，默认False）
     """
     topic_name = topic_config['name']
     topic_keywords = topic_config['keywords']
@@ -59,6 +60,9 @@ def extract_topic_by_keywords(input_dir, topic_config, output_dir=None, date_str
     summary_files = []
     for f in os.listdir(input_dir):
         if not f.endswith('.md'):
+            continue
+        if ignore_mtime:
+            summary_files.append(f)
             continue
         file_path = os.path.join(input_dir, f)
         mtime = dt.fromtimestamp(os.path.getmtime(file_path))
