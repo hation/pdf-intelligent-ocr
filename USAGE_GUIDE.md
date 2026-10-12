@@ -44,6 +44,7 @@ python3 daily_500_pdf_processor.py --no-ai
 1. 将PDF文件放入 files/ 目录
 2. 运行 python3 daily_500_pdf_processor.py
 3. 系统自动处理：
+   - 导入自动去重（归档同名回移 + 副本删除）
    - 解析PDF → 生成Markdown
    - AI分析 → 生成总结
    - 文件移动 → 移至 files_processed/
@@ -59,6 +60,7 @@ python3 daily_500_pdf_processor.py --no-ai
 | --workers | 可选 | 工作进程数 | 8 |
 | --no-ai | 可选 | 禁用AI内容分析，提高处理速度 | false |
 | --force | 可选 | 强制重新解析，忽略缓存 | false |
+| --skip-dedup | 可选 | 跳过导入自动去重（归档同名回移 + 副本删除） | false |
 | --min-score | 可选 | 最低解析质量评分 | 60 |
 | --help | 可选 | 显示帮助信息 | - |
 
@@ -158,11 +160,19 @@ output/汇总/YYYYMMDD/
 
 缓存文件放在 `output/daily/.pdf_parse_cache.json`，避免重复处理相同文件。
 
-### 5. 多进程处理
+### 5. 导入自动去重
+
+每次运行前自动检查 `files/` 与归档目录的重复文件，避免重复解析与重复消耗 token：
+
+- **归档同名回移**：`files/` 中与 `invest_files_processed/` / `media_files_processed/` / `other_files_processed/` / `problematic_pdfs/` 同名的文件，直接移回归档并跳过处理
+- **副本删除**：`files/` 内 `xxx (1).ext` 副本，若存在原始 `xxx.ext` 且 md5 完全一致，自动删除副本；无原始或 md5 不同则保留
+- 可用 `--skip-dedup` 跳过；也可单独运行 `python3 src/pdf_ocr_tool/scripts/deduplicate.py files`（`--no-delete` 只读预览）
+
+### 6. 多进程处理
 
 支持配置工作进程数，提高处理效率。
 
-### 6. 错误处理
+### 7. 错误处理
 
 系统具有完善的错误处理机制：
 - 识别处理失败的文件并记录详细信息

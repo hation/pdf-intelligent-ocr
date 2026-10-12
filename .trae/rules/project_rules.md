@@ -163,7 +163,7 @@ tesseract_ocr_on_pdf("/path/to/your/difficult.pdf")
 
 ```bash
 # 1. 确认 files/ 目录有新PDF
-# 2. 运行完整处理（不要用 --no-ai）
+# 2. 运行完整处理（不要用 --no-ai）；运行前会自动做导入去重（归档同名回移 + md5 一致副本删除），无需手动检查
 python3 daily_500_pdf_processor.py
 
 # 3. 如果是之前解析过但没有总结的，修改 batch_summarize.py 中的日期，然后运行
@@ -199,6 +199,11 @@ python3 extract_topic_summary.py
 
 ## 📋 标准流程（固定）
 
+0. **导入自动去重**（内置自动执行，`--skip-dedup` 跳过）：
+
+   * 每次运行 `daily_500_pdf_processor.py` 前自动检查 `files/` 与归档目录（`invest_files_processed/` / `media_files_processed/` / `other_files_processed/` / `problematic_pdfs/`）的重复
+   * 归档同名文件 → 直接移回归档并跳过处理；`xxx (1).ext` 副本与原始文件 md5 一致 → 自动删除（无原始或 md5 不同 → 保留）
+   * 避免重复解析与重复消耗 token；也可单独运行 `python3 src/pdf_ocr_tool/scripts/deduplicate.py files`（`--no-delete` 只读预览）
 1. **Office文档转换 + 移除非文档文件**（内置自动执行）：
 
    * `.docx/.doc/.xlsx/.xls/.pptx` 会自动转换为 Markdown 纳入总结流程（docx/xlsx/xls 用 markitdown，doc 用 macOS 自带 textutil，pptx 用 markitdown 文本 + 图片 Tesseract OCR 合并；xls 需要 xlrd），转换后源文件归档到本类别主题化归档目录（`invest_files_processed/` / `media_files_processed/`）

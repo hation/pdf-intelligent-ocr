@@ -31,6 +31,20 @@ PRECHECK_DPI = 400
 PROBLEMATIC_DIR = os.path.abspath('problematic_pdfs')
 
 
+def _has_sufficient_selectable_text(reader):
+    """检测PDF前几页是否含充足可选文本（可走文本提取路径，无需渲染OCR）"""
+    total = 0
+    try:
+        for page in reader.pages[:5]:
+            text = page.extract_text() or ""
+            total += len(text.strip())
+            if total >= 300:
+                return True
+    except Exception:
+        pass
+    return False
+
+
 def detect_problematic_pdf(pdf_path):
     """OCR前快速预检：检测超大文件/超大页面PDF，避免poppler渲染卡死。
 
@@ -59,6 +73,9 @@ def detect_problematic_pdf(pdf_path):
             except Exception:
                 continue
         if max_px > HUGEPIXEL_THRESHOLD:
+            # 页面超大但含充足可选文本：解析走文本提取路径无需渲染，不拦截
+            if _has_sufficient_selectable_text(reader):
+                return False, ''
             return True, f"超大页面渲染位图({max_px / 1000000:.0f}百万像素)"
         return False, ''
     except Exception:

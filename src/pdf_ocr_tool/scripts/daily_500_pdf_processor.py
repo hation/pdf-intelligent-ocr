@@ -10,6 +10,7 @@ import argparse
 from datetime import datetime
 
 from pdf_ocr_tool.scripts.daily_processor import DailyPDFProcessor
+from pdf_ocr_tool.scripts.deduplicate import deduplicate
 from pdf_ocr_tool.topics.config import FILENAME_CLASSIFIER, CLASS_LAYOUT
 
 
@@ -67,8 +68,30 @@ def main():
                        help='进入总结的最低解析质量评分（默认: 60）')
     parser.add_argument('--force', action='store_true',
                        help='忽略缓存，强制重新解析PDF')
+    parser.add_argument('--skip-dedup', action='store_true',
+                       help='跳过导入文档去重（归档同名回移 + 副本删除）')
     
     args = parser.parse_args()
+
+    # 去重：归档同名文件回移、重复副本删除（默认执行，--skip-dedup 跳过）
+    if not args.skip_dedup:
+        r = deduplicate(args.input_dir)  # 内部自动定位归档目录
+        print(f"===== 文档去重（{args.input_dir}）=====")
+        print(f"  待处理新文档: {r['new_count']} 份")
+        if r['moved_to_archive']:
+            print(f"  归档同名回移: {len(r['moved_to_archive'])} 份")
+            for fname, dest in r['moved_to_archive']:
+                print(f"    - {fname} -> {dest}/")
+        if r['deleted_copies']:
+            print(f"  删除重复副本: {len(r['deleted_copies'])} 份")
+            for fname in r['deleted_copies']:
+                print(f"    - {fname}")
+        if r['kept_copies']:
+            print(f"  保留副本: {len(r['kept_copies'])} 份")
+            for fname in r['kept_copies']:
+                print(f"    - {fname}")
+    else:
+        print("===== 文档去重（跳过，--skip-dedup）=====")
     
     # 按文件名开头的星球名自动分流：投资/自媒体/其他各自独立批次，
     # 输出与专题、微信读书收集均隔离，避免混在一起

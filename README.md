@@ -24,6 +24,7 @@
 - **文件自动移动**: 处理完成后自动归档源文件
 - **非PDF自动清理**: 启动时自动将 `files/` 中不属于任何星球类别的非文档文件（图片等）移动到 `~/Downloads`；Office 文档（docx/doc/xlsx/xls/pptx）会被转换为 Markdown 纳入总结流程，转换后源文件归档到主题化归档目录
 - **自动专题提取**: 主流程自动提取各批次默认专题并生成每日重点汇总
+- **导入自动去重**: 每次运行前自动检查 `files/` 与归档目录（`*_processed/` / `problematic_pdfs/`）的重复 —— 归档同名文件直接移回归档跳过处理；`xxx (1).ext` 副本与原始文件 md5 一致则自动删除，避免重复解析与重复消耗 token（可用 `--skip-dedup` 跳过）
 - **去重处理**: 只处理新文件，已处理过的文件不会重复总结
 
 ### 🤖 支持的19大专题
@@ -111,6 +112,7 @@ export FEISHU_WEBHOOK="https://open.feishu.cn/open-apis/bot/v2/hook/你的机器
 python3 daily_500_pdf_processor.py files output/daily/
 
 # 主流程自动执行：
+#   0. 导入自动去重：归档同名文件回移 + (N)副本删除（md5 一致），跳过重复处理
 #   1. 移除非PDF文件到 ~/Downloads
 #   2. 解析PDF -> processed/
 #   3. LLM总结 -> summaries/（乱码/不可读文档自动过滤，归档到 summaries/识别困难归档/，并生成识别困难文档清单）
@@ -176,6 +178,7 @@ python3 scripts/generate_all_daily_highlights.py --start 20260801 --end 20260831
 --min-score 40    # 最低解析质量评分，默认60
 --force           # 强制重新解析（忽略缓存）
 --no-ai          # 不生成总结和专题提取（只解析PDF）
+--skip-dedup     # 跳过导入自动去重（默认每次运行前自动去重）
 --topic, -t      # 指定要提取的专题（可多次指定，仅覆盖投资批次默认专题）
                   # 投资支持：AI/新能源/医药/消费/科技/汽车/有色/煤炭/地产/银行/运动/健康
                   # 自媒体批次固定提取：抖音/小红书/快手/B站/视频号/公众号/运营
@@ -256,7 +259,8 @@ summary/
 │       │   └── extractor.py     # 专题提取主函数
 │       └── scripts/             # 主流程
 │           ├── daily_processor.py           # DailyPDFProcessor 核心类
-│           └── daily_500_pdf_processor.py   # CLI 入口（分类批次 + 隔离输出）
+│           ├── daily_500_pdf_processor.py   # CLI 入口（分类批次 + 隔离输出）
+│           └── deduplicate.py               # 导入自动去重（归档同名回移 + 副本删除）
 │
 ├── daily_500_pdf_processor.py    # 入口1：批量解析+总结+多专题提取
 ├── extract_topic_summary.py       # 入口2：提取指定专题汇总
