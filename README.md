@@ -67,6 +67,31 @@ cd /Users/xingan/Documents/software/workspace/summary
 pip install -r requirements.txt
 ```
 
+### 安装对外扩展库（可选）
+
+`extensions/` 目录存放可在其他项目独立调用的对外库模块（与 `src/` 内部源码隔离），以标准 pip 包形式安装：
+
+```bash
+# 图片/PDF 文本提取库（PyPDF2 + Tesseract OCR 混合解析）
+pip install -e /Users/xingan/Documents/software/workspace/summary/extensions/doc_text_extractor
+
+# 可选增强：启用 LiteParse（复杂排版，Rust 引擎体积大）
+pip install -e "/Users/xingan/Documents/software/workspace/summary/extensions/doc_text_extractor[liteparse]"
+```
+
+调用示例：
+
+```python
+from doc_text_extractor import extract_image_text, extract_pdf_text
+
+text = extract_image_text("截图.png")          # 图片 → 文字
+r = extract_pdf_text("研报.pdf")               # PDF → 文字（可选文本→LiteParse→OCR 自动选策略）
+print(r.text, r.quality["score"], r.parser)
+```
+
+CLI：`doc-text-extractor image 截图.png` / `doc-text-extractor pdf 研报.pdf -o ./out`
+完整使用说明见 `extensions/doc_text_extractor/README.md`。系统依赖：`brew install tesseract tesseract-lang poppler`。
+
 ### 配置大模型（火山引擎方舟）
 
 所有配置统一放在 `.env` 文件（参考 `.env.example`），也可以用环境变量：
@@ -261,6 +286,13 @@ summary/
 │           ├── daily_processor.py           # DailyPDFProcessor 核心类
 │           ├── daily_500_pdf_processor.py   # CLI 入口（分类批次 + 隔离输出）
 │           └── deduplicate.py               # 导入自动去重（归档同名回移 + 副本删除）
+│
+├── extensions/                 # 对外扩展库（独立 pip 包，供其他项目调用）
+│   └── doc_text_extractor/     # 图片/PDF 文本提取库（见 README「安装对外扩展库」）
+│       ├── pyproject.toml
+│       ├── README.md
+│       ├── doc_text_extractor/ # 包源码（image_ocr / pdf_extractor / quality / cli）
+│       └── tests/
 │
 ├── daily_500_pdf_processor.py    # 入口1：批量解析+总结+多专题提取
 ├── extract_topic_summary.py       # 入口2：提取指定专题汇总

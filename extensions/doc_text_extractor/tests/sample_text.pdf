@@ -1,0 +1,32 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>
+endobj
+4 0 obj
+<< /Length 909 >>
+stream
+BT /F1 12 Tf 72 720 Td (This is a sample PDF document used for automated text extraction testing.) Tj 0 -20 Td (It contains selectable text that the PyPDF2 library can read directly.) Tj 0 -20 Td (The document covers company strategy, market analysis and industry reports.) Tj 0 -20 Td (Data collected across multiple projects is summarized in this research file.) Tj 0 -20 Td (Analysts review the market size, growth trends and business opportunities.) Tj 0 -20 Td (Key findings include customer demand, product quality and supply chain risk.) Tj 0 -20 Td (The report recommends investment in technology and system modernization.) Tj 0 -20 Td (All project teams share the results and plan the next iteration together.) Tj 0 -20 Td (Further details about the company and its products are listed in appendix.) Tj 0 -20 Td (This concludes the sample content used for testing the extraction tool.) Tj 0 -20 Td ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000241 00000 n 
+0000001201 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+1271
+%%EOF

@@ -458,10 +458,66 @@ class DailyPDFProcessor:
             return result.stdout
         if ext == '.pptx':
             return self._convert_pptx_to_markdown(file_path)
+        if ext in ('.xlsx', '.xls'):
+            converted = self._convert_xlsx_to_markdown(file_path)
+            if converted:
+                return converted
         from markitdown import MarkItDown
         md = MarkItDown()
         result = md.convert(file_path)
         return result.text_content
+
+    def _convert_xlsx_to_markdown(self, file_path):
+        """转换 Excel 为 Markdown，规避大表格（空 sheet 撑到行上限、数万行数据表）
+        导致 markitdown 遍历卡死的问题。
+
+        触发条件（任一满足即走只读手动转换，否则返回 None 交由 markitdown）：
+          - 存在 max_row > 20000 的 sheet（大表格 / 接近行上限的空 sheet）
+          - 文件大小超过 8MB（通常为大型数据表，markitdown 逐行渲染极慢）
+
+        手动转换使用只读模式（不加载样式），且每个 sheet 最多取前 1000 行，
+        避免生成超大 Markdown，保证总结流程可用。
+        """
+        try:
+            import openpyxl
+        except ImportError:
+            return None
+        try:
+            wb = openpyxl.load_workbook(file_path, read_only=True, data_only=True)
+        except Exception:
+            return None
+        file_size = os.path.getsize(file_path)
+        oversized = file_size > 8 * 1024 * 1024
+        if not oversized:
+            for ws in wb.worksheets:
+                if ws.max_row and ws.max_row > 20000:
+                    oversized = True
+                    break
+        if not oversized:
+            wb.close()
+            return None
+        # 手动只读转换：每个 sheet 转 Markdown 表格（跳过空行，限 1000 行）
+        parts = []
+        for ws in wb.worksheets:
+            header = f"\n## {ws.title}\n"
+            table_rows = []
+            for row in ws.iter_rows(values_only=True):
+                if not any(cell is not None and str(cell).strip() for cell in row):
+                    continue
+                table_rows.append(
+                    "| " + " | ".join(
+                        "" if cell is None else str(cell).replace("|", "\\|").replace("\n", " ")
+                        for cell in row
+                    ) + " |"
+                )
+                if len(table_rows) >= 1000:
+                    break
+            if table_rows:
+                ncols = max(len(row) for row in (r.split("|") for r in table_rows))
+                sep = "| " + " | ".join(["---"] * ncols) + " |"
+                parts.append(header + "\n" + table_rows[0] + "\n" + sep + "\n" + "\n".join(table_rows[1:]))
+        wb.close()
+        return "\n".join(parts)
 
     def _convert_pptx_to_markdown(self, file_path):
         """转换 PPTX：markitdown 提取文本元素 + python-pptx 提取图片做 Tesseract OCR，合并输出

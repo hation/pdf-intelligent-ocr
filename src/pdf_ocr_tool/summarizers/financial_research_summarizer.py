@@ -7,6 +7,7 @@
 import os
 import re
 import json
+import time
 import urllib.request
 from datetime import datetime
 
@@ -26,7 +27,7 @@ except ImportError:
     pass
 
 # 方舟模型配置（支持通过 .env / 环境变量覆盖）
-ARK_MODEL = os.environ.get("ARK_MODEL", "doubao-seed-2.0-pro")
+ARK_MODEL = os.environ.get("ARK_MODEL", "doubao-seed-2-1-pro-260915")
 ARK_BASE_URL = os.environ.get("ARK_BASE_URL", "https://ark.cn-beijing.volces.com/api/coding/v3")
 
 # 提示词集中配置（修改 prompts_config.py 即可调整总结效果）
@@ -37,6 +38,12 @@ from pdf_ocr_tool.prompts_config import (
     HIGHLIGHTS_SYSTEM,
     HIGHLIGHTS_PROMPT,
     DAILY_HIGHLIGHT_PROMPT,
+    DAILY_HIGHLIGHT_FRAGMENT_PROMPT,
+    DAILY_HIGHLIGHT_SECONDARY_PROMPT,
+    DAILY_HIGHLIGHT_NEWS_PROMPT,
+    DAILY_HIGHLIGHT_SECTIONS_PROMPT,
+    DAILY_HIGHLIGHT_DEEP_PROMPT,
+    DAILY_HIGHLIGHT_DATA_PROMPT,
 )
 
 
@@ -48,8 +55,11 @@ class FinancialResearchSummarizer:
         self.summary_tool = "大模型(豆包)" if self.use_llm else "算法提取"
         
         if self.use_llm:
+            import httpx
+            # 禁用系统代理直连（本地 xray 代理对大请求会挂起），并设置请求超时
             self.llm_client = OpenAI(
-                base_url=ARK_BASE_URL
+                base_url=ARK_BASE_URL,
+                http_client=httpx.Client(trust_env=False, timeout=httpx.Timeout(300.0, connect=30.0)),
             )
             print(f"✅ LLM模式已启用（{ARK_MODEL}）")
         else:
@@ -563,6 +573,29 @@ class FinancialResearchSummarizer:
             'summary_tool': self.summary_tool
         }
 
+    def _llm_complete(self, prompt, max_tokens=3000, temperature=0.3, timeout=120):
+        """用 urllib 直连方舟（绕过系统代理，httpx/代理对大请求会挂起），返回模型输出文本"""
+        payload = {
+            'model': ARK_MODEL,
+            'messages': [{'role': 'user', 'content': prompt}],
+            'temperature': temperature,
+            'max_tokens': max_tokens,
+        }
+        body = json.dumps(payload).encode('utf-8')
+        req = urllib.request.Request(
+            ARK_BASE_URL.rstrip('/') + '/chat/completions',
+            data=body,
+            headers={
+                'Content-Type': 'application/json',
+                'Authorization': f'Bearer {os.environ.get("OPENAI_API_KEY", "")}',
+            },
+        )
+        # 空代理 opener：绕过 macOS 系统代理（本地 xray 10808 对大请求挂起），直连方舟
+        opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+        with opener.open(req, timeout=timeout) as resp:
+            data = json.loads(resp.read().decode('utf-8'))
+        return data['choices'][0]['message']['content']
+
     def generate_daily_highlight_report(self, summary_dir, output_file, date_str=None):
         """生成每日重点汇总文档（大模型二次提炼）
         
@@ -587,8 +620,8 @@ class FinancialResearchSummarizer:
             print("⚠️  没有找到总结文件，跳过每日重点汇总")
             return False
         
-        all_content = ''
-        for sf in summary_files:
+        def build_doc_block(sf):
+            """提取单份文档的一句话总结（截断，防止超大表格类总结撑爆上下文）"""
             sf_path = os.path.join(summary_dir, sf)
             try:
                 with open(sf_path, 'r', encoding='utf-8') as f:
@@ -600,49 +633,98 @@ class FinancialResearchSummarizer:
                         doc_name = doc_name[:-len(suffix)]
                         break
                 
-                tool = ''
-                m = re.search(r'\*\*总结工具\*\*[:：]\s*(.+)', text)
-                if m:
-                    tool = m.group(1).strip()
-                
                 one_sentence = ''
                 m = re.search(r'##\s*一句话总结\s*\n\s*(.*?)(?=\n##|\Z)', text, re.DOTALL)
                 if m:
-                    one_sentence = m.group(1).strip()
+                    one_sentence = m.group(1).strip()[:150]
                 
-                key_points = ''
-                m = re.search(r'##\s*核心看点\s*\n\s*(.*?)(?=\n##|\Z)', text, re.DOTALL)
-                if m:
-                    key_points = m.group(1).strip()
-                
-                all_content += f'【文档】{doc_name}\n'
-                all_content += f'【总结工具】{tool}\n'
-                all_content += f'【一句话总结】{one_sentence}\n'
-                all_content += f'【核心看点】{key_points}\n'
-                all_content += '---\n'
+                return f'- {doc_name}: {one_sentence}\n'
             except Exception:
-                continue
+                return ''
         
-        if not all_content.strip():
-            print("⚠️  无法收集总结内容，跳过每日重点汇总")
+        def call_llm(prompt, max_tokens=1500, timeout=180, retries=3):
+            """调用大模型，失败自动重试（方舟服务端并发能力低，单请求可能超时）"""
+            for attempt in range(1, retries + 1):
+                try:
+                    return self._llm_complete(prompt, max_tokens=max_tokens, timeout=timeout)
+                except Exception:
+                    if attempt >= retries:
+                        raise
+                    time.sleep(3)
+            raise RuntimeError('unreachable')
+        
+        # 三阶段提炼方案（实测稳定）：
+        # S1 分片：每批 5 份文档 → 分片精华（输入小，模型注意力集中，响应快）
+        # S2 合并：每批 5 个分片精华 → 二次精华（合并去重、去粗取精）
+        # S3 分部分：核心要闻/行业速览/深度报告/数据亮点 各自独立生成，拼接为完整文档
+        #   （单次生成完整 5000 字文档会超时，拆分为四部分后每部分输出可控）
+        batch_size = 5
+        batches = [summary_files[i:i + batch_size] for i in range(0, len(summary_files), batch_size)]
+        
+        # ---- S1：文档 → 分片精华 ----
+        fragments = []
+        for batch_idx, batch in enumerate(batches, 1):
+            batch_content = ''.join(build_doc_block(sf) for sf in batch)
+            if not batch_content.strip():
+                continue
+            frag_prompt = render_prompt(
+                DAILY_HIGHLIGHT_FRAGMENT_PROMPT,
+                doc_count=len(batch),
+                all_content=batch_content,
+            )
+            try:
+                fragments.append(call_llm(frag_prompt))
+                print(f"  分片 {batch_idx}/{len(batches)} 提炼完成", flush=True)
+            except Exception as e:
+                print(f"  ⚠️ 分片 {batch_idx} 提炼失败: {e}", flush=True)
+        
+        if not fragments:
+            print("⚠️  所有分片提炼均失败，跳过每日重点汇总")
             return False
         
-        prompt = render_prompt(
-            DAILY_HIGHLIGHT_PROMPT,
-            doc_count=len(summary_files),
-            all_content=all_content,
-            date_str=date_str,
-        )
+        # ---- S2：分片精华 → 二次精华（合并去重） ----
+        secondary = []
+        sec_batches = [fragments[i:i + 5] for i in range(0, len(fragments), 5)]
+        for sec_idx, sec_batch in enumerate(sec_batches, 1):
+            sec_prompt = render_prompt(
+                DAILY_HIGHLIGHT_SECONDARY_PROMPT,
+                doc_count=len(sec_batch),
+                all_content='\n\n'.join(sec_batch),
+            )
+            try:
+                secondary.append(call_llm(sec_prompt))
+                print(f"  合并 {sec_idx}/{len(sec_batches)} 完成", flush=True)
+            except Exception as e:
+                print(f"  ⚠️ 合并 {sec_idx} 失败: {e}", flush=True)
+        
+        if not secondary:
+            print("⚠️  所有二次合并均失败，跳过每日重点汇总")
+            return False
+        
+        # ---- S3：分部分生成最终汇总 ----
+        all_content = '\n\n'.join(secondary)
+        parts = []
+        jobs = [
+            ('核心要闻', DAILY_HIGHLIGHT_NEWS_PROMPT, 2000),
+            ('行业速览', DAILY_HIGHLIGHT_SECTIONS_PROMPT, 2000),
+            ('深度报告', DAILY_HIGHLIGHT_DEEP_PROMPT, 2000),
+            ('数据亮点', DAILY_HIGHLIGHT_DATA_PROMPT, 1500),
+        ]
+        for part_name, template, max_tok in jobs:
+            part_prompt = render_prompt(template, all_content=all_content)
+            try:
+                parts.append(call_llm(part_prompt, max_tokens=max_tok))
+                print(f"  {part_name} 部分生成完成", flush=True)
+            except Exception as e:
+                print(f"  ⚠️ {part_name} 部分生成失败: {e}", flush=True)
+        
+        if not parts:
+            print("⚠️  四个部分均生成失败，跳过每日重点汇总")
+            return False
+        
+        result = f'# 每日重点汇总 {date_str}\n\n' + '\n\n'.join(parts)
         
         try:
-            response = self.llm_client.chat.completions.create(
-                model=ARK_MODEL,
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.3,
-                max_tokens=8000,
-            )
-            result = response.choices[0].message.content
-            
             os.makedirs(os.path.dirname(output_file) or '.', exist_ok=True)
             with open(output_file, 'w', encoding='utf-8') as f:
                 f.write(result)
