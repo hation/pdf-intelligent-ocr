@@ -360,3 +360,10 @@ python3 extract_topic_summary.py
 
 * 输出目录：投资 `output/topic_summaries/{专题名}/YYYYMMDDHH/`，自媒体 `output/topic_summaries_media/{专题名}/YYYYMMDDHH/`
 
+**专题核心论点收集（手动运行）**：
+
+* 把指定专题的核心论点汇总复制到 `output/daily/{专题}核心论点/`（与 `重点汇总`、`一句话总结` 平级的扁平目录，便于一次性复制研究）
+* 运行：`python3 src/pdf_ocr_tool/scripts/collect_topic_summaries.py --topic 存储 --topic 服务器`
+* 省略 `--topic` 时扫描 `output/topic_summaries/` 下全部专题；新增专题无需改脚本
+* 已收集：存储 46 份、服务器 61 份（2026-11-07 首次运行）
+
